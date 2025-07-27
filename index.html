@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STS Values</title>
+    <!-- Google Fonts link for the logo -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- === UI SUPERIOR (REDISÑADA) === -->
+    <div class="top-ui-container">
+        
+        <!-- === Apartado de Conversor de Unidades (NUEVA ESTRUCTURA) === -->
+        <div id="unit-converter" class="top-ui-module">
+            <!-- Wrapper para Origen -->
+            <div id="converter-from-wrapper" class="currency-selector-wrapper">
+                <input type="text" id="converter-from-input" class="converter-input" placeholder="Introduce un valor...">
+                <img id="converter-from-icon" class="converter-icon" src="">
+                <span id="converter-from-name" class="converter-currency-name"></span>
+                <select id="converter-from-currency"></select> <!-- Oculto por CSS -->
+            </div>
+
+            <div class="converter-equals">=</div>
+
+            <!-- Wrapper para Destino -->
+            <div id="converter-to-wrapper" class="currency-selector-wrapper">
+                <input type="text" id="converter-to-input" class="converter-input" readonly>
+                <img id="converter-to-icon" class="converter-icon" src="">
+                <span id="converter-to-name" class="converter-currency-name"></span>
+                <select id="converter-to-currency"></select> <!-- Oculto por CSS -->
+            </div>
+        </div>
+
+        <!-- === Apartado de Búsqueda (UI MEJORADA CON CSS) === -->
+        <div id="search-module" class="top-ui-module">
+            <input type="text" id="search-bar" placeholder="Buscar una espada...">
+            <div id="search-results"></div>
+        </div>
+    </div>
+
+    <header>
+        <h1 class="logo">STS Values</h1>
+    </header>
+
+    <main>
+        <!-- VISTA DE SELECCIÓN DE CAJAS -->
+        <div id="case-selection-view">
+            <h2 class="section-title">~CASES~</h2>
+            <div class="cases-container"></div>
+
+            <h2 class="section-title">~OTHER SWORDS~</h2>
+            <div id="other-swords-container"></div>
+            <div class="pagination-controls">
+                <button id="other-prev-btn">←</button>
+                <button id="other-next-btn">→</button>
+            </div>
+        </div>
+
+        <!-- VISTA DE DETALLES DE CAJA -->
+        <div id="case-details-view" style="display:none;">
+            <button class="back-btn" id="details-to-selection-btn">← Back to Cases</button>
+            <div class="details-content">
+                <div class="rewards-column">
+                    <h2 class="section-title">~Swords~</h2>
+                    <div class="rewards-list-header">
+                        <span class="header-chance">Chance</span>
+                        <span>Value</span>
+                        <span>Stats</span>
+                    </div>
+                    <div id="rewards-list-container"></div>
+                </div>
+                <div class="info-column">
+                    <img id="details-case-image" src="" alt="Case Image">
+                    <h3 id="details-case-name"></h3>
+                    <hr class="info-divider">
+                    <div id="details-case-price"></div>
+                </div>
+            </div>
+
+            <!-- === SECCIÓN DE CALCULADORA (ACTUALIZADA) === -->
+            <div id="calculator-section">
+                <h2 class="section-title">~PROFIT CALCULATOR~</h2>
+                <!-- Selector de Modo con 4 botones -->
+                <div class="calculator-mode-selector">
+                    <button id="mode-theoretical-btn" class="active">Theoretical</button>
+                    <button id="mode-simulate-btn">Simulate</button>
+                    <button id="mode-until-best-btn">Until Best</button>
+                    <button id="mode-graph-btn">Graph</button>
+                </div>
+                
+                <!-- Controles para los modos estándar -->
+                <div class="calculator-controls" id="standard-controls">
+                    <input type="number" id="case-quantity-input" placeholder="Enter amount of cases to open...">
+                    <button id="calculate-btn" class="calculator-btn">Calculate</button>
+                </div>
+                
+                <!-- === MODIFICADO: Controles para el modo gráfico === -->
+                <div class="calculator-controls" id="graph-controls" style="display: none;">
+                    <input type="number" id="graph-step-input" placeholder="Rango (ej: 100)">
+                    <input type="number" id="graph-max-input" placeholder="Máximo (ej: 5000)">
+                    <button id="calculate-graph-btn" class="calculator-btn">Generate Graph</button>
+                </div>
+
+                <!-- Contenedor de Resultados -->
+                <div id="calculator-results-container">
+                    <!-- Resumen del botín -->
+                    <div id="simulation-loot-summary" style="display: none;"></div>
+                    <!-- Tabla de resultados -->
+                    <div id="results-table-container"></div>
+                    <!-- === MODIFICADO: Contenedor para el gráfico de líneas === -->
+                    <div id="graph-container" style="display: none;">
+                        <div id="graph-plot-area">
+                            <svg></svg>
+                            <div class="graph-tooltip"></div>
+                        </div>
+                        <div id="graph-labels"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA DE DETALLES DE ESPADA -->
+        <div id="sword-details-view" style="display:none;">
+            <button class="back-btn" id="sword-to-details-btn">← Back</button>
+            <div class="sword-details-content">
+                <!-- Columna Izquierda: Tarjeta de la Espada -->
+                <div id="sword-info-card">
+                    <div id="sword-demand-indicator"></div>
+                    <div id="sword-details-image-container"></div>
+                    <h3 id="sword-details-name"></h3>
+                    <p id="sword-details-description"></p>
+                </div>
+
+                <!-- Columna Derecha: Estadísticas -->
+                <div class="sword-stats-container">
+                    <div class="stat-box">
+                        <h4>VALUE</h4>
+                        <p id="sword-details-value"></p>
+                        <span id="sword-details-updated" class="sub-text"></span>
+                    </div>
+                    <div class="stat-box">
+                        <h4>STATS</h4>
+                        <p id="sword-details-stats"></p>
+                    </div>
+                    <div class="stat-box">
+                        <h4>MORE</h4>
+                        <p id="sword-details-more"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
