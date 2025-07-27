@@ -745,3 +745,184 @@ body {
     cursor: not-allowed;
     opacity: 0.7;
 }
+
+/* --- ESTILOS RESPONSIVE PARA MÓVILES --- */
+@media (max-width: 768px) {
+
+    /* --- ESTILOS GLOBALES Y TIPOGRAFÍA --- */
+    body {
+        /* Reducir el padding horizontal en pantallas pequeñas */
+        padding: 15px 20px;
+    }
+
+    .logo {
+        /* Reducir el tamaño del logo */
+        font-size: 3em;
+        margin: 20px 0 30px 0;
+    }
+
+    .section-title {
+        /* Reducir el tamaño de los títulos de sección */
+        font-size: 2em;
+    }
+
+    /* --- UI SUPERIOR (CONVERSOR Y BÚSQUEDA) --- */
+    .top-ui-container {
+        /* Apilar los módulos en lugar de ponerlos lado a lado */
+        flex-direction: column;
+        align-items: center; /* Centrar los módulos */
+        gap: 15px;
+        margin-bottom: 20px; /* Añadir margen inferior */
+        padding: 0;
+    }
+
+    .top-ui-module, #search-module {
+        /* Hacer que los módulos ocupen todo el ancho disponible */
+        width: 100%;
+        max-width: 450px; /* Un ancho máximo para que no se vea mal en tablets */
+        box-sizing: border-box;
+    }
+
+    #unit-converter {
+        /* Apilar los elementos del conversor en pantallas muy pequeñas si es necesario */
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    /* --- VISTA DE SELECCIÓN DE CAJAS --- */
+    .cases-container {
+        /* Reducir el padding para ganar espacio */
+        padding: 10px 0;
+        margin: 0;
+    }
+
+    .case-item {
+        /* Reducir el tamaño de las tarjetas de las cajas */
+        min-width: 320px;
+        height: 180px;
+    }
+    
+    .case-title {
+        font-size: 1.5em;
+    }
+
+    .case-price {
+        font-size: 1.3em;
+    }
+
+    /* --- VISTA DE DETALLES (CAJA Y ESPADA) --- */
+    .details-content, .sword-details-content {
+        /* Cambiar el layout de 2 columnas a 1 sola */
+        flex-direction: column;
+        gap: 25px;
+    }
+    
+    .rewards-list-header {
+        /* Ocultar la cabecera de la lista para ahorrar espacio, la info está en cada item */
+        display: none;
+    }
+
+    #rewards-list-container {
+        /* Limitar la altura para que no ocupe toda la pantalla */
+        max-height: 400px;
+    }
+
+    .reward-item {
+        /* Ajustar el layout del item de recompensa */
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .reward-stats {
+        /* Posicionar las estadísticas de forma más clara */
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
+        background-color: rgba(0,0,0,0.2);
+        padding: 8px 0;
+        border-radius: 5px;
+        margin-top: 5px;
+    }
+    
+    #sword-details-name {
+        font-size: 2.2em;
+    }
+
+    .stat-box p {
+        font-size: 1.8em;
+    }
+
+    /* --- CALCULADORA --- */
+    #calculator-section {
+        padding: 20px;
+    }
+    
+    .calculator-mode-selector {
+        /* Hacer que los botones del selector de modo ocupen el ancho y se apilen si es necesario */
+        width: 100%;
+        flex-wrap: wrap;
+    }
+    .calculator-mode-selector button {
+        flex-basis: 50%; /* Dos botones por fila */
+    }
+
+    .calculator-controls {
+        /* Apilar el input y el botón */
+        flex-direction: column;
+        width: 100%;
+    }
+
+    #case-quantity-input, #graph-step-input, #graph-max-input {
+        width: 100%;
+        box-sizing: border-box; /* Asegurar que el padding no desborde */
+    }
+
+    /* --- TABLA DE RESULTADOS --- */
+    #results-table {
+        /* Forzar a la tabla a no ser más ancha que su contenedor */
+        display: block;
+        width: 100%;
+        overflow-x: auto; /* Permite scroll horizontal si el contenido no cabe */
+        white-space: nowrap; /* Evita que el texto de las celdas se rompa */
+    }
+    
+    #results-table th, #results-table td {
+        padding: 10px 8px;
+        font-size: 1em;
+    }
+
+    /* --- GRAFICO --- */
+    #graph-plot-area {
+        height: 250px; /* Reducir la altura del gráfico en móviles */
+    }
+}
+
+/* Ajustes adicionales para pantallas muy pequeñas */
+@media (max-width: 420px) {
+    .logo {
+        font-size: 2.5em;
+    }
+
+    .section-title {
+        font-size: 1.8em;
+    }
+
+    .case-item {
+        min-width: 280px;
+        height: 160px;
+    }
+    
+    .case-title {
+        font-size: 1.3em;
+    }
+
+    .case-price {
+        font-size: 1.1em;
+    }
+    
+    .calculator-mode-selector button {
+        flex-basis: 100%; /* Un botón por fila */
+    }
+}
