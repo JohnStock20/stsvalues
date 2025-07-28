@@ -1,0 +1,163 @@
+/* =================================================================================== */
+/* === ARCHIVO: layout.css === */
+/* === Controla la estructura principal de la página: barras laterales, header, etc. === */
+/* =================================================================================== */
+
+/* --- ESTRUCTURA PRINCIPAL DEL SITIO --- */
+.site-wrapper {
+    display: grid;
+    /* Define 3 columnas: [sidebar] [contenido] [sidebar] */
+    /* El contenido principal no superará los 1600px */
+    grid-template-columns: 1fr minmax(auto, 1600px) 1fr;
+    width: 100%;
+}
+
+.main-content-wrapper {
+    /* El contenido principal ocupa la segunda columna del grid */
+    grid-column: 2;
+    padding: 0 40px 40px 40px;
+    width: 100%;
+}
+
+.ad-sidebar {
+    grid-row: 1; /* Asegura que las barras laterales estén en la misma fila que el contenido */
+    width: 100%;
+    position: sticky; /* Las barras se quedan fijas al hacer scroll */
+    top: 0;
+    height: 100vh;
+    /* Podríamos añadir un fondo sutil para verlas durante el desarrollo */
+    /* background-color: rgba(0,0,0,0.1); */
+}
+
+.ad-sidebar-left {
+    grid-column: 1;
+}
+
+.ad-sidebar-right {
+    grid-column: 3;
+}
+
+
+/* --- CABECERA REDISEÑADA --- */
+.main-header {
+    display: grid;
+    /* Grid de 3 columnas para alinear logo, módulos y login */
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 0;
+    margin-bottom: 40px;
+}
+
+.logo-container {
+    grid-column: 1;
+}
+
+.logo {
+    font-family: 'Anton', sans-serif;
+    font-size: 3.5em; /* Ligeramente más pequeño para un look más limpio */
+    text-align: center;
+    text-transform: uppercase;
+    background: linear-gradient(45deg, var(--light-green), var(--main-green));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 25px var(--main-green-transparent, rgba(45, 212, 191, 0.4));
+    margin: 0;
+    padding: 0;
+}
+
+.top-ui-container {
+    grid-column: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap; /* Permite que se apilen en pantallas más pequeñas */
+}
+
+.auth-container {
+    grid-column: 3;
+    display: flex;
+    justify-content: flex-end;
+}
+
+
+/* --- TÍTULOS DE SECCIÓN --- */
+.section-title {
+    font-family: 'Anton', sans-serif;
+    font-size: 2.5em;
+    color: var(--main-green);
+    text-shadow: 0 0 10px rgba(45, 212, 191, 0.2);
+    margin: 60px 0 20px 0;
+    text-align: left;
+}
+
+.section-title:first-child {
+    margin-top: 0;
+}
+
+
+/* =================================================================================== */
+/* === ESTILOS RESPONSIVE === */
+/* =================================================================================== */
+
+/* --- TABLETS Y PORTÁTILES PEQUEÑOS (Ocultar barras laterales) --- */
+@media (max-width: 1280px) {
+    .site-wrapper {
+        /* Cambiamos a un layout de una sola columna */
+        grid-template-columns: 1fr;
+    }
+
+    .main-content-wrapper {
+        grid-column: 1; /* El contenido ahora ocupa toda la columna */
+    }
+
+    .ad-sidebar {
+        /* Ocultamos las barras laterales */
+        display: none;
+    }
+}
+
+/* --- TABLETS EN VERTICAL Y MÓVILES GRANDES (Reestructurar cabecera) --- */
+@media (max-width: 900px) {
+    .main-content-wrapper {
+        padding: 0 20px 20px 20px;
+    }
+
+    .main-header {
+        /* La cabecera se convierte en un layout de una columna, centrando todo */
+        grid-template-columns: 1fr;
+        gap: 25px;
+        margin-bottom: 20px;
+    }
+    
+    .logo-container,
+    .top-ui-container,
+    .auth-container {
+        grid-column: 1; /* Todos los elementos a la misma columna */
+        justify-content: center; /* Centramos el contenido */
+    }
+}
+
+
+/* --- MÓVILES PEQUEÑOS --- */
+@media (max-width: 480px) {
+    .main-content-wrapper {
+        padding: 0 15px 15px 15px;
+    }
+
+    .logo {
+        font-size: 2.8em;
+    }
+
+    .section-title {
+        font-size: 2em;
+    }
+
+    #unit-converter {
+        flex-direction: column;
+        width: 100%;
+        gap: 15px;
+    }
+}

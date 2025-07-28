@@ -1,0 +1,259 @@
+/* =================================================================================== */
+/* === ARCHIVO: auth.css === */
+/* === Estilos para los modales de login/registro y el perfil de usuario. === */
+/* =================================================================================== */
+
+/* --- BOTONES DE NAVEGACIÓN (LOGIN Y PERFIL) --- */
+.nav-button {
+    background-color: var(--main-green);
+    color: var(--dark-bg);
+    border: none;
+    padding: 10px 25px;
+    font-size: 1.1em;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: var(--border-radius-md);
+    transition: var(--transition-fast);
+}
+
+.nav-button:hover {
+    filter: brightness(1.1);
+    box-shadow: var(--shadow-md);
+}
+
+.user-profile-nav {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: var(--border-radius-md);
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+}
+
+.user-profile-nav #user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--main-green);
+}
+
+.user-profile-nav #user-name {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.user-profile-nav .dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 110%;
+    right: 0;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 110;
+    overflow: hidden;
+}
+
+.user-profile-nav:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu a {
+    display: block;
+    padding: 12px 20px;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.dropdown-menu a:hover {
+    background-color: var(--main-green);
+    color: var(--dark-bg);
+}
+
+
+/* --- MODAL Y OVERLAY --- */
+.auth-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.auth-modal-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.auth-modal {
+    background-color: var(--panel-bg);
+    padding: 30px;
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 450px;
+    position: relative;
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+}
+
+.auth-modal-overlay.visible .auth-modal {
+    transform: scale(1);
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 2em;
+    cursor: pointer;
+    line-height: 1;
+}
+.close-modal-btn:hover {
+    color: var(--text-primary);
+}
+
+/* --- FORMULARIOS DE AUTENTICACIÓN --- */
+.auth-modal h2 {
+    text-align: center;
+    color: var(--main-green);
+    margin-top: 0;
+    margin-bottom: 25px;
+}
+
+.auth-modal form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.auth-modal input[type="text"],
+.auth-modal input[type="password"] {
+    background-color: var(--dark-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 14px;
+    font-size: 1.1em;
+    border-radius: var(--border-radius-md);
+    transition: var(--transition-fast);
+}
+
+.auth-modal input:focus {
+    outline: none;
+    border-color: var(--main-green);
+}
+
+.auth-button {
+    background-color: var(--main-green);
+    color: var(--dark-bg);
+    border: none;
+    padding: 14px;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: var(--border-radius-md);
+    transition: var(--transition-fast);
+    margin-top: 10px;
+}
+.auth-button:hover {
+    filter: brightness(1.1);
+}
+
+.error-message {
+    color: var(--insane);
+    background-color: rgba(244, 63, 94, 0.1);
+    border: 1px solid var(--insane);
+    padding: 10px;
+    border-radius: var(--border-radius-md);
+    text-align: center;
+    font-size: 0.9em;
+    display: none; /* Se muestra con JS */
+}
+
+.auth-switch {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-top: 15px;
+}
+.auth-switch a {
+    font-weight: bold;
+    color: var(--main-green);
+}
+
+/* reCAPTCHA */
+.g-recaptcha {
+    margin: 10px auto;
+}
+
+/* --- ESTILOS PARA EL PASO 2 (VERIFICACIÓN) --- */
+.verification-steps {
+    padding-left: 20px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+.verification-steps li {
+    margin-bottom: 15px;
+}
+
+#verification-code-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--dark-bg);
+    padding: 10px;
+    border-radius: var(--border-radius-md);
+    margin-top: 5px;
+}
+#verification-code {
+    flex-grow: 1;
+    font-family: monospace;
+    font-size: 1.2em;
+    color: var(--text-primary);
+}
+#copy-code-btn {
+    background-color: var(--border-color);
+    color: var(--text-primary);
+    border: none;
+    padding: 8px 12px;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+#copy-code-btn:hover {
+    background-color: var(--main-green);
+    color: var(--dark-bg);
+}
+.sub-text {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* --- RESPONSIVE PARA MODALES --- */
+@media (max-width: 480px) {
+    .auth-modal {
+        width: 90%;
+        padding: 20px;
+    }
+    .auth-modal h2 {
+        font-size: 1.5em;
+    }
+}

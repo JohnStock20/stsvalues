@@ -1,0 +1,584 @@
+/* =================================================================================== */
+/* === ARCHIVO: components.css === */
+/* === Define los estilos para elementos reutilizables: tarjetas, botones, inputs... === */
+/* =================================================================================== */
+
+/* --- BOTONES --- */
+.back-btn {
+    background-color: var(--panel-bg);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
+    padding: 10px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: var(--border-radius-md);
+    margin-bottom: 20px;
+    transition: var(--transition-fast);
+}
+.back-btn:hover {
+    background-color: var(--main-green);
+    color: var(--dark-bg);
+    border-color: var(--main-green);
+    box-shadow: 0 0 15px rgba(45, 212, 191, 0.4);
+}
+
+.pagination-controls button {
+    background-color: var(--panel-bg);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
+    padding: 10px 25px;
+    font-size: 1.2em;
+    cursor: pointer;
+    border-radius: var(--border-radius-sm);
+    transition: var(--transition-fast);
+}
+.pagination-controls button:hover:not(:disabled) {
+    background-color: var(--main-green);
+    border-color: var(--main-green);
+    color: var(--dark-bg);
+}
+.pagination-controls button:disabled {
+    background-color: #27272a;
+    color: var(--text-secondary);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* --- TARJETA DE CAJA (SELECCIÓN) --- */
+.cases-container {
+    display: flex;
+    overflow-x: auto;
+    padding: 20px 5px; /* Padding vertical para que la sombra no se corte */
+    margin: 0 -5px;
+}
+
+.case-link {
+    text-decoration: none;
+    margin: 0 15px;
+    display: block;
+    transition: var(--transition-fast);
+}
+.case-link:hover {
+    transform: translateY(-5px);
+}
+
+.case-item {
+    position: relative;
+    width: 400px;
+    height: 230px;
+    cursor: pointer;
+    border-radius: var(--border-radius-lg);
+    transition: var(--transition-normal);
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
+}
+.case-link:hover .case-item {
+    box-shadow: 0 0 25px 3px var(--case-border-color, var(--main-green));
+}
+
+.case-content-image {
+    position: absolute;
+    top: 50%;
+    left: 45%;
+    transform: translate(-50%, -50%);
+    max-width: 85%;
+    max-height: 85%;
+}
+.case-title {
+    position: absolute;
+    top: -10px;
+    left: 20px;
+    font-family: 'Anton', sans-serif;
+    font-size: 1.8em;
+    text-transform: uppercase;
+    color: #fff;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+}
+.case-price {
+    position: absolute;
+    bottom: 20px;
+    right: 25px;
+    font-size: 1.5em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+.currency-icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 10px;
+}
+.case-price .currency-text, #details-case-price .currency-text {
+    color: var(--text-secondary);
+    font-weight: normal;
+    font-size: 0.8em;
+    margin-right: 8px;
+}
+
+/* --- VISTA DE DETALLES (Columnas y Tarjeta de info) --- */
+.details-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 40px;
+}
+.rewards-column {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+}
+.info-column {
+    border-radius: var(--border-radius-lg);
+    padding: 20px;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 0 20px -5px var(--case-border-color, var(--main-green));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    height: fit-content;
+}
+#details-case-image {
+    display: block;
+    width: 80%;
+    margin: 10px 0 20px 0;
+}
+#details-case-name {
+    font-size: 2em;
+    text-transform: uppercase;
+    margin: 0;
+    font-family: 'Anton', sans-serif;
+    line-height: 1.1;
+}
+.info-divider {
+    border: none;
+    width: 80%;
+    height: 1px;
+    background-image: linear-gradient(to right, transparent, var(--main-green), transparent);
+    opacity: 0.5;
+    margin: 20px 0;
+}
+#details-case-price {
+    font-size: 1.8em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- ITEMS DE RECOMPENSA (Swords) --- */
+.rewards-list-header {
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 20px;
+    margin-bottom: 10px;
+    color: var(--text-secondary);
+    font-weight: bold;
+}
+.rewards-list-header span {
+    width: 100px; /* Ancho aumentado para mejor espaciado */
+    text-align: center;
+}
+#rewards-list-container, #other-swords-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+#rewards-list-container {
+    max-height: 520px;
+    overflow-y: auto;
+    padding: 5px 10px 5px 5px;
+}
+.reward-item {
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    position: relative;
+    overflow: hidden;
+    border-left: 5px solid; /* El borde de color ahora está a la izquierda */
+}
+.reward-item:hover {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--main-green);
+}
+.reward-item.common { border-left-color: var(--common); }
+.reward-item.uncommon { border-left-color: var(--uncommon); }
+.reward-item.rare { border-left-color: var(--rare); }
+.reward-item.epic { border-left-color: var(--epic); }
+.reward-item.legendary { border-left-color: var(--legendary); }
+.reward-item.insane { border-left-color: var(--insane); }
+.reward-item.godly { border-left-color: var(--godly-color); }
+.reward-item.subzero { border-left-color: var(--subzero-color); }
+.reward-item.mythic { border-left-color: var(--mythic-color-1); }
+.reward-item.limited { border-left-color: var(--limited-color); }
+.reward-item.exclusive { border-left-color: var(--exclusive-color); }
+.reward-item.event { border-left-color: var(--event-color); }
+.reward-item.easter { border-left-color: var(--easter-color); }
+.reward-item.unobtainable { border-left-color: var(--unobtainable-color); }
+.reward-item.staff { border-left-color: var(--staff-color); }
+.reward-item.hell { border-left-color: var(--hell-color); }
+.reward-item.evil { border-left-color: var(--evil-color); }
+
+.reward-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-grow: 1;
+}
+.reward-image-placeholder {
+    width: 50px;
+    height: 50px;
+    background-color: var(--dark-bg);
+    border-radius: var(--border-radius-sm);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.reward-image-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.reward-name {
+    font-size: 1.2em;
+    font-weight: 500;
+}
+.reward-stats {
+    display: flex;
+    align-items: center;
+}
+.reward-stats span {
+    width: 100px;
+    text-align: center;
+    font-size: 1.1em;
+    flex-shrink: 0;
+}
+.reward-stats .reward-value {
+    width: auto;
+    min-width: 100px;
+    flex-grow: 1;
+}
+.reward-stats .no-chance {
+    color: var(--text-secondary);
+}
+
+/* --- VISTA DE DETALLES DE ESPADA --- */
+.sword-details-content {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 40px;
+}
+#sword-info-card {
+    border-radius: var(--border-radius-lg);
+    padding: 25px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    background-color: var(--panel-bg);
+    position: relative;
+    overflow: hidden;
+    border-top: 5px solid; /* Borde de color ahora está arriba */
+    box-shadow: var(--shadow-md);
+}
+#sword-info-card.common { border-top-color: var(--common); }
+#sword-info-card.uncommon { border-top-color: var(--uncommon); }
+#sword-info-card.rare { border-top-color: var(--rare); }
+#sword-info-card.epic { border-top-color: var(--epic); }
+#sword-info-card.legendary { border-top-color: var(--legendary); }
+#sword-info-card.insane { border-top-color: var(--insane); }
+#sword-info-card.godly { border-top-color: var(--godly-color); }
+#sword-info-card.subzero { border-top-color: var(--subzero-color); }
+#sword-info-card.mythic { border-top-color: var(--mythic-color-1); }
+#sword-info-card.limited { border-top-color: var(--limited-color); }
+#sword-info-card.exclusive { border-top-color: var(--exclusive-color); }
+#sword-info-card.event { border-top-color: var(--event-color); }
+#sword-info-card.easter { border-top-color: var(--easter-color); }
+#sword-info-card.unobtainable { border-top-color: var(--unobtainable-color); }
+#sword-info-card.staff { border-top-color: var(--staff-color); }
+#sword-info-card.hell { border-top-color: var(--hell-color); }
+#sword-info-card.evil { border-top-color: var(--evil-color); }
+
+#sword-demand-indicator {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 15px; /* Más pequeño y sutil */
+    height: 15px;
+    border-radius: 50%;
+    z-index: 5;
+}
+#sword-demand-indicator.insane { background-color: #c533ff; box-shadow: 0 0 12px #c533ff; }
+#sword-demand-indicator.high { background-color: #4CAF50; box-shadow: 0 0 12px #4CAF50; }
+#sword-demand-indicator.medium { background-color: #f5f925; box-shadow: 0 0 12px #f5f925; }
+#sword-demand-indicator.low { background-color: #ff3333; box-shadow: 0 0 12px #ff3333; }
+#sword-details-image-container {
+    width: 90%;
+    max-width: 300px;
+    margin: 0 auto 20px auto;
+    background-color: var(--dark-bg);
+    border-radius: var(--border-radius-md);
+    padding: 10px;
+}
+#sword-details-image-container img {
+    width: 100%;
+    border-radius: var(--border-radius-sm);
+}
+#sword-details-name {
+    font-family: 'Anton', sans-serif;
+    font-size: 2.8em;
+    margin: 0;
+    line-height: 1.1;
+}
+#sword-details-description {
+    font-size: 1em;
+    color: var(--text-secondary);
+    margin: 10px 0 20px 0;
+    line-height: 1.6;
+}
+.case-link-in-description, .sword-link-in-description {
+    color: var(--main-green);
+    text-decoration: none;
+    font-weight: bold;
+    border-bottom: 1px dotted var(--main-green);
+    transition: var(--transition-fast);
+}
+.case-link-in-description:hover, .sword-link-in-description:hover {
+    color: #fff;
+    border-bottom-color: #fff;
+}
+.sword-stats-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.stat-box {
+    border-radius: var(--border-radius-lg);
+    padding: 20px;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+}
+.stat-box h4 {
+    margin: 0 0 10px 0;
+    font-size: 1.2em;
+    color: var(--main-green);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+.stat-box p {
+    font-size: 2.2em;
+    font-weight: bold;
+    margin: 0;
+}
+.stat-box .sub-text {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    margin-top: 5px;
+}
+.value-oc {
+    cursor: help;
+    border-bottom: 1px dotted var(--text-secondary);
+}
+
+/* --- CLASES DE TEXTO PARA RAREZAS --- */
+.rarity-text {
+    font-weight: bold;
+    text-transform: capitalize;
+}
+.rarity-text.common { color: var(--common); }
+.rarity-text.uncommon { color: var(--uncommon); }
+.rarity-text.rare { color: var(--rare); }
+.rarity-text.epic { color: var(--epic); }
+.rarity-text.legendary { color: var(--legendary); }
+.rarity-text.insane { color: var(--insane); }
+
+.rarity-text.godly, .rarity-text.subzero, .rarity-text.mythic,
+.rarity-text.limited, .rarity-text.exclusive, .rarity-text.event,
+.rarity-text.easter, .rarity-text.unobtainable, .rarity-text.staff,
+.rarity-text.hell, .rarity-text.evil {
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+}
+.rarity-text.godly { background-image: var(--godly-gradient); }
+.rarity-text.subzero { background-image: var(--subzero-gradient); }
+.rarity-text.mythic { background-image: var(--mythic-gradient); }
+.rarity-text.limited { background-image: var(--limited-gradient); }
+.rarity-text.exclusive { background-image: var(--exclusive-gradient); }
+.rarity-text.event { background-image: var(--event-gradient); }
+.rarity-text.easter { background-image: var(--easter-gradient); }
+.rarity-text.unobtainable { background-image: var(--unobtainable-gradient); }
+.rarity-text.staff { background-image: var(--staff-gradient); }
+.rarity-text.hell { background-image: var(--hell-gradient); }
+.rarity-text.evil { background-image: var(--evil-gradient); }
+
+
+/* --- COMPONENTES UI SUPERIOR (BÚSQUEDA Y CONVERSOR) --- */
+.top-ui-module {
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    padding: 10px;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-normal);
+}
+.top-ui-module:hover {
+    border-color: var(--main-green);
+}
+#unit-converter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.converter-equals {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: var(--text-secondary);
+}
+.currency-selector-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: var(--dark-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 8px 12px;
+    gap: 8px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+.currency-selector-wrapper:hover {
+    border-color: var(--main-green);
+}
+.converter-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+.converter-input {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.1em;
+    outline: none;
+    width: 120px;
+}
+.converter-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+.converter-currency-name {
+    color: var(--text-primary);
+    font-weight: bold;
+    font-size: 1.1em;
+}
+#unit-converter select {
+    display: none;
+}
+.converter-input[type="number"]::-webkit-outer-spin-button,
+.converter-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.converter-input[type=number] {
+  -moz-appearance: textfield;
+}
+
+#search-module {
+    position: relative;
+    width: 350px;
+}
+#search-bar {
+    background-color: var(--dark-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 12px 15px;
+    font-size: 1.1em;
+    border-radius: var(--border-radius-md);
+    width: 100%;
+    transition: var(--transition-fast);
+}
+#search-bar:focus {
+    outline: none;
+    border-color: var(--main-green);
+    background-color: var(--panel-bg);
+}
+#search-results {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    width: 100%;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    max-height: 450px;
+    overflow-y: auto;
+    padding: 10px;
+    display: none;
+    z-index: 101;
+    box-shadow: var(--shadow-lg);
+}
+#search-results .reward-item {
+    padding: 10px;
+    margin: 0;
+    border-radius: var(--border-radius-sm);
+}
+#search-results .reward-item:hover {
+    background-color: var(--dark-bg);
+    border-color: var(--main-green);
+}
+
+/* --- RESPONSIVE ADAPTATIONS FOR COMPONENTS --- */
+@media (max-width: 768px) {
+    .details-content, .sword-details-content {
+        grid-template-columns: 1fr; /* Apilar columnas */
+    }
+    .rewards-list-header {
+        display: none;
+    }
+    #rewards-list-container {
+        max-height: 400px;
+    }
+    .reward-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .reward-stats {
+        width: 100%;
+        display: flex;
+        justify-content: space-around;
+        background-color: rgba(0,0,0,0.2);
+        padding: 8px 0;
+        border-radius: var(--border-radius-sm);
+        margin-top: 5px;
+    }
+    .case-item {
+        width: 320px;
+        height: 180px;
+    }
+}
+@media (max-width: 480px) {
+    .case-item {
+        width: 280px;
+        height: 160px;
+    }
+    .reward-stats span, .reward-stats .reward-value {
+        font-size: 1em;
+        width: 80px;
+    }
+    #search-module {
+        width: 100%;
+    }
+}
