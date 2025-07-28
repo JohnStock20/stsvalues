@@ -1,5 +1,5 @@
 /* =================================================================================== */
-/* === ARCHIVO: ui.js (VERSIÓN FINAL Y CORREGIDA) === */
+/* === ARCHIVO: ui.js (VERSIÓN COMPLETA Y FINAL) === */
 /* === Controla toda la manipulación del DOM y el renderizado de la interfaz de usuario. === */
 /* =================================================================================== */
 
@@ -231,7 +231,6 @@ export function renderResultsTable(data, appState) {
     const resultSign = data.result >= 0 ? '+' : '';
     const profitPerCase = data.result / quantity;
     const profitPercentage = data.totalCost > 0 ? (data.result / data.totalCost) * 100 : (data.result > 0 ? Infinity : 0);
-    
     let totalCostDisplay;
     const currentCaseData = appData.cases[appState.currentCaseIdForCalc];
     if (currentCaseData && currentCaseData.currency === 'cooldown') {
@@ -239,9 +238,7 @@ export function renderResultsTable(data, appState) {
     } else {
         totalCostDisplay = formatLargeNumber(data.totalCost);
     }
-    
     const profitPercentageDisplay = isFinite(profitPercentage) ? `${profitPercentage.toFixed(2)}%` : `∞%`;
-
     const tableHTML = `<table id="results-table"><thead><tr><th>${appState.calculatorMode === 'theoretical' ? 'Expected Value' : 'Total Value'}</th><th>Total Cost</th><th>Net Result</th><th>Result/Case</th><th>Profit %</th></tr></thead><tbody><tr><td>${formatLargeNumber(data.totalValueGained)}</td><td>${totalCostDisplay}</td><td class="${resultClass}">${resultSign}${formatLargeNumber(data.result)}</td><td class="${resultClass}">${resultSign}${formatLargeNumber(profitPerCase)}</td><td class="${resultClass}">${resultSign}${profitPercentageDisplay}</td></tr></tbody></table>`;
     containers.resultsTable.innerHTML = tableHTML;
 }
@@ -281,9 +278,7 @@ export function renderProfitGraph(results, MAX_GRAPH_SECTIONS) {
     const tooltip = document.querySelector('.graph-tooltip');
     containers.graphSvg.innerHTML = '';
     containers.graphLabels.innerHTML = '';
-
     if (results.length < 2) return;
-
     const isPercentage = results[0].isPercentage;
     const yAxisLabel = isPercentage ? 'Profit %' : 'Net Gain (Time)';
     const padding = { top: 20, right: 20, bottom: 20, left: 20 };
@@ -302,7 +297,6 @@ export function renderProfitGraph(results, MAX_GRAPH_SECTIONS) {
     const yDomainMax = yMax + yRange * 0.1;
     const xScale = (cases) => padding.left + ((cases - minCases) / (maxCases - minCases)) * chartWidth;
     const yScale = (val) => padding.top + chartHeight - ((val - yDomainMin) / (yDomainMax - yDomainMin)) * chartHeight;
-
     const createLineSegment = (p1, p2, isPositive) => {
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         line.setAttribute('x1', p1.x); line.setAttribute('y1', p1.y);
@@ -310,10 +304,9 @@ export function renderProfitGraph(results, MAX_GRAPH_SECTIONS) {
         line.setAttribute('class', isPositive ? 'graph-profit-line' : 'graph-loss-line');
         containers.graphSvg.appendChild(line);
     };
-    
     const zeroY = yScale(0);
     if (zeroY >= padding.top && zeroY <= height - padding.bottom) {
-         const zeroLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        const zeroLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         zeroLine.setAttribute('x1', padding.left); zeroLine.setAttribute('y1', zeroY);
         zeroLine.setAttribute('x2', width - padding.right); zeroLine.setAttribute('y2', zeroY);
         zeroLine.setAttribute('class', 'graph-zero-line');

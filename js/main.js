@@ -1,9 +1,9 @@
 /* =================================================================================== */
-/* === ARCHIVO: main.js (VERSIÓN FINAL Y CORREGIDA) === */
+/* === ARCHIVO: main.js (VERSIÓN COMPLETA Y FINAL) === */
 /* =================================================================================== */
 
 import { appData, parseValue } from './data.js';
-import { findSwordById, getUnitValue, convertTimeValueToCurrency } from './utils.js';
+import { findSwordById, getUnitValue, convertTimeValueToCurrency, formatLargeNumber } from './utils.js';
 import * as UI from './ui.js';
 import * as Calculator from './calculator.js';
 import { initializeAuth } from './auth.js';
@@ -85,7 +85,6 @@ function initializeTopUI() {
         }
     });
 
-    // Lógica del conversor...
     const fromCurrencySelect = document.getElementById('converter-from-currency');
     const toCurrencySelect = document.getElementById('converter-to-currency');
     const currencyKeys = Object.keys(appData.currencies);
@@ -94,6 +93,7 @@ function initializeTopUI() {
         toCurrencySelect.innerHTML += `<option value="${key}">${appData.currencies[key].name}</option>`;
     });
     fromCurrencySelect.value = 'time'; toCurrencySelect.value = 'diamonds';
+
     function updateConverterUI() {
         const fromCurrency = appData.currencies[fromCurrencySelect.value];
         document.getElementById('converter-from-name').textContent = fromCurrency.name;
@@ -109,7 +109,7 @@ function initializeTopUI() {
         if (isNaN(fromAmount) || fromAmount <= 0) { UI.inputs.converterTo.value = ''; return; }
         const totalTimeValue = fromAmount * getUnitValue(fromCurrencySelect.value, fromAmount);
         const finalAmount = convertTimeValueToCurrency(totalTimeValue, toCurrencySelect.value);
-        UI.inputs.converterTo.value = finalAmount > 0 ? UI.formatLargeNumber(finalAmount) : 'N/A';
+        UI.inputs.converterTo.value = finalAmount > 0 ? formatLargeNumber(finalAmount) : 'N/A';
     }
     function cycleCurrency(selectElement) {
         const currentIndex = currencyKeys.indexOf(selectElement.value);
@@ -163,10 +163,16 @@ function initializeCalculator() {
 }
 
 function initializeApp() {
+    // 1. Inicializar sistema de autenticación (esto añade los listeners al botón de login)
     initializeAuth();
+
+    // 2. Inicializar UI superior (búsqueda y conversor)
     initializeTopUI();
+
+    // 3. Inicializar lógica de la calculadora
     initializeCalculator();
 
+    // 4. Configurar listeners de navegación principal
     document.getElementById('details-to-selection-btn').addEventListener('click', () => navigateTo('selection'));
     document.getElementById('sword-to-details-btn').addEventListener('click', () => {
         if (navigationContext.type === 'case') {
@@ -176,6 +182,7 @@ function initializeApp() {
         }
     });
 
+    // 5. Configurar paginación
     document.getElementById('other-prev-btn').addEventListener('click', () => {
         if (appState.currentPage > 1) {
             appState.currentPage--;
@@ -190,10 +197,15 @@ function initializeApp() {
         }
     });
 
+    // 6. Renderizar contenido inicial
     UI.renderCaseSelection(navigateTo);
     UI.renderOtherSwords(appState, navigateTo);
+    
+    // 7. Mostrar la vista inicial
     navigateTo('selection');
+    
     console.log("STS Values App Initialized Correctly!");
 }
 
+// Punto de entrada: ejecutar todo cuando el DOM esté listo.
 document.addEventListener('DOMContentLoaded', initializeApp);
