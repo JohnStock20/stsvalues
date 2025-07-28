@@ -134,14 +134,15 @@
     border-radius: var(--border-radius-lg);
     padding: 20px;
     background-color: var(--panel-bg);
-    border: 1px solid var(--border-color);
-    box-shadow: 0 0 20px -5px var(--case-border-color, var(--main-green));
+    border: 1px solid var(--case-border-color, var(--main-green)); /* Borde exterior dinámico */
+    /* Borde interior dinámico y permanente */
+    box-shadow: var(--shadow-md), inset 0 0 0 2px var(--case-border-color, var(--main-green));
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
-    height: fit-content;
+    /* QUITAMOS 'height: fit-content;' para que se estire y se alinee */
 }
 #details-case-image {
     display: block;
