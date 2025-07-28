@@ -381,6 +381,30 @@
 #sword-info-card.hell::before { background: var(--hell-gradient); }
 #sword-info-card.evil::before { background: var(--evil-gradient); }
 
+#sword-info-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 20px 5px rgba(165, 180, 252, 0.4); /* Un brillo genérico suave */
+}
+
+/* Y un brillo específico por rareza */
+#sword-info-card.common:hover { box-shadow: 0 0 20px 5px rgba(74, 222, 128, 0.6); }
+#sword-info-card.uncommon:hover { box-shadow: 0 0 20px 5px rgba(34, 211, 238, 0.6); }
+#sword-info-card.rare:hover { box-shadow: 0 0 20px 5px rgba(96, 165, 250, 0.6); }
+#sword-info-card.epic:hover { box-shadow: 0 0 20px 5px rgba(192, 132, 252, 0.6); }
+#sword-info-card.legendary:hover { box-shadow: 0 0 20px 5px rgba(250, 204, 21, 0.6); }
+#sword-info-card.insane:hover { box-shadow: 0 0 20px 5px rgba(244, 63, 94, 0.6); }
+#sword-info-card.godly:hover { box-shadow: 0 0 20px 5px var(--godly-color); }
+#sword-info-card.subzero:hover { box-shadow: 0 0 20px 5px var(--subzero-color); }
+#sword-info-card.mythic:hover { box-shadow: 0 0 20px 5px var(--mythic-color-1); }
+#sword-info-card.limited:hover { box-shadow: 0 0 20px 5px var(--limited-color); }
+#sword-info-card.exclusive:hover { box-shadow: 0 0 20px 5px var(--exclusive-color); }
+#sword-info-card.event:hover { box-shadow: 0 0 20px 5px var(--event-color); }
+#sword-info-card.easter:hover { box-shadow: 0 0 20px 5px var(--easter-color); }
+#sword-info-card.unobtainable:hover { box-shadow: 0 0 20px 5px var(--unobtainable-color); }
+#sword-info-card.staff:hover { box-shadow: 0 0 20px 5px var(--staff-color); }
+#sword-info-card.hell:hover { box-shadow: 0 0 20px 5px var(--hell-color); }
+#sword-info-card.evil:hover { box-shadow: 0 0 20px 5px var(--evil-color); }
+
 #sword-demand-indicator {
     position: absolute;
     top: 15px;
@@ -439,8 +463,16 @@
     padding: 20px;
     background-color: var(--panel-bg);
     border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-sm), inset 0 0 0 2px transparent; /* Sombra inicial transparente */
+    transition: var(--transition-fast);
 }
+
+.stat-box:hover {
+    /* Al pasar el ratón, el borde interior aparece y se añade un brillo exterior */
+    box-shadow: var(--shadow-md), inset 0 0 0 2px var(--main-green);
+    border-color: var(--main-green);
+}
+
 .stat-box h4 {
     margin: 0 0 10px 0;
     font-size: 1.2em;
