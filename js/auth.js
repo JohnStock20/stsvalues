@@ -58,25 +58,42 @@ export function initializeAuth() {
         }
     }
 
-    async function handleRegisterStep1(event) {
-        event.preventDefault();
-        const form = event.target;
-        const username = form.username.value;
-        const password = form.password.value;
-        const confirmPassword = form.confirm_password.value;
-        const errorElement = document.getElementById('register-error-step1');
-        errorElement.style.display = 'none';
+// En tu archivo js/auth.js
 
-        if (password !== confirmPassword) {
-            errorElement.textContent = "Passwords do not match.";
+async function handleRegisterStep1(event) {
+    event.preventDefault();
+    const form = event.target;
+    // ... obtener username, password, etc. ...
+
+    try {
+        const response = await fetch('/.netlify/functions/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                username: username, 
+                password: password,
+                // verificationCode: ... (si lo implementas)
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            // Si hay un error (ej: usuario ya existe), lo mostramos
+            const errorElement = document.getElementById('register-error-step1');
+            errorElement.textContent = data.message;
             errorElement.style.display = 'block';
-            return;
+        } else {
+            // Si todo va bien, mostramos el mensaje de éxito y pedimos que haga login
+            alert(data.message);
+            showModal(loginModal); // Llevamos al usuario al modal de login
         }
 
-        // Simulación: Pasamos al paso 2
-        document.getElementById('verification-code').textContent = `code-${Math.random().toString(36).substr(2, 9)}`;
-        showModal(registerModalStep2);
+    } catch (error) {
+        console.error('Network or fetch error:', error);
+        // Mostrar un error genérico
     }
+}
 
     async function handleVerifyAndCreateAccount() {
         const username = document.querySelector('#register-form-step1 input[name="username"]').value;
