@@ -60,38 +60,67 @@ export function initializeAuth() {
 
 // En tu archivo js/auth.js
 
+// En tu archivo js/auth.js
+
+// Reemplaza tu función handleRegisterStep1 (o como se llame) con esto:
 async function handleRegisterStep1(event) {
-    event.preventDefault();
+    event.preventDefault(); // Esto evita que la página se recargue, es importante.
     const form = event.target;
-    // ... obtener username, password, etc. ...
+    const username = form.username.value;
+    const password = form.password.value;
+    const confirmPassword = form.confirm_password.value;
+    const errorElement = document.getElementById('register-error-step1');
+
+    // Ocultamos cualquier mensaje de error anterior
+    errorElement.style.display = 'none';
+
+    // Comprobamos si las contraseñas coinciden
+    if (password !== confirmPassword) {
+        errorElement.textContent = "Las contraseñas no coinciden.";
+        errorElement.style.display = 'block';
+        return; // Detenemos la función aquí
+    }
+
+    // Le decimos al usuario que estamos trabajando en ello
+    const submitButton = form.querySelector('button');
+    submitButton.disabled = true;
+    submitButton.textContent = 'Creando cuenta...';
 
     try {
+        // ---- LA MAGIA OCURRE AQUÍ ----
+        // Llamamos por "teléfono" a nuestro backend. La URL es la "dirección mágica" que Netlify entiende.
         const response = await fetch('/.netlify/functions/register', {
-            method: 'POST',
+            method: 'POST', // Le decimos que estamos ENVIANDO datos.
             headers: { 'Content-Type': 'application/json' },
+            // Metemos el usuario y la contraseña en un "sobre" para enviarlos.
             body: JSON.stringify({ 
                 username: username, 
-                password: password,
-                // verificationCode: ... (si lo implementas)
+                password: password
             })
         });
 
+        // Leemos la respuesta que nos da el backend.
         const data = await response.json();
 
         if (!response.ok) {
-            // Si hay un error (ej: usuario ya existe), lo mostramos
-            const errorElement = document.getElementById('register-error-step1');
+            // Si el backend respondió con un error (ej: usuario ya existe), lo mostramos.
             errorElement.textContent = data.message;
             errorElement.style.display = 'block';
         } else {
-            // Si todo va bien, mostramos el mensaje de éxito y pedimos que haga login
-            alert(data.message);
-            showModal(loginModal); // Llevamos al usuario al modal de login
+            // ¡Éxito! Si todo fue bien, mostramos una alerta y lo llevamos a la ventana de login.
+            alert("¡Cuenta creada con éxito! Por favor, inicia sesión.");
+            showModal(loginModal); // Esta función ya la tenías para mostrar la ventana de login
         }
 
     } catch (error) {
-        console.error('Network or fetch error:', error);
-        // Mostrar un error genérico
+        // Si hay un error de conexión (no se pudo llamar al "teléfono").
+        console.error('Error de conexión:', error);
+        errorElement.textContent = "No se pudo conectar al servidor. Inténtalo más tarde.";
+        errorElement.style.display = 'block';
+    } finally {
+        // Haya funcionado o no, volvemos a activar el botón.
+        submitButton.disabled = false;
+        submitButton.textContent = 'Siguiente: Verificar Cuenta';
     }
 }
 
