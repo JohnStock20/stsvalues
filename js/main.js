@@ -1,5 +1,5 @@
 /* =================================================================================== */
-/* === ARCHIVO: main.js (VERSIÓN COMPLETA, FINAL Y FUNCIONAL) === */
+/* === ARCHIVO: main.js (VERSIÓN FINAL, CORREGIDA Y FUNCIONAL) === */
 /* =================================================================================== */
 
 // --- MÓDULOS ---
@@ -11,7 +11,7 @@ import { initializeAuth } from './auth.js';
 
 // --- ESTADO DE LA APLICACIÓN ---
 let swordUpdateInterval = null;
-let navigationContext = { view: 'selection', id: null };
+let navigationContext = { view: 'selection', id: null, type: null };
 const appState = {
     currentPage: 1,
     itemsPerPage: 10,
@@ -58,10 +58,7 @@ function initializeTopUI() {
     
     UI.inputs.searchBar.addEventListener('input', () => {
         const query = UI.inputs.searchBar.value.toLowerCase().trim();
-        if (!query) {
-            searchResultsContainer.style.display = 'none';
-            return;
-        }
+        if (!query) { searchResultsContainer.style.display = 'none'; return; }
         const results = allSwords.filter(s => s.name.toLowerCase().includes(query)).slice(0, 10);
         searchResultsContainer.innerHTML = '';
         if (results.length > 0) {
@@ -78,9 +75,7 @@ function initializeTopUI() {
                 searchResultsContainer.appendChild(item);
             });
             searchResultsContainer.style.display = 'block';
-        } else {
-            searchResultsContainer.style.display = 'none';
-        }
+        } else { searchResultsContainer.style.display = 'none'; }
     });
 
     document.addEventListener('click', (e) => {
