@@ -49,33 +49,35 @@
 .cases-container {
     display: flex;
     overflow-x: auto;
-    padding: 20px 5px; /* Padding vertical para que la sombra no se corte */
-    margin: 0 -5px;
+    padding: 20px;
+    margin: 0 -20px;
 }
 
 .case-link {
     text-decoration: none;
     margin: 0 15px;
     display: block;
-    transition: var(--transition-fast);
+    transition: transform 0.2s ease-out;
 }
 .case-link:hover {
-    transform: translateY(-5px);
+    transform: scale(1.03);
 }
 
 .case-item {
     position: relative;
-    width: 400px;
+    width: 400px; /* Ancho ajustado */
     height: 230px;
     cursor: pointer;
-    border-radius: var(--border-radius-lg);
-    transition: var(--transition-normal);
+    border-radius: 15px;
+    transition: box-shadow 0.2s;
     background-color: var(--panel-bg);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-md);
+    border: 3px solid var(--border-color);
+    /* El "doble borde" se crea con este box-shadow inset */
+    box-shadow: inset 0 0 0 3px var(--case-border-color, var(--main-green));
 }
 .case-link:hover .case-item {
-    box-shadow: 0 0 25px 3px var(--case-border-color, var(--main-green));
+    /* El brillo intenso al hacer hover */
+    box-shadow: inset 0 0 0 3px var(--case-border-color, var(--main-green)), 0 0 25px 8px var(--case-border-color, var(--main-green));
 }
 
 .case-content-image {
@@ -179,7 +181,7 @@
     font-weight: bold;
 }
 .rewards-list-header span {
-    width: 100px; /* Ancho aumentado para mejor espaciado */
+    width: 100px;
     text-align: center;
 }
 #rewards-list-container, #other-swords-container {
@@ -192,42 +194,89 @@
     overflow-y: auto;
     padding: 5px 10px 5px 5px;
 }
+
 .reward-item {
-    background-color: var(--panel-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-md);
+    background-color: transparent; /* CLAVE para el efecto */
+    border: 3px solid var(--border-color);
+    border-radius: 10px;
     padding: 15px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     cursor: pointer;
-    transition: var(--transition-fast);
+    transition: transform 0.2s, box-shadow 0.2s;
     position: relative;
     overflow: hidden;
-    border-left: 5px solid; /* El borde de color ahora está a la izquierda */
+    flex-shrink: 0;
 }
+
+/* El fondo oscuro interior que va DENTRO del borde */
+.reward-item::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px; right: 3px; bottom: 3px;
+    background: var(--panel-bg);
+    border-radius: 7px;
+    z-index: 0;
+}
+
+/* El borde de color que va DETRÁS del item */
+.reward-item::before {
+    content: '';
+    position: absolute;
+    top: -3px; right: -3px; bottom: -3px; left: -3px;
+    border-radius: 10px;
+    z-index: -1;
+}
+
+/* Pone el contenido del item por encima del fondo interior */
+.reward-item > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Asignación de colores y gradientes al borde de fondo */
+.reward-item.common::before { background: var(--common); }
+.reward-item.uncommon::before { background: var(--uncommon); }
+.reward-item.rare::before { background: var(--rare); }
+.reward-item.epic::before { background: var(--epic); }
+.reward-item.legendary::before { background: var(--legendary); }
+.reward-item.insane::before { background: var(--insane); }
+.reward-item.godly::before { background: var(--godly-gradient); }
+.reward-item.subzero::before { background: var(--subzero-gradient); }
+.reward-item.mythic::before { background: var(--mythic-gradient); }
+.reward-item.limited::before { background: var(--limited-gradient); }
+.reward-item.exclusive::before { background: var(--exclusive-gradient); }
+.reward-item.event::before { background: var(--event-gradient); }
+.reward-item.easter::before { background: var(--easter-gradient); }
+.reward-item.unobtainable::before { background: var(--unobtainable-gradient); }
+.reward-item.staff::before { background: var(--staff-gradient); }
+.reward-item.hell::before { background: var(--hell-gradient); }
+.reward-item.evil::before { background: var(--evil-gradient); }
+
+/* Efecto de levantarse al hacer hover */
 .reward-item:hover {
-    transform: scale(1.02);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--main-green);
+    transform: translateY(-3px);
 }
-.reward-item.common { border-left-color: var(--common); }
-.reward-item.uncommon { border-left-color: var(--uncommon); }
-.reward-item.rare { border-left-color: var(--rare); }
-.reward-item.epic { border-left-color: var(--epic); }
-.reward-item.legendary { border-left-color: var(--legendary); }
-.reward-item.insane { border-left-color: var(--insane); }
-.reward-item.godly { border-left-color: var(--godly-color); }
-.reward-item.subzero { border-left-color: var(--subzero-color); }
-.reward-item.mythic { border-left-color: var(--mythic-color-1); }
-.reward-item.limited { border-left-color: var(--limited-color); }
-.reward-item.exclusive { border-left-color: var(--exclusive-color); }
-.reward-item.event { border-left-color: var(--event-color); }
-.reward-item.easter { border-left-color: var(--easter-color); }
-.reward-item.unobtainable { border-left-color: var(--unobtainable-color); }
-.reward-item.staff { border-left-color: var(--staff-color); }
-.reward-item.hell { border-left-color: var(--hell-color); }
-.reward-item.evil { border-left-color: var(--evil-color); }
+
+/* El BRILLO que tanto te gustaba, específico para cada rareza */
+.reward-item.common:hover { box-shadow: 0 0 20px 5px rgba(74, 222, 128, 0.6); }
+.reward-item.uncommon:hover { box-shadow: 0 0 20px 5px rgba(34, 211, 238, 0.6); }
+.reward-item.rare:hover { box-shadow: 0 0 20px 5px rgba(96, 165, 250, 0.6); }
+.reward-item.epic:hover { box-shadow: 0 0 20px 5px rgba(192, 132, 252, 0.6); }
+.reward-item.legendary:hover { box-shadow: 0 0 20px 5px rgba(250, 204, 21, 0.6); }
+.reward-item.insane:hover { box-shadow: 0 0 20px 5px rgba(244, 63, 94, 0.6); }
+.reward-item.godly:hover { box-shadow: 0 0 20px 5px var(--godly-color); }
+.reward-item.subzero:hover { box-shadow: 0 0 20px 5px var(--subzero-color); }
+.reward-item.mythic:hover { box-shadow: 0 0 20px 5px var(--mythic-color-1); }
+.reward-item.limited:hover { box-shadow: 0 0 20px 5px var(--limited-color); }
+.reward-item.exclusive:hover { box-shadow: 0 0 20px 5px var(--exclusive-color); }
+.reward-item.event:hover { box-shadow: 0 0 20px 5px var(--event-color); }
+.reward-item.easter:hover { box-shadow: 0 0 20px 5px var(--easter-color); }
+.reward-item.unobtainable:hover { box-shadow: 0 0 20px 5px var(--unobtainable-color); }
+.reward-item.staff:hover { box-shadow: 0 0 20px 5px var(--staff-color); }
+.reward-item.hell:hover { box-shadow: 0 0 20px 5px var(--hell-color); }
+.reward-item.evil:hover { box-shadow: 0 0 20px 5px var(--evil-color); }
 
 .reward-info {
     display: flex;
