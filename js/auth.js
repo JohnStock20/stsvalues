@@ -1,5 +1,5 @@
 /* =================================================================================== */
-/* === ARCHIVO: auth.js (VERSIÓN COMPLETA, FINAL Y FUNCIONAL) === */
+/* === ARCHIVO: auth.js (VERSIÓN CORREGIDA Y FUNCIONAL) === */
 /* === Lógica para el sistema de autenticación de usuarios (login, registro, logout). === */
 /* =================================================================================== */
 
@@ -20,13 +20,22 @@ export function initializeAuth() {
 
     // --- Funciones para controlar la visibilidad de los modales ---
     function showModal(modalElement) {
-        authModalOverlay.classList.add('visible');
+        // Usamos clases para una transición suave, en lugar de cambiar 'display' directamente.
+        authModalOverlay.style.display = 'flex'; // Primero lo hacemos un flex container
+        setTimeout(() => {
+            authModalOverlay.classList.add('visible');
+        }, 10); // Un pequeño retardo para que la transición CSS se active
+        
         [loginModal, registerModalStep1, registerModalStep2].forEach(m => m.style.display = 'none');
         modalElement.style.display = 'block';
     }
 
     function hideModals() {
         authModalOverlay.classList.remove('visible');
+        // Esperamos a que la transición de opacidad termine antes de ocultarlo completamente
+        setTimeout(() => {
+            authModalOverlay.style.display = 'none';
+        }, 300); // 300ms es la duración de la transición en auth.css
     }
 
     // --- Manejadores de eventos de formularios (Simulados) ---
@@ -38,6 +47,7 @@ export function initializeAuth() {
         const errorElement = document.getElementById('login-error');
         errorElement.style.display = 'none';
 
+        // Simulación: si los datos son correctos, "logeamos"
         if (username === "testuser" && password === "password") {
             console.log("Login exitoso (simulado)");
             updateUIAfterLogin({ username: "testuser", avatar: "images/placeholder.png" });
@@ -63,6 +73,7 @@ export function initializeAuth() {
             return;
         }
 
+        // Simulación: Pasamos al paso 2
         document.getElementById('verification-code').textContent = `code-${Math.random().toString(36).substr(2, 9)}`;
         showModal(registerModalStep2);
     }
@@ -72,6 +83,8 @@ export function initializeAuth() {
         const errorElement = document.getElementById('register-error-step2');
         errorElement.style.display = 'none';
 
+        // Simulación: Mostramos un mensaje de éxito y volvemos al login
+        console.log("Verificando cuenta (simulado)...");
         setTimeout(() => {
             alert(`Account for ${username} created successfully! Please log in.`);
             showModal(loginModal);
@@ -81,6 +94,7 @@ export function initializeAuth() {
     function handleLogout() {
         loginNavBtn.style.display = 'block';
         userProfileNav.style.display = 'none';
+        console.log("Logout exitoso (simulado)");
     }
 
     function updateUIAfterLogin(userData) {
@@ -106,11 +120,13 @@ export function initializeAuth() {
     });
 
     authModalOverlay.addEventListener('click', (e) => {
+        // Si se hace clic directamente en el overlay (el fondo oscuro), se cierra.
         if (e.target === authModalOverlay) {
             hideModals();
         }
     });
 
+    // Añade el listener a todos los botones de cerrar
     document.querySelectorAll('.close-modal-btn').forEach(btn => {
         btn.addEventListener('click', hideModals);
     });
@@ -120,7 +136,10 @@ export function initializeAuth() {
     document.getElementById('verify-account-btn').addEventListener('click', handleVerifyAndCreateAccount);
 
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', handleLogout);
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault(); // Previene que el enlace '#' recargue la página
+            handleLogout();
+        });
     }
 
     document.getElementById('copy-code-btn').addEventListener('click', () => {
@@ -130,5 +149,5 @@ export function initializeAuth() {
         });
     });
 
-    console.log("Auth system initialized.");
+    console.log("Auth system initialized correctly.");
 }
