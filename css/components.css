@@ -326,34 +326,60 @@
     grid-template-columns: 1fr 2fr;
     gap: 40px;
 }
+
 #sword-info-card {
     border-radius: var(--border-radius-lg);
     padding: 25px;
     text-align: center;
-    border: 1px solid var(--border-color);
-    background-color: var(--panel-bg);
     position: relative;
     overflow: hidden;
-    border-top: 5px solid; /* Borde de color ahora está arriba */
+    background: transparent; /* CLAVE para el efecto */
+    border: 3px solid var(--border-color);
     box-shadow: var(--shadow-md);
 }
-#sword-info-card.common { border-top-color: var(--common); }
-#sword-info-card.uncommon { border-top-color: var(--uncommon); }
-#sword-info-card.rare { border-top-color: var(--rare); }
-#sword-info-card.epic { border-top-color: var(--epic); }
-#sword-info-card.legendary { border-top-color: var(--legendary); }
-#sword-info-card.insane { border-top-color: var(--insane); }
-#sword-info-card.godly { border-top-color: var(--godly-color); }
-#sword-info-card.subzero { border-top-color: var(--subzero-color); }
-#sword-info-card.mythic { border-top-color: var(--mythic-color-1); }
-#sword-info-card.limited { border-top-color: var(--limited-color); }
-#sword-info-card.exclusive { border-top-color: var(--exclusive-color); }
-#sword-info-card.event { border-top-color: var(--event-color); }
-#sword-info-card.easter { border-top-color: var(--easter-color); }
-#sword-info-card.unobtainable { border-top-color: var(--unobtainable-color); }
-#sword-info-card.staff { border-top-color: var(--staff-color); }
-#sword-info-card.hell { border-top-color: var(--hell-color); }
-#sword-info-card.evil { border-top-color: var(--evil-color); }
+
+#sword-info-card::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px; right: 3px; bottom: 3px;
+    background: var(--panel-bg);
+    border-radius: 10px; /* Un poco menos que el padre */
+    z-index: 0;
+}
+
+#sword-info-card::before {
+    content: '';
+    position: absolute;
+    top: -3px; left: -3px; right: -3px; bottom: -3px;
+    border-radius: 13px; /* Un poco más que el padre */
+    z-index: -1;
+}
+
+/* Pone el contenido por encima del fondo interior */
+#sword-info-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+
+/* AÑADE ESTAS REGLAS PARA LOS COLORES DEL BORDE */
+#sword-info-card.common::before { background: var(--common); }
+#sword-info-card.uncommon::before { background: var(--uncommon); }
+#sword-info-card.rare::before { background: var(--rare); }
+#sword-info-card.epic::before { background: var(--epic); }
+#sword-info-card.legendary::before { background: var(--legendary); }
+#sword-info-card.insane::before { background: var(--insane); }
+#sword-info-card.godly::before { background: var(--godly-gradient); }
+#sword-info-card.subzero::before { background: var(--subzero-gradient); }
+#sword-info-card.mythic::before { background: var(--mythic-gradient); }
+#sword-info-card.limited::before { background: var(--limited-gradient); }
+#sword-info-card.exclusive::before { background: var(--exclusive-gradient); }
+#sword-info-card.event::before { background: var(--event-gradient); }
+#sword-info-card.easter::before { background: var(--easter-gradient); }
+#sword-info-card.unobtainable::before { background: var(--unobtainable-gradient); }
+#sword-info-card.staff::before { background: var(--staff-gradient); }
+#sword-info-card.hell::before { background: var(--hell-gradient); }
+#sword-info-card.evil::before { background: var(--evil-gradient); }
 
 #sword-demand-indicator {
     position: absolute;

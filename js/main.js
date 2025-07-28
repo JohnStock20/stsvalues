@@ -23,21 +23,26 @@ const MAX_GRAPH_SECTIONS = 50;
 
 
 // --- NAVEGACIÓN ---
+// REEMPLAZA ESTA FUNCIÓN COMPLETA
 function handleNavigation(view, payload) {
-    navigationContext = { view, ...payload };
+    // Para la vista de detalles de la espada, el payload es un objeto {sword, source}
+    if (view === 'swordDetails') {
+        const { sword, source } = payload;
+        navigationContext = { view, id: source.id }; // Actualizamos el contexto correctamente
+        UI.renderSwordDetails(sword, source, handleNavigation, (intervalId) => {
+            if (swordUpdateInterval) clearInterval(swordUpdateInterval);
+            swordUpdateInterval = intervalId;
+        });
+        return;
+    }
+
+    // Para otras vistas, el payload es simplemente el ID
+    navigationContext = { view, id: payload };
     
     switch (view) {
         case 'caseDetails':
             appState.currentCaseIdForCalc = payload;
             UI.renderCaseDetails(payload, handleNavigation);
-            break;
-        case 'swordDetails':
-            const { sword, source } = payload;
-            UI.renderSwordDetails(sword, source, handleNavigation, (intervalId) => {
-                // Gestiona el intervalo de actualización para el temporizador
-                if (swordUpdateInterval) clearInterval(swordUpdateInterval);
-                swordUpdateInterval = intervalId;
-            });
             break;
         case 'selection':
         default:
