@@ -62,81 +62,93 @@ export function initializeAuth() {
 
 // En tu archivo js/auth.js
 
-// Reemplaza tu función handleRegisterStep1 (o como se llame) con esto:
+// 1. MODIFICA la función que maneja el primer paso del registro
 async function handleRegisterStep1(event) {
-    event.preventDefault(); // Esto evita que la página se recargue, es importante.
+    event.preventDefault();
     const form = event.target;
     const username = form.username.value;
     const password = form.password.value;
     const confirmPassword = form.confirm_password.value;
     const errorElement = document.getElementById('register-error-step1');
-
-    // Ocultamos cualquier mensaje de error anterior
     errorElement.style.display = 'none';
 
-    // Comprobamos si las contraseñas coinciden
     if (password !== confirmPassword) {
         errorElement.textContent = "Las contraseñas no coinciden.";
         errorElement.style.display = 'block';
-        return; // Detenemos la función aquí
+        return;
+    }
+    
+    // --- ESTA PARTE ES NUEVA ---
+    // Simulación: Generamos un código aleatorio en el frontend por ahora.
+    // Más adelante, una función de backend haría esto.
+    const verificationCode = `verify-my-account-${Math.random().toString(36).substr(2, 9)}`;
+    document.getElementById('verification-code').textContent = verificationCode;
+    
+    // Guardamos los datos temporalmente para usarlos en el paso 2
+    // Usamos el `sessionStorage` que es como una memoria temporal del navegador
+    sessionStorage.setItem('pending_username', username);
+    sessionStorage.setItem('pending_password', password);
+    sessionStorage.setItem('pending_code', verificationCode);
+
+    // Mostramos el segundo modal con las instrucciones
+    showModal(registerModalStep2);
+}
+
+// 2. MODIFICA la función que maneja el botón "Verificar y Crear Cuenta"
+async function handleVerifyAndCreateAccount() {
+    const errorElement = document.getElementById('register-error-step2');
+    errorElement.style.display = 'none';
+
+    // Recuperamos los datos que guardamos del paso 1
+    const username = sessionStorage.getItem('pending_username');
+    const password = sessionStorage.getItem('pending_password');
+    const verificationCode = sessionStorage.getItem('pending_code');
+
+    if (!username || !password || !verificationCode) {
+        errorElement.textContent = "Error de sesión. Por favor, empieza el registro de nuevo.";
+        errorElement.style.display = 'block';
+        return;
     }
 
-    // Le decimos al usuario que estamos trabajando en ello
-    const submitButton = form.querySelector('button');
-    submitButton.disabled = true;
-    submitButton.textContent = 'Creando cuenta...';
+    const verifyButton = document.getElementById('verify-account-btn');
+    verifyButton.disabled = true;
+    verifyButton.textContent = 'Verificando...';
 
     try {
-        // ---- LA MAGIA OCURRE AQUÍ ----
-        // Llamamos por "teléfono" a nuestro backend. La URL es la "dirección mágica" que Netlify entiende.
-        const response = await fetch('/.netlify/functions/register', {
-            method: 'POST', // Le decimos que estamos ENVIANDO datos.
+        // Llamamos a nuestra nueva función de backend para verificar
+        const response = await fetch('/.netlify/functions/verify-and-register', {
+            method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            // Metemos el usuario y la contraseña en un "sobre" para enviarlos.
             body: JSON.stringify({ 
                 username: username, 
-                password: password
+                password: password,
+                verificationCode: verificationCode
             })
         });
 
-        // Leemos la respuesta que nos da el backend.
         const data = await response.json();
 
         if (!response.ok) {
-            // Si el backend respondió con un error (ej: usuario ya existe), lo mostramos.
             errorElement.textContent = data.message;
             errorElement.style.display = 'block';
         } else {
-            // ¡Éxito! Si todo fue bien, mostramos una alerta y lo llevamos a la ventana de login.
-            alert("¡Cuenta creada con éxito! Por favor, inicia sesión.");
-            showModal(loginModal); // Esta función ya la tenías para mostrar la ventana de login
+            // Limpiamos los datos temporales
+            sessionStorage.removeItem('pending_username');
+            sessionStorage.removeItem('pending_password');
+            sessionStorage.removeItem('pending_code');
+            
+            alert(data.message);
+            showModal(loginModal);
         }
-
     } catch (error) {
-        // Si hay un error de conexión (no se pudo llamar al "teléfono").
-        console.error('Error de conexión:', error);
+        console.error('Error de verificación:', error);
         errorElement.textContent = "No se pudo conectar al servidor. Inténtalo más tarde.";
         errorElement.style.display = 'block';
     } finally {
-        // Haya funcionado o no, volvemos a activar el botón.
-        submitButton.disabled = false;
-        submitButton.textContent = 'Siguiente: Verificar Cuenta';
+        verifyButton.disabled = false;
+        verifyButton.textContent = 'Verificar & Crear Cuenta';
     }
 }
-
-    async function handleVerifyAndCreateAccount() {
-        const username = document.querySelector('#register-form-step1 input[name="username"]').value;
-        const errorElement = document.getElementById('register-error-step2');
-        errorElement.style.display = 'none';
-
-        // Simulación: Mostramos un mensaje de éxito y volvemos al login
-        console.log("Verificando cuenta (simulado)...");
-        setTimeout(() => {
-            alert(`Account for ${username} created successfully! Please log in.`);
-            showModal(loginModal);
-        }, 1500);
-    }
-
     function handleLogout() {
         loginNavBtn.style.display = 'block';
         userProfileNav.style.display = 'none';
