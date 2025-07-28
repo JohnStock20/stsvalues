@@ -38,29 +38,51 @@ export function initializeAuth() {
         }, 300); // 300ms es la duración de la transición en auth.css
     }
 
-    // --- Manejadores de eventos de formularios (Simulados) ---
-    async function handleLogin(event) {
-        event.preventDefault();
-        const form = event.target;
-        const username = form.username.value;
-        const password = form.password.value;
-        const errorElement = document.getElementById('login-error');
-        errorElement.style.display = 'none';
+// En js/auth.js
 
-        // Simulación: si los datos son correctos, "logeamos"
-        if (username === "testuser" && password === "password") {
-            console.log("Login exitoso (simulado)");
-            updateUIAfterLogin({ username: "testuser", avatar: "images/placeholder.png" });
-            hideModals();
-        } else {
-            errorElement.textContent = "Invalid username or password.";
+// Reemplaza tu vieja función handleLogin con esta:
+async function handleLogin(event) {
+    event.preventDefault();
+    const form = event.target;
+    const username = form.username.value;
+    const password = form.password.value;
+    const errorElement = document.getElementById('login-error');
+    errorElement.style.display = 'none';
+
+    const loginButton = form.querySelector('button');
+    loginButton.disabled = true;
+    loginButton.textContent = 'Logging in...';
+
+    try {
+        const response = await fetch('/.netlify/functions/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            errorElement.textContent = data.message;
             errorElement.style.display = 'block';
+        } else {
+            // ¡Éxito! El backend nos ha dado un token.
+            // Guardamos el token en la memoria del navegador para recordar al usuario.
+            localStorage.setItem('sts-token', data.token);
+
+            // Actualizamos la UI para mostrar el perfil del usuario.
+            updateUIAfterLogin(data.user); // Esta función ya la tenías
+            hideModals(); // Esta también
         }
+    } catch (error) {
+        console.error('Login fetch error:', error);
+        errorElement.textContent = "Could not connect to the server.";
+        errorElement.style.display = 'block';
+    } finally {
+        loginButton.disabled = false;
+        loginButton.textContent = 'Login';
     }
-
-// En tu archivo js/auth.js
-
-// En tu archivo js/auth.js
+}
 
 // 1. MODIFICA la función que maneja el primer paso del registro
 async function handleRegisterStep1(event) {
