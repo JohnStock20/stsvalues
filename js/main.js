@@ -1,7 +1,8 @@
 /* =================================================================================== */
-/* === ARCHIVO: main.js (VERSIÓN COMPLETA Y FINAL) === */
+/* === ARCHIVO: main.js (VERSIÓN COMPLETA, FINAL Y FUNCIONAL) === */
 /* =================================================================================== */
 
+// --- MÓDULOS ---
 import { appData, parseValue } from './data.js';
 import { findSwordById, getUnitValue, convertTimeValueToCurrency, formatLargeNumber } from './utils.js';
 import * as UI from './ui.js';
