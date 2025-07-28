@@ -75,11 +75,12 @@
     gap: 20px;
     flex-wrap: wrap; /* Permite que se apilen en pantallas más pequeñas */
 }
-
 .auth-container {
     grid-column: 3;
     display: flex;
     justify-content: flex-end;
+    position: relative; /* Añadido: Necesario para que z-index funcione */
+    z-index: 2;         /* Añadido: Pone este contenedor por encima de los demás */
 }
 
 
