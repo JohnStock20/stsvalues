@@ -2,19 +2,26 @@
 
 const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
-const jwt = require('jsonwebtoken'); // La librería para crear el "pase VIP"
+const jwt = require('jsonwebtoken');
 
+// Configuración de la conexión a la base de datos de Neon
 const pool = new Pool({
     connectionString: process.env.NEON_DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+    ssl: { 
+        rejectUnauthorized: false 
+    }
 });
 
+// --- LÓGICA PRINCIPAL DEL SCRIPT ---
+
 exports.handler = async (event) => {
+    // Solo permitimos peticiones de tipo POST
     if (event.httpMethod !== 'POST') {
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
     try {
+        // Obtenemos los datos enviados desde el frontend
         const { username, password } = JSON.parse(event.body);
 
         if (!username || !password) {
@@ -23,46 +30,44 @@ exports.handler = async (event) => {
 
         const client = await pool.connect();
         try {
-            // 1. Buscamos al usuario por su nombre
+            // Paso 1: Buscamos al usuario en nuestra base de datos
             const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
 
-            // 2. Si no encontramos ninguna fila, el usuario no existe.
+            // Si no devuelve filas, el usuario no existe
             if (result.rows.length === 0) {
-                // Devolvemos el mismo error genérico por seguridad.
                 return { statusCode: 401, body: JSON.stringify({ message: "Invalid username or password." }) };
             }
 
             const user = result.rows[0];
 
-            // 3. Comparamos la contraseña enviada con la contraseña encriptada de la BD.
+            // Paso 2: Comparamos la contraseña enviada con la encriptada que tenemos
             const passwordIsValid = await bcrypt.compare(password, user.password_hash);
 
             if (!passwordIsValid) {
-                // Si la contraseña no coincide, devolvemos el mismo error.
                 return { statusCode: 401, body: JSON.stringify({ message: "Invalid username or password." }) };
             }
 
-            // 4. ¡Éxito! La contraseña es correcta. Creamos el "pase VIP" (JWT).
+            // Paso 3: Si la contraseña es válida, creamos un token (el "pase VIP")
             const token = jwt.sign(
-                { userId: user.id, username: user.username }, // La información que guardamos en el pase
-                process.env.JWT_SECRET, // Una clave secreta que SOLO el servidor conoce
-                { expiresIn: '1d' } // El pase caduca en 1 día
+                { userId: user.id, username: user.username }, // Información dentro del token
+                process.env.JWT_SECRET, // La clave secreta para firmarlo
+                { expiresIn: '1d' } // El token caduca en 1 día
             );
             
-            // 5. Devolvemos el token al frontend
+            // Paso 4: Devolvemos una respuesta de éxito con el token y los datos del usuario
             return {
                 statusCode: 200,
                 body: JSON.stringify({ 
                     message: "Login successful!",
                     token: token,
                     user: {
-                        username: user.username
-                        // Puedes añadir aquí la URL del avatar de roblox si la guardas
+                        username: user.username,
+                        avatar: user.roblox_avatar_url // Aquí devolvemos el link del avatar
                     }
                 })
             };
-
         } finally {
+            // Asegurarse de liberar la conexión a la BD
             client.release();
         }
     } catch (error) {
