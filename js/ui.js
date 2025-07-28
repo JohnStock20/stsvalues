@@ -1,19 +1,18 @@
 /* =================================================================================== */
-/* === ARCHIVO: ui.js === */
+/* === ARCHIVO: ui.js (VERSIÓN FINAL Y CORREGIDA) === */
 /* === Controla toda la manipulación del DOM y el renderizado de la interfaz de usuario. === */
 /* =================================================================================== */
 
-import { appData, parseValue } from './data.js';
-import { findSwordById } from './utils.js'; // Lo crearemos después
+import { appData } from './data.js';
+import { findSwordById } from './utils.js';
+// IMPORTAMOS las funciones de formato, no las definimos aquí.
+import { formatLargeNumber, formatHours, formatTimeAgo } from './utils.js';
 
-// --- DOM Element Selection ---
-// Mantener todos los selectores del DOM en un solo lugar dentro del módulo que los usa.
 export const mainViews = {
     selection: document.getElementById('case-selection-view'),
     caseDetails: document.getElementById('case-details-view'),
     swordDetails: document.getElementById('sword-details-view')
 };
-
 export const containers = {
     cases: document.querySelector('#case-selection-view .cases-container'),
     rewards: document.getElementById('rewards-list-container'),
@@ -26,7 +25,6 @@ export const containers = {
     graphLabels: document.getElementById('graph-labels'),
     graphSvg: document.querySelector('#graph-plot-area svg')
 };
-
 export const inputs = {
     caseQuantity: document.getElementById('case-quantity-input'),
     graphStep: document.getElementById('graph-step-input'),
@@ -35,87 +33,35 @@ export const inputs = {
     converterTo: document.getElementById('converter-to-input'),
     searchBar: document.getElementById('search-bar')
 };
-
 export const controls = {
     standard: document.getElementById('standard-controls'),
     graph: document.getElementById('graph-controls'),
 };
 
-// --- Helper & Formatting Functions ---
-
-export function formatTimeAgo(isoString) {
-    if (!isoString) return '';
-    const date = new Date(isoString);
-    const now = new Date();
-    const seconds = Math.round((now - date) / 1000);
-    if (seconds < 5) return `Updated just now`;
-    if (seconds < 60) return `Updated ${seconds} seconds ago`;
-    const minutes = Math.round(seconds / 60);
-    if (minutes < 60) return `Updated ${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-    const hours = Math.round(minutes / 60);
-    if (hours < 24) return `Updated ${hours} hour${hours > 1 ? 's' : ''} ago`;
-    const days = Math.round(hours / 24);
-    return `Updated ${days} day${days > 1 ? 's' : ''} ago`;
-}
-
-export function formatLargeNumber(num) {
-    if (typeof num !== 'number' || isNaN(num)) return 'N/A';
-    if (Math.abs(num) < 1000) return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
-    const units = ['K', 'M', 'B', 'T', 'Qd'];
-    if (num === 0) return '0';
-    const tier = Math.floor(Math.log10(Math.abs(num)) / 3);
-    if (tier === 0) return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
-    const unit = units[tier - 1];
-    if (!unit) return num.toLocaleString();
-    const scaled = num / Math.pow(1000, tier);
-    return scaled.toFixed(2) + unit;
-}
-
-export function formatHours(totalHours) {
-    if (totalHours < 24) return `${totalHours.toFixed(1)} hours`;
-    const days = totalHours / 24;
-    if (days < 7) return `${days.toFixed(1)} days`;
-    const weeks = days / 7;
-    if (weeks < 4.34) return `${weeks.toFixed(1)} weeks`;
-    const months = days / 30.44;
-    if (months < 12) return `${months.toFixed(1)} months`;
-    const years = days / 365.25;
-    return `${years.toFixed(2)} years`;
-}
-
-
-// --- Core UI Rendering Logic ---
-
-export function showView(viewName, swordUpdateInterval) {
-    if (swordUpdateInterval) {
-        clearInterval(swordUpdateInterval);
-    }
+export function showView(viewName) {
     Object.values(mainViews).forEach(view => view.style.display = 'none');
-    mainViews[viewName].style.display = 'block';
+    if (mainViews[viewName]) {
+        mainViews[viewName].style.display = 'block';
+    }
     window.scrollTo(0, 0);
 }
 
 function getCurrencyHTML(currencyKey, price) {
-    if (currencyKey === 'cooldown') {
-        return `<span class="currency-text">Free (Every ${price} hr)</span>`;
-    }
+    if (currencyKey === 'cooldown') return `<span class="currency-text">Free (Every ${price} hr)</span>`;
     const currency = appData.currencies[currencyKey];
-    if (currency.icon) {
-        return `<img src="${currency.icon}" alt="${currencyKey}" class="currency-icon"> <span class="value">${price.toLocaleString()}</span>`;
-    }
+    if (currency.icon) return `<img src="${currency.icon}" alt="${currencyKey}" class="currency-icon"> <span class="value">${price.toLocaleString()}</span>`;
     return `<span class="currency-text">${currency.name}</span> <span class="value">${price.toLocaleString()}</span>`;
 }
 
-function parseAndSetDescription(element, text, renderCaseDetails, renderSwordDetails) {
+function parseAndSetDescription(element, text, navigateTo) {
     element.innerHTML = '';
     if (!text) {
-        element.textContent = 'No description available for this item.';
+        element.textContent = 'No description available.';
         return;
     }
     const fragment = document.createDocumentFragment();
     const regex = /\[(case|sword):([a-zA-Z0-9_-]+)\]/g;
-    let lastIndex = 0;
-    let match;
+    let lastIndex = 0, match;
     while ((match = regex.exec(text)) !== null) {
         fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
         const [fullMatch, type, id] = match;
@@ -126,39 +72,32 @@ function parseAndSetDescription(element, text, renderCaseDetails, renderSwordDet
             if (data) {
                 link.textContent = data.name;
                 link.className = 'case-link-in-description';
-                link.onclick = (e) => { e.preventDefault(); renderCaseDetails(id); };
+                link.onclick = (e) => { e.preventDefault(); navigateTo('caseDetails', id); };
             }
         } else if (type === 'sword') {
             const data = findSwordById(id);
             if (data) {
                 link.textContent = data.sword.name;
                 link.className = 'sword-link-in-description';
-                link.onclick = (e) => { e.preventDefault(); renderSwordDetails(data.sword, data.source); };
+                link.onclick = (e) => { e.preventDefault(); navigateTo('swordDetails', data); };
             }
         }
-        if (link.textContent) {
-            fragment.appendChild(link);
-        } else {
-            fragment.appendChild(document.createTextNode(fullMatch));
-        }
+        if (link.textContent) fragment.appendChild(link);
+        else fragment.appendChild(document.createTextNode(fullMatch));
         lastIndex = regex.lastIndex;
     }
     fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
     element.appendChild(fragment);
 }
 
-export function renderSwordDetails(sword, sourceInfo, onNavigate, onNewInterval) {
-    if (!sword) return;
-
+export function renderSwordDetails(sword, sourceInfo, navigateTo, onNewInterval) {
     const swordInfoCard = document.getElementById('sword-info-card');
-    swordInfoCard.className = ``;
+    swordInfoCard.className = ''; // Limpiamos clases anteriores
     swordInfoCard.classList.add(sword.rarity);
 
     const demandIndicator = document.getElementById('sword-demand-indicator');
     if (sword.demand) {
-        demandIndicator.className = '';
-        demandIndicator.classList.add('sword-demand-indicator');
-        demandIndicator.classList.add(sword.demand);
+        demandIndicator.className = 'sword-demand-indicator ' + sword.demand;
         demandIndicator.style.display = 'block';
     } else {
         demandIndicator.style.display = 'none';
@@ -166,17 +105,15 @@ export function renderSwordDetails(sword, sourceInfo, onNavigate, onNewInterval)
 
     document.getElementById('sword-details-image-container').innerHTML = `<img src="${sword.image}" alt="${sword.name}">`;
     document.getElementById('sword-details-name').textContent = sword.name;
-
-    const descriptionEl = document.getElementById('sword-details-description');
-    const fullDescription = sword.description || (sourceInfo.type === 'case' ? `This sword is obtainable from the [case:${sourceInfo.id}].` : 'A special item, not available in cases.');
-    parseAndSetDescription(descriptionEl, fullDescription, (caseId) => onNavigate('caseDetails', caseId), renderSwordDetails);
+    const fullDescription = sword.description || `This sword is obtainable from the [case:${sourceInfo.id}].`;
+    parseAndSetDescription(document.getElementById('sword-details-description'), fullDescription, navigateTo);
 
     const valueEl = document.getElementById('sword-details-value');
     if (typeof sword.value === 'string' && sword.value.toUpperCase().startsWith('O/C')) {
         const match = sword.value.match(/\[(.*?)\]/);
         valueEl.textContent = 'O/C';
         valueEl.classList.add('value-oc');
-        valueEl.title = match ? `Owner's Choice: ${match[1]}` : 'Owner\'s Choice - No range specified';
+        valueEl.title = match ? `Owner's Choice: ${match[1]}` : 'Owner\'s Choice';
     } else {
         valueEl.textContent = typeof sword.value === 'number' ? sword.value.toLocaleString() : sword.value;
         valueEl.classList.remove('value-oc');
@@ -184,20 +121,13 @@ export function renderSwordDetails(sword, sourceInfo, onNavigate, onNewInterval)
     }
 
     document.getElementById('sword-details-stats').textContent = sword.stats;
-    const moreEl = document.getElementById('sword-details-more');
     const existCount = typeof sword.exist === 'number' ? sword.exist.toLocaleString() : sword.exist;
-    moreEl.innerHTML = `
-        ${sword.chance ? `Chance - ${sword.chance}%<br>` : ''}
-        Exist - ${existCount}<br>
-        Rarity - <span class="rarity-text ${sword.rarity}">${sword.rarity}</span>
-    `;
+    document.getElementById('sword-details-more').innerHTML = `${sword.chance ? `Chance - ${sword.chance}%<br>` : ''}Exist - ${existCount}<br>Rarity - <span class="rarity-text ${sword.rarity}">${sword.rarity}</span>`;
+    
     const updatedEl = document.getElementById('sword-details-updated');
     const updateSwordTime = () => updatedEl.textContent = formatTimeAgo(sword.lastUpdated);
     updateSwordTime();
-    
-    // Pass the new interval ID back to the main script to manage.
     onNewInterval(setInterval(updateSwordTime, 60000));
-    
     showView('swordDetails');
 }
 
@@ -209,46 +139,31 @@ export function createRewardItemHTML(reward, source) {
     } else {
         valueDisplayHTML = typeof reward.value === 'number' ? reward.value.toLocaleString() : reward.value;
     }
-
     const isCaseReward = source.type === 'case';
-    return `
-        <div class="reward-info">
-            <div class="reward-image-placeholder"><img src="${reward.image}" alt="${reward.name}"></div>
-            <span class="reward-name">${reward.name}</span>
-        </div>
-        <div class="reward-stats">
-           ${isCaseReward ? `<span>${reward.chance}%</span>` : '<span class="no-chance">--</span>'}
-           <span class="reward-value">${valueDisplayHTML}</span>
-           <span>${reward.stats}</span>
-        </div>
-    `;
+    return `<div class="reward-info"><div class="reward-image-placeholder"><img src="${reward.image}" alt="${reward.name}"></div><span class="reward-name">${reward.name}</span></div><div class="reward-stats">${isCaseReward ? `<span>${reward.chance}%</span>` : '<span class="no-chance">--</span>'}<span class="reward-value">${valueDisplayHTML}</span><span>${reward.stats}</span></div>`;
 }
 
-export function renderCaseDetails(caseId, onNavigate) {
+export function renderCaseDetails(caseId, navigateTo) {
     const data = appData.cases[caseId];
     if (!data) return;
-
     document.getElementById('details-case-image').src = data.image;
     document.getElementById('details-case-name').textContent = data.name;
     document.getElementById('details-case-price').innerHTML = getCurrencyHTML(data.currency, data.price);
-    
     const infoColumn = document.querySelector('.info-column');
     infoColumn.style.setProperty('--case-border-color', data.borderColor || 'var(--main-green)');
-    
     containers.rewards.innerHTML = '';
     data.rewards.forEach(reward => {
         const item = document.createElement('div');
         item.className = `reward-item ${reward.rarity}`;
         item.innerHTML = createRewardItemHTML(reward, { type: 'case' });
-        item.addEventListener('click', () => onNavigate('swordDetails', { sword: reward, source: { type: 'case', id: caseId } }));
+        item.addEventListener('click', () => navigateTo('swordDetails', { sword: reward, source: { type: 'case', id: caseId } }));
         containers.rewards.appendChild(item);
     });
-    
-    clearCalculator();
+    clearCalculator({ calculatorMode: 'theoretical' });
     showView('caseDetails');
 }
 
-export function renderCaseSelection(onNavigate) {
+export function renderCaseSelection(navigateTo) {
     containers.cases.innerHTML = '';
     Object.keys(appData.cases).forEach(caseId => {
         const data = appData.cases[caseId];
@@ -259,37 +174,32 @@ export function renderCaseSelection(onNavigate) {
         const caseItem = link.querySelector('.case-item');
         caseItem.style.setProperty('--case-border-color', data.borderColor || 'var(--main-green)');
         caseItem.innerHTML = `<img class="case-content-image" src="${data.image}" alt="${data.name}"><h3 class="case-title">${data.name}</h3><div class="case-price">${getCurrencyHTML(data.currency, data.price)}</div>`;
-        link.addEventListener('click', (e) => { e.preventDefault(); onNavigate('caseDetails', caseId); });
+        link.addEventListener('click', (e) => { e.preventDefault(); navigateTo('caseDetails', caseId); });
         containers.cases.appendChild(link);
     });
 }
 
-export function renderOtherSwords(appState, onNavigate) {
+export function renderOtherSwords(appState, navigateTo) {
     const { currentPage, itemsPerPage } = appState;
     containers.otherSwords.innerHTML = '';
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
     const pagedItems = appData.otherSwords.slice(start, end);
-
     pagedItems.forEach(reward => {
         const item = document.createElement('div');
         item.className = `reward-item ${reward.rarity}`;
         item.innerHTML = createRewardItemHTML(reward, { type: 'other' });
-        item.addEventListener('click', () => onNavigate('swordDetails', { sword: reward, source: { type: 'other' } }));
+        item.addEventListener('click', () => navigateTo('swordDetails', { sword: reward, source: { type: 'other' } }));
         containers.otherSwords.appendChild(item);
     });
     updatePaginationControls(appState);
 }
 
 export function updatePaginationControls(appState) {
-    const { currentPage, itemsPerPage } = appState;
-    const totalPages = Math.ceil(appData.otherSwords.length / itemsPerPage);
-    document.getElementById('other-prev-btn').disabled = currentPage === 1;
-    document.getElementById('other-next-btn').disabled = currentPage === totalPages;
+    const totalPages = Math.ceil(appData.otherSwords.length / appState.itemsPerPage);
+    document.getElementById('other-prev-btn').disabled = appState.currentPage === 1;
+    document.getElementById('other-next-btn').disabled = appState.currentPage === totalPages;
 }
-
-
-// --- Calculator UI ---
 
 export function clearCalculator(appState) {
     containers.simulationLoot.style.display = 'none';
@@ -297,14 +207,11 @@ export function clearCalculator(appState) {
     containers.graph.style.display = 'none';
     if (containers.graphSvg) containers.graphSvg.innerHTML = '';
     if (containers.graphLabels) containers.graphLabels.innerHTML = '';
-
     const calculateBtn = document.getElementById('calculate-btn');
     const isGraphMode = appState.calculatorMode === 'graph';
     const isUntilBestMode = appState.calculatorMode === 'untilBest';
-
     controls.standard.style.display = isGraphMode ? 'none' : 'flex';
     controls.graph.style.display = isGraphMode ? 'flex' : 'none';
-
     if (isUntilBestMode) {
         inputs.caseQuantity.value = '';
         inputs.caseQuantity.placeholder = "Not applicable";

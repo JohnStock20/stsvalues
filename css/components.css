@@ -458,19 +458,21 @@
     flex-direction: column;
     gap: 20px;
 }
+
 .stat-box {
     border-radius: var(--border-radius-lg);
     padding: 20px;
     background-color: var(--panel-bg);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm), inset 0 0 0 2px transparent; /* Sombra inicial transparente */
+    border: 1px solid var(--main-green); /* Borde exterior siempre del color principal */
+    /* El borde interior inset es ahora permanente */
+    box-shadow: var(--shadow-sm), inset 0 0 0 2px var(--main-green);
     transition: var(--transition-fast);
 }
 
 .stat-box:hover {
-    /* Al pasar el ratón, el borde interior aparece y se añade un brillo exterior */
-    box-shadow: var(--shadow-md), inset 0 0 0 2px var(--main-green);
-    border-color: var(--main-green);
+    /* Al pasar el ratón, ahora solo aumentamos el brillo */
+    transform: scale(1.01);
+    box-shadow: var(--shadow-md), inset 0 0 0 2px var(--main-green), 0 0 15px rgba(45, 212, 191, 0.3);
 }
 
 .stat-box h4 {
