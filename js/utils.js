@@ -1,15 +1,11 @@
 /* =================================================================================== */
-/* === ARCHIVO: utils.js === */
+/* === ARCHIVO: utils.js (VERSIÓN COMPLETA Y FINAL) === */
 /* === Contiene funciones de utilidad reutilizables en toda la aplicación. === */
 /* =================================================================================== */
 
 import { appData, currencyTiers } from './data.js';
 
-/**
- * Busca una espada por su ID en todas las cajas y en la lista de otras espadas.
- * @param {string} swordId - El ID de la espada a buscar.
- * @returns {{sword: object, source: object}|null} - El objeto de la espada y su origen, o null si no se encuentra.
- */
+// --- Funciones de Búsqueda ---
 export function findSwordById(swordId) {
     for (const caseId in appData.cases) {
         const foundSword = appData.cases[caseId].rewards.find(r => r.id === swordId);
@@ -24,43 +20,65 @@ export function findSwordById(swordId) {
     return null;
 }
 
-/**
- * Obtiene el valor base (en 'Time') de una unidad de una moneda específica, considerando los tiers.
- * @param {string} currencyKey - La clave de la moneda ('diamonds', 'heartstones').
- * @param {number} totalUnits - La cantidad total de la moneda que se está usando, para determinar el tier.
- * @returns {number} - El valor de una unidad de esa moneda.
- */
+// --- Funciones de Moneda ---
 export function getUnitValue(currencyKey, totalUnits = 1) {
     if (currencyKey === 'time' || currencyKey === 'cooldown') return 1;
-
     const tiers = currencyTiers[currencyKey];
     if (!tiers) return 0;
-
     const applicableTier = tiers.find(tier => totalUnits >= tier.threshold);
     return applicableTier ? applicableTier.value : 0;
 }
 
-/**
- * Convierte un valor total de 'Time' a otra moneda.
- * @param {number} timeValue - El valor total en 'Time'.
- * @param {string} targetCurrency - La moneda a la que se quiere convertir.
- * @returns {number} - La cantidad en la moneda de destino.
- */
 export function convertTimeValueToCurrency(timeValue, targetCurrency) {
-    if (targetCurrency === 'time') return timeValue;
-    if (targetCurrency === 'cooldown') return timeValue; // Asumimos que cooldown se mide en horas, que es un tipo de "time"
-
+    if (targetCurrency === 'time' || targetCurrency === 'cooldown') return timeValue;
     const tiers = currencyTiers[targetCurrency];
     if (!tiers || timeValue <= 0) return 0;
-
-    // Itera desde el tier más alto al más bajo para encontrar el mejor tipo de cambio posible
     for (const tier of tiers) {
         const calculatedQuantity = timeValue / tier.value;
         if (calculatedQuantity >= tier.threshold) {
             return calculatedQuantity;
         }
     }
-    
-    // Si no alcanza ningún umbral, usa el valor del tier más bajo (base)
     return timeValue / tiers[tiers.length - 1].value;
+}
+
+// --- Funciones de Formato ---
+export function formatTimeAgo(isoString) {
+    if (!isoString) return '';
+    const date = new Date(isoString);
+    const now = new Date();
+    const seconds = Math.round((now - date) / 1000);
+    if (seconds < 5) return `Updated just now`;
+    if (seconds < 60) return `Updated ${seconds} seconds ago`;
+    const minutes = Math.round(seconds / 60);
+    if (minutes < 60) return `Updated ${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    const hours = Math.round(minutes / 60);
+    if (hours < 24) return `Updated ${hours} hour${hours > 1 ? 's' : ''} ago`;
+    const days = Math.round(hours / 24);
+    return `Updated ${days} day${days > 1 ? 's' : ''} ago`;
+}
+
+export function formatLargeNumber(num) {
+    if (typeof num !== 'number' || isNaN(num)) return 'N/A';
+    if (Math.abs(num) < 1000) return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    const units = ['K', 'M', 'B', 'T', 'Qd'];
+    if (num === 0) return '0';
+    const tier = Math.floor(Math.log10(Math.abs(num)) / 3);
+    if (tier === 0) return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    const unit = units[tier - 1];
+    if (!unit) return num.toLocaleString();
+    const scaled = num / Math.pow(1000, tier);
+    return scaled.toFixed(2) + unit;
+}
+
+export function formatHours(totalHours) {
+    if (totalHours < 24) return `${totalHours.toFixed(1)} hours`;
+    const days = totalHours / 24;
+    if (days < 7) return `${days.toFixed(1)} days`;
+    const weeks = days / 7;
+    if (weeks < 4.34) return `${weeks.toFixed(1)} weeks`;
+    const months = days / 30.44;
+    if (months < 12) return `${months.toFixed(1)} months`;
+    const years = days / 365.25;
+    return `${years.toFixed(2)} years`;
 }

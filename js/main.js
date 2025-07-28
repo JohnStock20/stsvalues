@@ -8,6 +8,7 @@ import * as UI from './ui.js';
 import * as Calculator from './calculator.js';
 import { initializeAuth } from './auth.js';
 
+// --- ESTADO DE LA APLICACIÓN ---
 let swordUpdateInterval = null;
 let navigationContext = { view: 'selection', id: null };
 const appState = {
@@ -18,6 +19,7 @@ const appState = {
 };
 const MAX_GRAPH_SECTIONS = 50;
 
+// --- NAVEGACIÓN ---
 function navigateTo(view, data) {
     if (swordUpdateInterval) {
         clearInterval(swordUpdateInterval);
@@ -45,6 +47,7 @@ function navigateTo(view, data) {
     }
 }
 
+// --- LÓGICA DE LA UI SUPERIOR (CONVERSOR Y BÚSQUEDA) ---
 function initializeTopUI() {
     const allSwords = [
         ...Object.values(appData.cases).flatMap(c => c.rewards),
@@ -122,6 +125,7 @@ function initializeTopUI() {
     updateConverterUI(); runConversion();
 }
 
+// --- LÓGICA DE LA CALCULADORA ---
 function initializeCalculator() {
     function handleCalculate() {
         const quantity = parseInt(UI.inputs.caseQuantity.value, 10);
@@ -162,6 +166,7 @@ function initializeCalculator() {
     });
 }
 
+// --- INICIALIZACIÓN DE LA APLICACIÓN ---
 function initializeApp() {
     // 1. Inicializar sistema de autenticación (esto añade los listeners al botón de login)
     initializeAuth();

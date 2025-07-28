@@ -1,11 +1,9 @@
 /* =================================================================================== */
 /* === ARCHIVO: ui.js (VERSIÓN COMPLETA Y FINAL) === */
-/* === Controla toda la manipulación del DOM y el renderizado de la interfaz de usuario. === */
 /* =================================================================================== */
 
 import { appData } from './data.js';
 import { findSwordById } from './utils.js';
-// IMPORTAMOS las funciones de formato, no las definimos aquí.
 import { formatLargeNumber, formatHours, formatTimeAgo } from './utils.js';
 
 export const mainViews = {
@@ -92,7 +90,7 @@ function parseAndSetDescription(element, text, navigateTo) {
 
 export function renderSwordDetails(sword, sourceInfo, navigateTo, onNewInterval) {
     const swordInfoCard = document.getElementById('sword-info-card');
-    swordInfoCard.className = ''; // Limpiamos clases anteriores
+    swordInfoCard.className = '';
     swordInfoCard.classList.add(sword.rarity);
 
     const demandIndicator = document.getElementById('sword-demand-indicator');
