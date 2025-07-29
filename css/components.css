@@ -144,8 +144,7 @@
     justify-content: center;
     align-items: center;
     text-align: center;
-    position: sticky;
-    top: 120px;
+    /* FIX: position: sticky eliminado para permitir crecimiento dinámico */
 }
 #details-case-image {
     display: block;
@@ -194,14 +193,13 @@
     gap: 15px;
 }
 #rewards-list-container {
-    max-height: 520px;
-    overflow-y: auto;
     padding-right: 10px;
 }
 
 /* --- Estilo unificado de Tarjeta con Doble Borde --- */
 .reward-item {
-    background-color: transparent; /* El fondo lo da el ::after */
+    --shadow-color: rgba(165, 180, 252, 0.4); /* Color de sombra por defecto */
+    background-color: transparent;
     border-radius: 10px;
     padding: 15px;
     display: flex;
@@ -212,33 +210,28 @@
     position: relative;
     overflow: hidden;
     flex-shrink: 0;
-    border: none; /* Quitamos el borde principal */
+    border: none;
 }
-/* Gradiente de borde */
 .reward-item::before {
     content: '';
     position: absolute;
-    top: 0; right: 0; bottom: 0; left: 0;
-    z-index: -1;
+    inset: 0;
+    z-index: 0;
     border-radius: 10px;
     background: var(--border-color); /* Color por defecto */
     padding: 3px;
-    -webkit-mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
             mask-composite: exclude;
 }
-/* Fondo sólido interior */
 .reward-item::after {
     content: '';
     position: absolute;
-    top: 3px; left: 3px; right: 3px; bottom: 3px;
+    inset: 3px;
     background: var(--panel-bg);
     border-radius: 7px;
-    z-index: -2;
+    z-index: -1;
 }
-/* Contenido por encima de todo */
 .reward-item > * {
     position: relative;
     z-index: 1;
@@ -247,7 +240,26 @@
 /* --- Efecto Hover y Colores de Borde --- */
 .reward-item:hover {
     transform: translateY(-3px);
+    box-shadow: 0 0 20px 5px var(--shadow-color);
 }
+.reward-item.common { --shadow-color: rgba(74, 222, 128, 0.6); }
+.reward-item.uncommon { --shadow-color: rgba(34, 211, 238, 0.6); }
+.reward-item.rare { --shadow-color: rgba(96, 165, 250, 0.6); }
+.reward-item.epic { --shadow-color: rgba(192, 132, 252, 0.6); }
+.reward-item.legendary { --shadow-color: rgba(250, 204, 21, 0.6); }
+.reward-item.insane { --shadow-color: rgba(244, 63, 94, 0.6); }
+.reward-item.godly { --shadow-color: rgba(249, 168, 212, 0.6); }
+.reward-item.subzero { --shadow-color: rgba(125, 211, 252, 0.6); }
+.reward-item.mythic { --shadow-color: rgba(244, 114, 182, 0.6); }
+.reward-item.staff { --shadow-color: rgba(168, 85, 247, 0.6); }
+.reward-item.limited { --shadow-color: rgba(74, 222, 128, 0.6); }
+.reward-item.exclusive { --shadow-color: rgba(251, 146, 60, 0.6); }
+.reward-item.event { --shadow-color: rgba(96, 165, 250, 0.6); }
+.reward-item.easter { --shadow-color: rgba(251, 207, 232, 0.7); }
+.reward-item.unobtainable { --shadow-color: rgba(165, 180, 252, 0.7); }
+.reward-item.hell { --shadow-color: rgba(185, 28, 28, 0.6); }
+.reward-item.evil { --shadow-color: rgba(239, 68, 68, 0.6); }
+
 .reward-item.common::before { background: var(--common); }
 .reward-item.uncommon::before { background: var(--uncommon); }
 .reward-item.rare::before { background: var(--rare); }
@@ -266,19 +278,6 @@
 .reward-item.hell::before { background: var(--hell-gradient); }
 .reward-item.evil::before { background: var(--evil-gradient); }
 
-.reward-item.common:hover { box-shadow: 0 0 20px 5px rgba(74, 222, 128, 0.6); }
-.reward-item.uncommon:hover { box-shadow: 0 0 20px 5px rgba(34, 211, 238, 0.6); }
-.reward-item.rare:hover { box-shadow: 0 0 20px 5px rgba(96, 165, 250, 0.6); }
-.reward-item.epic:hover { box-shadow: 0 0 20px 5px rgba(192, 132, 252, 0.6); }
-.reward-item.legendary:hover { box-shadow: 0 0 20px 5px rgba(250, 204, 21, 0.6); }
-.reward-item.insane:hover { box-shadow: 0 0 20px 5px rgba(244, 63, 94, 0.6); }
-.reward-item.godly:hover, .reward-item.subzero:hover, .reward-item.mythic:hover,
-.reward-item.limited:hover, .reward-item.exclusive:hover, .reward-item.event:hover,
-.reward-item.easter:hover, .reward-item.unobtainable:hover, .reward-item.staff:hover,
-.reward-item.hell:hover, .reward-item.evil:hover {
-    box-shadow: 0 0 25px 8px rgba(200, 200, 255, 0.4); /* Sombra genérica para gradientes */
-}
-
 /* Contenido del item */
 .reward-info { display: flex; align-items: center; gap: 15px; flex-grow: 1; }
 .reward-image-placeholder { width: 50px; height: 50px; background-color: var(--dark-bg); border-radius: var(--border-radius-sm); overflow: hidden; flex-shrink: 0; }
@@ -295,7 +294,7 @@
     border-radius: var(--border-radius-lg);
     padding: 25px;
     text-align: center;
-    position: sticky; /* Hacemos que la tarjeta se quede fija */
+    position: sticky;
     top: 120px;
     overflow: hidden;
     background: transparent;
@@ -310,24 +309,20 @@
     border-radius: var(--border-radius-lg);
     padding: 3px;
     background: var(--border-color); /* Fallback */
-    -webkit-mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-            mask-composite: exclude;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
     z-index: 0;
 }
 #sword-info-card::after { /* Fondo */
     content: '';
     position: absolute;
-    top: 3px; left: 3px; right: 3px; bottom: 3px;
+    inset: 3px;
     background: var(--panel-bg);
     border-radius: 10px;
     z-index: -1;
 }
 #sword-info-card > * { position: relative; z-index: 1; }
 
-/* Colores de borde para la tarjeta de espada */
 #sword-info-card.common::before { background: var(--common); }
 #sword-info-card.uncommon::before { background: var(--uncommon); }
 #sword-info-card.rare::before { background: var(--rare); }
@@ -433,8 +428,8 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    max-height: 70vh;
-    overflow-y: auto;
+    height: 600px; /* Altura fija */
+    overflow-y: auto; /* Scroll si el contenido excede la altura */
     padding-right: 10px;
 }
 .title-list-item {
@@ -444,6 +439,9 @@
     position: relative;
     padding: 20px;
     overflow: hidden;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 .title-list-item::before, .title-list-item::after {
     content: '';
@@ -478,6 +476,13 @@
 }
 .title-list-item .lock-icon { font-size: 1.2em; color: var(--text-secondary); }
 .title-list-item .title-name { text-transform: uppercase; font-family: 'Anton', sans-serif; font-size: 1.5em; }
+.title-list-item .title-name.gradient {
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+}
 
 #title-details-view {
     padding: 25px;
@@ -486,6 +491,9 @@
     border: 1px solid var(--border-color);
     position: sticky;
     top: 120px;
+    height: 600px; /* Altura fija para coincidir */
+    display: flex;
+    flex-direction: column;
 }
 #title-details-view h3 {
     font-family: 'Anton', sans-serif;
@@ -494,7 +502,14 @@
     text-transform: uppercase;
     min-height: 80px;
 }
-#title-details-view p { color: var(--text-secondary); min-height: 40px; margin-bottom: 25px; }
+#title-details-view h3.gradient {
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+}
+#title-details-view p { color: var(--text-secondary); min-height: 40px; margin-bottom: 25px; flex-grow: 1; }
 #equip-title-btn { width: 100%; padding: 15px; font-size: 1.2em; }
 #equip-title-btn.equipped { background-color: var(--main-green); color: var(--dark-bg); cursor: default; border-color: var(--main-green); }
 #equip-title-btn:disabled:not(.equipped) { background-color: var(--border-color); cursor: not-allowed; }
@@ -510,7 +525,7 @@
     .case-item { width: 320px; height: 180px; }
 
     .titles-view-container { grid-template-columns: 1fr; }
-    #title-details-view { margin-top: 20px; }
+    #titles-list-container, #title-details-view { height: auto; max-height: 50vh; }
 }
 @media (max-width: 480px) {
     .case-item { width: 280px; height: 160px; }

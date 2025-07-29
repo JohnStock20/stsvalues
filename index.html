@@ -9,22 +9,21 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-
+    
     <!-- Modular CSS -->
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/calculator.css">
     <link rel="stylesheet" href="css/auth.css">
     <link rel="stylesheet" href="css/giveaways.css">
-
+    
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4YY08MDW4M"></script>
     <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-4YY08MDW4M');
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-4YY08MDW4M');
     </script>
 </head>
 <body>
@@ -128,7 +127,18 @@
                             <div id="details-case-price"></div>
                         </div>
                     </div>
-                    <!-- Calculadora se mantiene aquí -->
+                    <!-- CALCULADORA RESTAURADA -->
+                    <div id="calculator-section">
+                        <h2 class="section-title">~PROFIT CALCULATOR~</h2>
+                        <div id="calculator-controls">
+                             <input type="number" id="case-quantity-input" placeholder="Enter amount of cases to open...">
+                             <button id="calculate-btn" class="auth-button">Calculate</button>
+                        </div>
+                        <div id="calculator-results-container">
+                             <div id="simulation-loot-summary" style="display: none;"></div>
+                             <div id="results-table-container"></div>
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- VISTA 3: DETALLES DE ESPADA -->
@@ -149,47 +159,39 @@
                      </div>
                 </div>
 
-                <!-- VISTA 4: TÍTULOS (REDISEÑADA) -->
+                <!-- VISTA 4: TÍTULOS -->
                 <div id="titles-view" class="main-view-panel">
                     <h2 class="section-title">~TITLES~</h2>
                     <p class="section-subtitle">Select a title to display on your profile. Unlock more by playing and participating in the community!</p>
                     <div class="titles-view-container">
-                        <div id="titles-list-container">
-                            <!-- La lista de títulos se inyecta aquí con JS -->
-                        </div>
-                        <div id="title-details-view">
-                             <!-- Los detalles del título seleccionado se inyectan aquí con JS -->
-                        </div>
+                        <div id="titles-list-container"></div>
+                        <div id="title-details-view"></div>
                     </div>
                 </div>
 
-                <!-- VISTA 5: SORTEOS (REDISEÑADA) -->
+                <!-- VISTA 5: SORTEOS -->
                 <div id="giveaways-view" class="main-view-panel">
                     <div class="giveaways-layout">
                         <div class="giveaway-main-panel">
-                            <!-- Contenedor para el sorteo activo (o mensaje si no hay) -->
                             <div id="active-giveaway-container"></div>
-                            <!-- Contenedor para los próximos sorteos -->
                             <div id="upcoming-giveaways-container"></div>
-                             <!-- Botón para hostear (solo para usuarios autorizados) -->
                             <div id="host-giveaway-btn-container"></div>
                         </div>
                         <aside class="giveaway-sidebar">
-                             <!-- Contenedor para la lista de participantes -->
                             <div id="giveaway-participants-container">
                                 <h3>PARTICIPANTS</h3>
-                                <div id="giveaway-participants-list">
-                                    <p>No active giveaway.</p>
-                                </div>
+                                <div id="giveaway-participants-list"></div>
+                            </div>
+                            <div id="giveaway-winners-container">
+                                <h3>RECENT WINNERS</h3>
+                                <div id="giveaway-winners-list"></div>
                             </div>
                         </aside>
                     </div>
                 </div>
                 
                 <!-- VISTA 6: HERRAMIENTAS DE DESARROLLADOR -->
-                <div id="devtools-view" class="main-view-panel">
-                    <!-- El contenido de las herramientas de admin se inyecta con JS -->
-                </div>
+                <div id="devtools-view" class="main-view-panel"></div>
 
             </main>
         </div>
@@ -256,9 +258,7 @@
                 <div class="form-field full-width">
                     <label>Prize Pool</label>
                     <div id="prize-pool-builder">
-                        <div id="added-prizes-list">
-                            <!-- Premios añadidos aparecerán aquí -->
-                        </div>
+                        <div id="added-prizes-list"></div>
                     </div>
                      <div id="add-prize-form">
                         <div class="form-field">
@@ -270,7 +270,6 @@
                         </div>
                         <div class="form-field">
                             <label for="prize-id">Item</label>
-                            <!-- Este contenedor cambiará dinámicamente -->
                             <div id="prize-id-container"></div>
                         </div>
                         <div class="form-field">
@@ -280,7 +279,6 @@
                         <button type="button" id="add-prize-btn" class="auth-button" style="margin-top: 0;">Add</button>
                     </div>
                 </div>
-
                 <div class="form-grid">
                     <div class="form-field">
                         <label for="start-time">Start Time</label>
@@ -291,7 +289,6 @@
                         <input type="datetime-local" id="end-time" name="end_time" required>
                     </div>
                 </div>
-
                 <p class="feedback-message" id="giveaway-feedback"></p>
                 <button type="submit" class="auth-button">Create Giveaway</button>
              </form>

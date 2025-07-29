@@ -1,5 +1,5 @@
 // =================================================================================
-// ARCHIVO: ui.js (Controlador de la Interfaz de Usuario) - VERSIÓN CORREGIDA
+// ARCHIVO: ui.js (Controlador de la Interfaz de Usuario) - VERSIÓN FINAL CORREGIDA
 // =================================================================================
 
 import { appData, parseValue } from './data.js';
@@ -7,9 +7,7 @@ import { findSwordById, formatLargeNumber, formatTimeAgo, getPrizeItemHtml } fro
 import { titleStyles } from './auth.js';
 
 // --- Selectores del DOM ---
-// FIX: Exportamos el objeto 'dom' para que sea accesible desde otros módulos como main.js
 export const dom = {
-    // Vistas principales
     views: {
         cases: document.getElementById('cases-view'),
         caseDetails: document.getElementById('case-details-view'),
@@ -18,7 +16,6 @@ export const dom = {
         giveaways: document.getElementById('giveaways-view'),
         devtools: document.getElementById('devtools-view'),
     },
-    // Contenedores de contenido
     containers: {
         cases: document.querySelector('#cases-view .cases-container'),
         otherSwords: document.getElementById('other-swords-container'),
@@ -28,40 +25,47 @@ export const dom = {
         activeGiveaway: document.getElementById('active-giveaway-container'),
         upcomingGiveaways: document.getElementById('upcoming-giveaways-container'),
         participantsList: document.getElementById('giveaway-participants-list'),
+        winnersList: document.getElementById('giveaway-winners-list'),
         hostGiveawayBtn: document.getElementById('host-giveaway-btn-container'),
         adminTools: document.getElementById('devtools-view'),
+        searchResults: document.getElementById('search-results'),
+        resultsTable: document.getElementById('results-table-container'),
     },
-    // Botones
     buttons: {
         backToCases: document.getElementById('details-to-cases-btn'),
         backToSwordList: document.getElementById('details-to-sword-list-btn'),
         prevPage: document.getElementById('other-prev-btn'),
         nextPage: document.getElementById('other-next-btn'),
+        calculate: document.getElementById('calculate-btn'),
     },
-    // Modales
+    inputs: {
+        converterFrom: document.getElementById('converter-from-input'),
+        converterTo: document.getElementById('converter-to-input'),
+        searchBar: document.getElementById('search-bar'),
+        caseQuantity: document.getElementById('case-quantity-input'),
+    },
     modals: {
         createGiveaway: document.getElementById('create-giveaway-modal-overlay'),
-        createGiveawayContent: document.getElementById('create-giveaway-modal'),
         closeGiveaway: document.querySelector('#create-giveaway-modal .close-modal-btn'),
-    }
+    },
+    converterFromName: document.getElementById('converter-from-name'),
+    converterToName: document.getElementById('converter-to-name'),
 };
 
 // --- Funciones de Control de Vistas ---
 
 export function showView(viewName) {
-    Object.values(dom.views).forEach(view => {
-        if (view) view.style.display = 'none';
-    });
+    Object.values(dom.views).forEach(view => { if (view) view.style.display = 'none'; });
     if (dom.views[viewName]) {
         dom.views[viewName].style.display = 'block';
     } else {
-        dom.views.cases.style.display = 'block'; // Vista por defecto
+        dom.views.cases.style.display = 'block';
     }
     window.scrollTo(0, 0);
 }
 
 
-// --- Renderizado de la Página Principal (Cajas y Espadas) ---
+// --- Renderizado de la Página Principal ---
 
 function getCurrencyHTML(currencyKey, price) {
     if (currencyKey === 'cooldown') return `<span class="currency-text">Free (Every ${price} hr)</span>`;
@@ -78,7 +82,6 @@ export function renderCaseSelection(navigateTo) {
         link.href = '#';
         link.className = 'case-link';
         link.onclick = (e) => { e.preventDefault(); navigateTo('caseDetails', caseId); };
-
         const caseItem = document.createElement('div');
         caseItem.className = 'case-item';
         caseItem.style.setProperty('--case-border-color', data.borderColor || 'var(--main-green)');
@@ -97,7 +100,6 @@ export function renderOtherSwords(appState, navigateTo) {
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
     const pagedItems = appData.otherSwords.slice(start, end);
-
     pagedItems.forEach(reward => {
         const item = createRewardItem(reward, { type: 'other' }, navigateTo);
         dom.containers.otherSwords.appendChild(item);
@@ -114,11 +116,12 @@ export function updatePaginationControls(appState) {
 
 // --- Renderizado de Detalles (Caja y Espada) ---
 
-function createRewardItem(reward, source, navigateTo) {
+export function createRewardItem(reward, source, navigateTo) {
     const item = document.createElement('div');
     item.className = `reward-item ${reward.rarity}`;
-    item.onclick = () => navigateTo('swordDetails', { sword: reward, source });
-    item.innerHTML = createRewardItemHTML(reward, source);
+    const itemHTML = createRewardItemHTML(reward, source);
+    item.innerHTML = itemHTML;
+    item.addEventListener('click', () => navigateTo('swordDetails', { sword: reward, source }));
     return item;
 }
 
@@ -127,7 +130,6 @@ function createRewardItemHTML(reward, source) {
     const valueDisplayHTML = (typeof reward.value === 'string' && reward.value.toUpperCase().startsWith('O/C'))
         ? `<span class="value-oc" title="Owner's Choice">O/C</span>`
         : formatLargeNumber(parseValue(reward.value));
-
     return `
         <div class="reward-info">
             <div class="reward-image-placeholder"><img src="${reward.image}" alt="${reward.name}"></div>
@@ -143,12 +145,10 @@ function createRewardItemHTML(reward, source) {
 export function renderCaseDetails(caseId, navigateTo) {
     const data = appData.cases[caseId];
     if (!data) return;
-
     document.getElementById('details-case-image').src = data.image;
     document.getElementById('details-case-name').textContent = data.name;
     document.getElementById('details-case-price').innerHTML = getCurrencyHTML(data.currency, data.price);
     document.querySelector('#case-details-view .info-column').style.setProperty('--case-border-color', data.borderColor || 'var(--main-green)');
-    
     dom.containers.rewards.innerHTML = '';
     data.rewards.forEach(reward => {
         const source = { type: 'case', id: caseId };
@@ -161,17 +161,14 @@ export function renderCaseDetails(caseId, navigateTo) {
 function parseAndSetDescription(element, text, navigateTo) {
     element.innerHTML = '';
     if (!text) { element.textContent = 'No description available.'; return; }
-    
     const fragment = document.createDocumentFragment();
     const regex = /\[(case|sword):([a-zA-Z0-9_-]+)\]/g;
     let lastIndex = 0, match;
-
     while ((match = regex.exec(text)) !== null) {
         fragment.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
         const [fullMatch, type, id] = match;
         const link = document.createElement('a');
         link.href = '#';
-        
         let linkData;
         if (type === 'case') {
             linkData = appData.cases[id];
@@ -188,7 +185,6 @@ function parseAndSetDescription(element, text, navigateTo) {
                 link.onclick = (e) => { e.preventDefault(); navigateTo('swordDetails', linkData); };
             }
         }
-        
         if (link.textContent) fragment.appendChild(link);
         else fragment.appendChild(document.createTextNode(fullMatch));
         lastIndex = regex.lastIndex;
@@ -201,7 +197,6 @@ export function renderSwordDetails(sword, sourceInfo, navigateTo, onNewInterval)
     const swordInfoCard = document.getElementById('sword-info-card');
     swordInfoCard.className = 'sword-info-card';
     swordInfoCard.classList.add(sword.rarity);
-
     const demandIndicator = document.getElementById('sword-demand-indicator');
     if (sword.demand) {
         demandIndicator.className = 'sword-demand-indicator ' + sword.demand;
@@ -209,25 +204,20 @@ export function renderSwordDetails(sword, sourceInfo, navigateTo, onNewInterval)
     } else {
         demandIndicator.style.display = 'none';
     }
-
     document.getElementById('sword-details-image-container').innerHTML = `<img src="${sword.image}" alt="${sword.name}">`;
     document.getElementById('sword-details-name').textContent = sword.name;
-    
     const fullDescription = sword.description || (sourceInfo.id ? `This sword is obtainable from the [case:${sourceInfo.id}].` : 'No origin specified.');
     parseAndSetDescription(document.getElementById('sword-details-description'), fullDescription, navigateTo);
-
     document.getElementById('sword-details-value').textContent = formatLargeNumber(parseValue(sword.value));
     document.getElementById('sword-details-stats').textContent = sword.stats;
     document.getElementById('sword-details-more').innerHTML = `
         ${sword.chance ? `Chance - ${sword.chance}%<br>` : ''}
         Exist - ${formatLargeNumber(sword.exist)}<br>
         Rarity - <span class="rarity-text ${sword.rarity}">${sword.rarity}</span>`;
-
     const updatedEl = document.getElementById('sword-details-updated');
     const updateSwordTime = () => updatedEl.textContent = formatTimeAgo(sword.lastUpdated);
     updateSwordTime();
     onNewInterval(setInterval(updateSwordTime, 60000));
-
     showView('swordDetails');
 }
 
@@ -235,54 +225,37 @@ export function renderSwordDetails(sword, sourceInfo, navigateTo, onNewInterval)
 
 export function renderTitlesPage(titlesData, selectedKey, onSelect, onEquip) {
     dom.containers.titlesList.innerHTML = '';
-    if (!titlesData) {
-        dom.containers.titlesList.innerHTML = '<p>Could not load titles.</p>';
-        return;
-    }
-
+    if (!titlesData) { /* ... */ return; }
     titlesData.forEach(title => {
         const styleInfo = titleStyles[title.key] || titleStyles['player'];
         const item = document.createElement('div');
         item.className = `title-list-item ${title.unlocked ? 'unlocked' : 'locked'}`;
-        if (title.key === selectedKey) {
-            item.classList.add('selected');
-        }
+        if (title.key === selectedKey) item.classList.add('selected');
         item.onclick = () => { if (title.unlocked) onSelect(title.key); };
-
-        const nameClass = styleInfo.style.includes('gradient') ? 'title-name gradient' : 'title-name';
-        const nameStyle = nameClass === 'title-name gradient' ? `style="background-image: ${styleInfo.style};"` : `style="color: ${styleInfo.style};"`;
-        
         item.innerHTML = `
-            <div class="title-list-item-content">
-                <span class="${nameClass}" ${nameStyle}>${styleInfo.text}</span>
-                ${!title.unlocked ? '<span class="lock-icon">🔒</span>' : ''}
-            </div>
-        `;
+            <span class="title-name ${styleInfo.style.includes('gradient') ? 'gradient' : ''}" 
+                  style="${styleInfo.style.includes('gradient') ? `background-image: ${styleInfo.style}` : `color: ${styleInfo.style}`}">
+                ${styleInfo.text}
+            </span>
+            ${!title.unlocked ? '<span class="lock-icon">🔒</span>' : ''}`;
         dom.containers.titlesList.appendChild(item);
     });
-
     renderTitleDetails(titlesData.find(t => t.key === selectedKey), onEquip);
 }
 
 function renderTitleDetails(title, onEquip) {
     const container = dom.containers.titleDetails;
-    if (!title) {
-        container.innerHTML = '<p>Select a title from the list to see its details.</p>';
-        return;
-    }
-
+    if (!title) { container.innerHTML = '<p>Select a title to see its details.</p>'; return; }
     const styleInfo = titleStyles[title.key] || titleStyles['player'];
-    const nameClass = styleInfo.style.includes('gradient') ? 'title-name gradient' : 'title-name';
-    const nameStyle = nameClass === 'title-name gradient' ? `style="background-image: ${styleInfo.style};"` : `style="color: ${styleInfo.style};"`;
-
     container.innerHTML = `
-        <h3 class="${nameClass}" ${nameStyle}>${styleInfo.text}</h3>
-        <p>${title.description || 'This title has no special description.'}</p>
+        <h3 class="${styleInfo.style.includes('gradient') ? 'gradient' : ''}" 
+            style="${styleInfo.style.includes('gradient') ? `background-image: ${styleInfo.style}` : `color: ${styleInfo.style}`}">
+            ${styleInfo.text}
+        </h3>
+        <p>${titleStyles[title.key]?.description || 'No description available.'}</p>
         <button id="equip-title-btn" class="auth-button ${title.equipped ? 'equipped' : ''}">
             ${title.equipped ? 'Equipped' : 'Equip Title'}
-        </button>
-    `;
-
+        </button>`;
     const equipBtn = document.getElementById('equip-title-btn');
     if (title.unlocked && !title.equipped) {
         equipBtn.onclick = () => onEquip(title.key);
@@ -294,14 +267,12 @@ function renderTitleDetails(title, onEquip) {
 
 // --- Renderizado de Sorteos ---
 
-export function renderGiveawayPage(giveaways, currentUser, onJoin, onHost) {
+export function renderGiveawayPage(giveaways, recentWinners, currentUser, onJoin, onHost) {
     const activeGiveaway = giveaways.find(gw => gw.status === 'active');
-    const upcomingGiveaways = giveaways.filter(gw => gw.status === 'upcoming');
-    
     renderActiveGiveaway(activeGiveaway, currentUser, onJoin);
-    renderUpcomingGiveaways(upcomingGiveaways);
+    renderUpcomingGiveaways(giveaways.filter(gw => gw.status === 'upcoming'));
     renderParticipants(activeGiveaway ? activeGiveaway.participants : []);
-    
+    renderRecentWinners(recentWinners);
     dom.containers.hostGiveawayBtn.innerHTML = '';
     if (currentUser && ['owner', 'tester'].includes(currentUser.role)) {
         const hostBtn = document.createElement('button');
@@ -311,7 +282,6 @@ export function renderGiveawayPage(giveaways, currentUser, onJoin, onHost) {
         hostBtn.onclick = onHost;
         dom.containers.hostGiveawayBtn.appendChild(hostBtn);
     }
-
     showView('giveaways');
 }
 
@@ -321,10 +291,8 @@ function renderActiveGiveaway(giveaway, currentUser, onJoin) {
         container.innerHTML = `<div class="giveaway-card"><h2>There are no active giveaways right now. Check back soon!</h2></div>`;
         return;
     }
-    
     const prizeListHTML = giveaway.prize_pool.map(prize => `<div class="prize-item">${getPrizeItemHtml(prize)}</div>`).join('');
-    const isJoined = giveaway.participants?.includes(currentUser?.username);
-
+    const isJoined = giveaway.participants?.some(p => p.username === currentUser?.username);
     container.innerHTML = `
         <div id="active-giveaway-card" class="giveaway-card">
             <div class="card-header">
@@ -343,7 +311,6 @@ function renderActiveGiveaway(giveaway, currentUser, onJoin) {
                 ${!currentUser ? 'Log in to Join' : isJoined ? 'You Have Joined!' : 'Join Giveaway'}
             </button>
         </div>`;
-
     if (currentUser && !isJoined) {
         document.getElementById('join-giveaway-btn').onclick = () => onJoin(giveaway.id);
     }
@@ -353,17 +320,11 @@ function renderUpcomingGiveaways(giveaways) {
     const container = dom.containers.upcomingGiveaways;
     container.innerHTML = '';
     if (giveaways.length === 0) return;
-    
     container.innerHTML = '<h3>Upcoming Giveaways</h3>';
     const list = document.createElement('div');
     list.id = 'upcoming-giveaways-list';
-
     giveaways.slice(0, 5).forEach(gw => {
-        const prizeText = gw.prize_pool.map(p => {
-             const amount = formatLargeNumber(p.amount);
-             const name = p.type === 'currency' ? (appData.currencies[p.id] ? appData.currencies[p.id].name : p.id) : (findSwordById(p.id) ? findSwordById(p.id).sword.name : p.id);
-             return `${amount > 1 ? `${amount}x ` : ''}${name}`;
-        }).join(' + ');
+        const prizeText = gw.prize_pool.map(p => `${formatLargeNumber(p.amount)}${p.type === 'sword' ? 'x' : ''} ${p.type === 'currency' ? appData.currencies[p.id]?.name : findSwordById(p.id)?.sword.name}`).join(' + ');
         list.innerHTML += `
             <div class="upcoming-giveaway-item">
                 <span class="prize">${prizeText}</span>
@@ -385,6 +346,22 @@ function renderParticipants(participants) {
             <span>${p_user.username}</span>
         </div>
     `).join('');
+}
+
+function renderRecentWinners(winners) {
+    const list = dom.containers.winnersList;
+    if (!winners || winners.length === 0) {
+        list.innerHTML = '<p>No recent winners.</p>';
+        return;
+    }
+    list.innerHTML = winners.map(w => {
+        const prizeText = w.prize_pool.map(p => `${formatLargeNumber(p.amount)}${p.type === 'sword' ? 'x' : ''} ${p.type === 'currency' ? appData.currencies[p.id]?.name : findSwordById(p.id)?.sword.name}`).join(' + ');
+        return `
+            <div class="winner-item">
+                <span class="winner-name">${w.winner}</span> won 
+                <span class="winner-prize">${prizeText}</span>
+            </div>`;
+    }).join('');
 }
 
 export function openGiveawayModal() {
@@ -412,12 +389,31 @@ export function renderAdminTools(onGrantTitle) {
         </form>
         <div id="admin-feedback" class="feedback-message"></div>
     </div>`;
-
     document.getElementById('grant-title-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const form = e.target;
-        const targetUsername = form.targetUsername.value;
-        const titleKey = form.titleKey.value;
-        onGrantTitle(targetUsername, titleKey);
+        onGrantTitle(form.targetUsername.value, form.titleKey.value);
     });
+}
+
+export function updateProfileHeader(userData) {
+    const userProfileNav = document.getElementById('user-profile-nav');
+    const titleElement = document.getElementById('user-title');
+    document.getElementById('user-name').textContent = `@${userData.username}`;
+    document.getElementById('user-avatar').src = userData.avatar || 'images/placeholder.png';
+
+    const styleInfo = titleStyles[userData.equippedTitle] || titleStyles['player'];
+    titleElement.textContent = styleInfo.text;
+
+    if (styleInfo.style.includes('gradient')) {
+        titleElement.classList.add('gradient');
+        titleElement.style.backgroundImage = styleInfo.style;
+        titleElement.style.color = '';
+        userProfileNav.style.setProperty('--border-gradient', styleInfo.style);
+    } else {
+        titleElement.classList.remove('gradient');
+        titleElement.style.backgroundImage = '';
+        titleElement.style.color = styleInfo.style;
+        userProfileNav.style.setProperty('--border-gradient', `linear-gradient(to right, ${styleInfo.style}, ${styleInfo.style})`);
+    }
 }
