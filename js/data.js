@@ -4,7 +4,7 @@
 /* =================================================================================== */
 
 // Función de parsing que vive junto a los datos que la necesitan.
-function parseValue(value) {
+export function parseValue(value) {
     if (typeof value === 'number') return value;
     if (typeof value !== 'string' || !value) return 0;
 
@@ -16,7 +16,8 @@ function parseValue(value) {
         if (match && match[1]) {
             processableValue = match[1];
         } else {
-            return 0; // Si es O/C sin rango, no podemos asignarle un valor numérico para cálculos.
+            // Si es O/C sin rango, no podemos asignarle un valor numérico para cálculos.
+            return 0;
         }
     }
 
@@ -38,19 +39,27 @@ function parseValue(value) {
     return isNaN(plainNumber) ? 0 : plainNumber;
 }
 
-const currencyTiers = {
+export const currencyTiers = {
     'diamonds': [
-        { threshold: 50000, value: parseValue("3B") }, { threshold: 35000, value: parseValue("2.7B") },
-        { threshold: 25000, value: parseValue("2.4B") }, { threshold: 15000, value: 2.2e9 },
-        { threshold: 10000, value: 2e9 }, { threshold: 5000, value: 1.8e9 },
-        { threshold: 3000, value: 1.7e9 }, { threshold: 1000, value: 1.6e9 },
+        { threshold: 50000, value: parseValue("3B") },
+        { threshold: 35000, value: parseValue("2.7B") },
+        { threshold: 25000, value: parseValue("2.4B") },
+        { threshold: 15000, value: 2.2e9 },
+        { threshold: 10000, value: 2e9 },
+        { threshold: 5000, value: 1.8e9 },
+        { threshold: 3000, value: 1.7e9 },
+        { threshold: 1000, value: 1.6e9 },
         { threshold: 0, value: 1.5e9 }
     ],
     'heartstones': [
-        { threshold: 50000, value: parseValue("775M") }, { threshold: 35000, value: parseValue("725M") },
-        { threshold: 25000, value: parseValue("650M") }, { threshold: 15000, value: 625e6 },
-        { threshold: 10000, value: 600e6 }, { threshold: 5000, value: 575e6 },
-        { threshold: 3000, value: 550e6 }, { threshold: 1000, value: 525e6 },
+        { threshold: 50000, value: parseValue("775M") },
+        { threshold: 35000, value: parseValue("725M") },
+        { threshold: 25000, value: parseValue("650M") },
+        { threshold: 15000, value: 625e6 },
+        { threshold: 10000, value: 600e6 },
+        { threshold: 5000, value: 575e6 },
+        { threshold: 3000, value: 550e6 },
+        { threshold: 1000, value: 525e6 },
         { threshold: 0, value: 500e6 }
     ]
 };
@@ -195,6 +204,3 @@ const appData = {
          { id: "unobtainable_1", name: "Beta Tester's Blade", image: "images/placeholder.png", value: "250K", stats: "x1000", rarity: "unobtainable", exist: 100, lastUpdated: "2025-07-15T10:00:00Z", description: "This item is no longer obtainable in any way." }
     ]
 };
-
-// Exportamos las constantes para que puedan ser usadas en otros módulos.
-export { appData, currencyTiers, parseValue };

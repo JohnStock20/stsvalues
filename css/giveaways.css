@@ -1,82 +1,198 @@
-/* =================================================================================== */
-/* === ARCHIVO: giveaways.css === */
-/* === Estilos para todas las funcionalidades de Sorteos (Giveaways). === */
-/* =================================================================================== */
+/* =================================================================================
+   ARCHIVO: giveaways.css
+   Estilos para todas las funcionalidades de Sorteos (Giveaways).
+   ================================================================================= */
 
-/* --- BARRAS LATERALES DE SORTEOS --- */
-.sidebar-giveaway-container {
-    padding: 15px;
+/* --- LAYOUT PRINCIPAL DE LA PÁGINA DE SORTEOS --- */
+.giveaways-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr); /* Columnas flexibles */
+    gap: 40px;
+    align-items: flex-start;
 }
 
-.sidebar-title {
-    font-family: 'Anton', sans-serif;
-    font-size: 1.5em;
-    color: var(--main-green);
-    margin: 0 0 15px 0;
-    text-transform: uppercase;
-}
-
-#active-giveaway-card, .upcoming-giveaway-item {
-    background-color: var(--panel-bg);
-    border-radius: var(--border-radius-md);
-    border: 1px solid var(--border-color);
-    padding: 15px;
-    margin-bottom: 15px;
-}
-
-#active-giveaway-card h4 {
-    margin: 0 0 10px 0;
-    font-size: 1.2em;
-    color: var(--text-primary);
-}
-
-#active-giveaway-prize {
+/* --- PANEL IZQUIERDO: SORTEO ACTIVO Y PRÓXIMOS --- */
+.giveaway-main-panel {
     display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.1em;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-#active-giveaway-prize img {
-    width: 32px;
-    height: 32px;
+    flex-direction: column;
+    gap: 30px;
 }
 
-#giveaway-timer, #giveaway-participants-count {
-    font-size: 1em;
+.giveaway-card {
+    background-color: var(--panel-bg);
+    border-radius: var(--border-radius-lg);
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+    border: none;
+}
+/* Efecto de doble borde con gradiente */
+.giveaway-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--border-radius-lg);
+    padding: 2px; /* Grosor del borde */
+    background: linear-gradient(45deg, var(--main-green), var(--epic));
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+}
+.giveaway-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 20px;
+    flex-wrap: wrap; /* Para responsividad */
+    gap: 10px;
+}
+.card-header h2 {
+    font-family: 'Anton', sans-serif;
+    font-size: 2em;
+    color: var(--text-primary);
+    margin: 0;
+}
+.host-info, .winner-info {
+    font-size: 0.9em;
     color: var(--text-secondary);
 }
-#giveaway-timer strong, #giveaway-participants-count strong {
+.host-info strong, .winner-info strong {
     color: var(--text-primary);
-    font-size: 1.2em;
+    font-weight: bold;
 }
 
-.upcoming-giveaway-item {
+#prize-pool-container {
+    margin: 20px 0;
+}
+.prize-pool-title {
+    text-transform: uppercase;
+    font-weight: bold;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
     font-size: 0.9em;
+    letter-spacing: 1px;
+}
+#prize-pool-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 15px;
+}
+.prize-item {
+    background: var(--dark-bg);
+    padding: 10px 15px;
+    border-radius: var(--border-radius-md);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.1em;
+    overflow: hidden;
+}
+.prize-item img {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+.prize-item span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#giveaway-timer-container {
+    text-align: center;
+    margin: 30px 0;
+}
+#giveaway-timer {
+    font-size: 2.2em;
+    font-weight: bold;
+    color: var(--main-green);
+    letter-spacing: 2px;
+}
+.timer-label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.8em;
+    margin-top: 5px;
+}
+
+#join-giveaway-btn, #host-giveaway-btn {
+    width: 100%;
+    font-size: 1.5em;
+    padding: 15px 40px;
+}
+#host-giveaway-btn {
+    margin-top: 20px;
+    background-color: var(--panel-bg);
+    border: 2px solid var(--main-green);
+}
+#host-giveaway-btn:hover {
+    background-color: var(--main-green);
+    color: var(--dark-bg);
+}
+
+#upcoming-giveaways-container h3 {
+    margin-bottom: 15px;
+}
+#upcoming-giveaways-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.upcoming-giveaway-item {
+    background-color: var(--panel-bg);
+    padding: 15px;
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 .upcoming-giveaway-item .prize {
     font-weight: bold;
     color: var(--main-green);
 }
 .upcoming-giveaway-item .time {
+    font-size: 0.9em;
     color: var(--text-secondary);
-    display: block;
-    margin-top: 5px;
+    text-align: right;
 }
 
+/* --- PANEL DERECHO: PARTICIPANTES --- */
+.giveaway-sidebar {
+    position: sticky;
+    top: 120px;
+}
+.giveaway-sidebar h3 {
+    margin-bottom: 15px;
+}
+#giveaway-participants-container {
+    background: var(--panel-bg);
+    border-radius: var(--border-radius-lg);
+    padding: 20px;
+    border: 1px solid var(--border-color);
+}
 #giveaway-participants-list {
-    max-height: calc(100vh - 100px);
+    max-height: 60vh;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 10px;
+    padding-right: 10px; /* Espacio para la barra de scroll */
 }
 .participant-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    background-color: var(--panel-bg);
+    background-color: var(--dark-bg);
     padding: 8px;
     border-radius: var(--border-radius-md);
 }
@@ -89,33 +205,12 @@
     font-weight: 500;
 }
 
-/* --- PÁGINA PRINCIPAL DE SORTEOS --- */
-#giveaway-creation-container {
-    margin-bottom: 40px;
-}
-
-#giveaway-creation-form {
-    max-width: 700px;
-    margin: auto;
-    background-color: var(--panel-bg);
-    padding: 25px;
-    border-radius: var(--border-radius-lg);
-    border: 1px solid var(--border-color);
-}
-#giveaway-creation-form h3 {
-    text-align: center;
-    font-family: 'Anton', sans-serif;
-    font-size: 2em;
-    color: var(--main-green);
-    margin: 0 0 25px 0;
-}
-
+/* --- ESTILOS PARA EL MODAL DE CREAR SORTEO --- */
 .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
-
 .form-field {
     display: flex;
     flex-direction: column;
@@ -135,76 +230,64 @@
     padding: 12px;
     font-size: 1em;
     border-radius: var(--border-radius-md);
+    width: 100%;
 }
-/* Estilo para el selector de fecha y hora */
+.form-field input:focus, .form-field select:focus {
+    border-color: var(--main-green);
+    outline: none;
+}
 input[type="datetime-local"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
     cursor: pointer;
 }
-#prize-search-container {
-    position: relative;
+#prize-pool-builder {
+    border: 1px dashed var(--border-color);
+    padding: 15px;
+    border-radius: var(--border-radius-md);
+    min-height: 100px;
 }
-#prize-search-results {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background-color: var(--panel-bg);
-    border: 1px solid var(--border-color);
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 10;
-    border-radius: 0 0 var(--border-radius-md) var(--border-radius-md);
+#add-prize-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 10px;
+    margin-top: 15px;
+    align-items: flex-end;
 }
-#prize-search-results div {
-    padding: 10px;
-    cursor: pointer;
-}
-#prize-search-results div:hover {
-    background-color: var(--main-green);
-    color: var(--dark-bg);
-}
-
-#giveaway-display-container {
-    text-align: center;
-}
-
-#main-giveaway-card {
-    background: var(--panel-bg);
-    border: 2px solid var(--main-green);
-    box-shadow: 0 0 20px rgba(45, 212, 191, 0.3);
-    border-radius: var(--border-radius-lg);
-    padding: 30px;
-    max-width: 800px;
-    margin: auto;
-}
-#main-giveaway-card h2 {
-    font-family: 'Anton', sans-serif;
-    font-size: 2.5em;
-    margin: 0 0 15px 0;
-}
-#main-giveaway-prize {
+#added-prizes-list {
+    margin-top: 15px;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+}
+.added-prize-item {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 15px;
-    font-size: 2em;
-    font-weight: bold;
-    margin: 20px 0;
+    background-color: var(--dark-bg);
+    padding: 5px 10px;
+    border-radius: var(--border-radius-sm);
 }
-#main-giveaway-prize img {
-    width: 64px;
-    height: 64px;
+.remove-prize-btn {
+    background: none;
+    border: none;
+    color: var(--text-danger);
+    cursor: pointer;
+    font-size: 1.2em;
 }
-#main-giveaway-timer {
-    font-size: 1.8em;
-    margin: 20px 0;
+
+
+/* --- RESPONSIVE --- */
+@media (max-width: 900px) {
+    .giveaways-layout {
+        grid-template-columns: 1fr;
+    }
+    .giveaway-sidebar {
+        position: static;
+        margin-top: 30px;
+    }
 }
-#join-giveaway-btn {
-    font-size: 1.5em;
-    padding: 15px 40px;
-}
-#join-giveaway-btn:disabled {
-    background-color: var(--border-color);
-    cursor: not-allowed;
+@media (max-width: 600px) {
+    #add-prize-form {
+        grid-template-columns: 1fr; /* Apilar controles para añadir premios */
+    }
 }

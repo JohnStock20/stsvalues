@@ -1,131 +1,168 @@
-/*
-=======================================================================
-============ */
-/* === ARCHIVO: main.js (NUEVO CEREBRO DE LA APLICACIÓN) === */
-/*
-=======================================================================
-============ */
+// =================================================================================
+// ARCHIVO: main.js (NUEVO CEREBRO DE LA APLICACIÓN)
+// =================================================================================
 
 // --- MÓDULOS ---
-import { appData, parseValue, currencyTiers } from './data.js';
-import { findSwordById, getUnitValue, convertTimeValueToCurrency, formatLargeNumber } from './utils.js';
+import { appData, parseValue } from './data.js';
+import { findSwordById, getPrizeItemHtml } from './utils.js';
 import * as UI from './ui.js';
-import * as Calculator from './calculator.js';
-import { initializeAuth } from './auth.js';
+import { initializeAuth, titleStyles } from './auth.js';
 
 // --- ESTADO GLOBAL DE LA APLICACIÓN ---
 let currentUser = null;
+let navigationContext = { view: 'cases', id: null, type: null }; // Rastrea la vista anterior para los botones "Back"
 let activeGiveaways = [];
-let giveawayParticipants = []; // Se podría llenar desde una API en el futuro
+let giveawayUpdateInterval = null;
 let timerInterval = null;
+let selectedTitleKey = null; // Para la página de títulos
 
 const appState = {
     currentPage: 1,
     itemsPerPage: 10,
-    currentCaseIdForCalc: null,
-    calculatorMode: 'theoretical',
-    currentTitleSelection: null,
 };
 
-const MAX_GRAPH_SECTIONS = 50;
+// --- GESTIÓN DE VISTAS Y NAVEGACIÓN ---
 
-
-// --- GESTIÓN DE VISTAS ---
-async function navigateToView(viewName) {
+function navigateToView(viewName) {
     UI.showView(viewName);
 
     if (viewName === 'titles') {
-        if (!currentUser) {
-            UI.containers.titlesList.innerHTML = '<p>You must be logged in to view your titles.</p>';
-            UI.containers.titleDetailsPanel.innerHTML = '';
-            return;
-        }
-        await loadAndRenderTitles();
+        loadAndRenderTitles();
     } else if (viewName === 'giveaways') {
-        // La obtención de datos ya se hace periódicamente, aquí solo renderizamos
-        UI.renderMainGiveawayPage(activeGiveaways, currentUser, handleJoinGiveaway, handleCreateGiveaway, showGiveawayCreationModal);
-        UI.renderGiveawayParticipants(giveawayParticipants);
-        startTimer(); // Asegurarse de que el timer esté corriendo
+        UI.renderGiveawayPage(activeGiveaways, currentUser, handleJoinGiveaway, openCreateGiveawayModal);
     } else if (viewName === 'devtools') {
         if (currentUser && currentUser.role === 'owner') {
-           // UI.renderAdminTools(handleGrantTitle); // Implementación futura
+            UI.renderAdminTools(handleGrantTitle);
         } else {
-            const devtoolsView = document.getElementById('devtools-view');
-            devtoolsView.innerHTML = `<h2 class="section-title">ACCESS DENIED</h2><p>You do not have permission to view this page.</p>`;
+            document.getElementById('devtools-view').innerHTML = `<h2 class="section-title">ACCESS DENIED</h2><p>You do not have permission to view this page.</p>`;
         }
     }
 }
 
 function navigateToSubView(view, data) {
+    // Limpiar intervalos de actualización de espada si existen
+    if (window.swordUpdateInterval) clearInterval(window.swordUpdateInterval);
+
     switch (view) {
         case 'caseDetails':
-            appState.currentCaseIdForCalc = data;
+            navigationContext = { view: 'cases', id: null, type: 'cases' };
             UI.renderCaseDetails(data, navigateToSubView);
             break;
         case 'swordDetails':
-            let swordUpdateInterval = null;
-            const onNewInterval = (intervalId) => {
-                if(swordUpdateInterval) clearInterval(swordUpdateInterval);
-                swordUpdateInterval = intervalId;
-            };
-            UI.renderSwordDetails(data.sword, data.source, navigateToSubView, onNewInterval);
+            // Guardamos el contexto actual ANTES de navegar a los detalles
+            navigationContext = { ...appState.currentNavigationView };
+            UI.renderSwordDetails(data.sword, data.source, navigateToSubView, (intervalId) => {
+                window.swordUpdateInterval = intervalId;
+            });
             break;
-        case 'selection':
+        case 'cases':
         default:
-            UI.showView('main');
+            navigationContext = { view: 'cases', id: null, type: 'cases' };
+            UI.showView('cases');
             break;
     }
+    // Actualizamos la vista actual en el estado global
+    appState.currentNavigationView = { view, id: data, type: view === 'caseDetails' ? 'case' : 'sword' };
 }
 
 
-// --- LÓGICA DE NEGOCIO ---
+// --- LÓGICA DE NEGOCIO (TÍTULOS, SORTEOS, ADMIN) ---
 
-// TÍTULOS
 async function loadAndRenderTitles() {
-    console.log("Fetching user titles...");
+    const token = localStorage.getItem('sts-token');
+    if (!token) {
+        document.getElementById('titles-view').innerHTML = `<p>You must be logged in to view your titles.</p>`;
+        return;
+    }
     try {
-        // Aquí iría la llamada fetch real
-        const titlesData = [ // Datos simulados
-            { key: 'player', text: 'Player', unlocked: true, equipped: false },
-            { key: 'member', text: 'Member', unlocked: true, equipped: false },
-            { key: 'gamedeveloper', text: 'Game Developer', unlocked: false, equipped: false },
-            { key: '100t', text: '+100T Value', unlocked: false, equipped: false },
-            { key: '250t', text: '+250T Time', unlocked: false, equipped: false },
-            { key: 'tester', text: 'Tester', unlocked: true, equipped: true },
-            { key: 'owner', text: 'Owner', unlocked: false, equipped: false },
-        ];
-        UI.renderTitlesPage(titlesData, handleTitleSelection, handleEquipTitle);
+        const response = await fetch('/.netlify/functions/get-titles', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to fetch titles');
+        const titlesData = await response.json();
+        
+        // El primer título desbloqueado es el seleccionado por defecto
+        const defaultSelected = titlesData.find(t => t.equipped) || titlesData.find(t => t.unlocked);
+        selectedTitleKey = defaultSelected ? defaultSelected.key : null;
+
+        UI.renderTitlesPage(titlesData, selectedTitleKey, handleTitleSelection, handleTitleEquip);
+
     } catch (e) {
         console.error("Error loading titles:", e);
-        UI.containers.titlesList.innerHTML = `<p class="error-message">Error loading titles.</p>`;
+        document.getElementById('titles-list-container').innerHTML = `<p class="error-message" style="display:block;">Could not load titles.</p>`;
     }
 }
 
-function handleTitleSelection(titleKey) {
-    appState.currentTitleSelection = titleKey;
-    console.log(`Title selected: ${titleKey}`);
+function handleTitleSelection(newKey) {
+    selectedTitleKey = newKey;
+    loadAndRenderTitles(); // Recarga todo para actualizar la vista
 }
 
-async function handleEquipTitle(newTitleKey) {
-    console.log(`Equipping title: ${newTitleKey}`);
-    alert(`Title "${newTitleKey}" equipped! (Simulation)`);
-    await loadAndRenderTitles();
+async function handleTitleEquip(newTitleKey) {
+    const token = localStorage.getItem('sts-token');
+    try {
+        const response = await fetch('/.netlify/functions/update-user-profile', {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ newTitle: newTitleKey })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message);
+        
+        // Actualizar el usuario localmente
+        currentUser.equippedTitle = result.equippedTitle;
+        localStorage.setItem('sts-user', JSON.stringify(currentUser));
+        
+        // Actualizar UI
+        initializeAuth(onLoginSuccess); // Llama a la función de auth para refrescar el header
+        loadAndRenderTitles();
+
+    } catch (e) {
+        console.error("Error updating title:", e);
+        alert(`Error: ${e.message}`);
+    }
+}
+
+async function handleGrantTitle(targetUsername, titleKey) {
+    const token = localStorage.getItem('sts-token');
+    const feedbackEl = document.getElementById('admin-feedback');
+    const btn = document.querySelector('#grant-title-form button');
+    feedbackEl.style.display = 'none';
+    btn.disabled = true;
+    btn.textContent = 'Granting...';
+
+    try {
+        const response = await fetch('/.netlify/functions/admin-tools', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'grantTitle', targetUsername, titleKey })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message);
+        feedbackEl.className = 'feedback-message success';
+        feedbackEl.textContent = result.message;
+    } catch (e) {
+        feedbackEl.className = 'feedback-message error';
+        feedbackEl.textContent = `Error: ${e.message}`;
+    } finally {
+        feedbackEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Grant Title';
+    }
 }
 
 
-// SORTEOS (GIVEAWAYS)
+// --- LÓGICA DE SORTEOS ---
+
 async function fetchGiveaways() {
     try {
-        console.log("Fetching giveaways...");
-        // Datos simulados
-         activeGiveaways = [
-             { id: 'gw1', status: 'active', end_time: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), prize_details: [{type: 'sword', id: 'excalibur', amount: 1}, {type: 'currency', id: 'diamonds', amount: 50000}], participants: ['user1', 'user2'] },
-             { id: 'gw2', status: 'upcoming', start_time: new Date(Date.now() + 1000 * 60 * 60 * 25).toISOString(), prize_details: [{type: 'sword', id: 'claustrophobia', amount: 5}] },
-         ];
+        const response = await fetch('/.netlify/functions/giveaways-manager');
+        if (!response.ok) throw new Error('Failed to fetch giveaways');
+        activeGiveaways = await response.json();
         
+        // Si el usuario está en la página de giveaways, la volvemos a renderizar
         if (document.getElementById('giveaways-view').style.display === 'block') {
-            UI.renderMainGiveawayPage(activeGiveaways, currentUser, handleJoinGiveaway, handleCreateGiveaway, showGiveawayCreationModal);
-            UI.renderGiveawayParticipants(giveawayParticipants);
+            UI.renderGiveawayPage(activeGiveaways, currentUser, handleJoinGiveaway, openCreateGiveawayModal);
         }
     } catch (error) {
         console.error("Error fetching giveaways:", error);
@@ -139,220 +176,227 @@ function startTimer() {
             const endTime = new Date(el.dataset.endtime).getTime();
             const now = new Date().getTime();
             const distance = endTime - now;
+
             if (distance < 0) {
-                el.innerHTML = "<strong>Giveaway Ended</strong>";
+                el.textContent = "Giveaway Ended";
+                // Podríamos llamar a fetchGiveaways() aquí para actualizar al finalizar
                 return;
             }
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            el.innerHTML = `Time Left: <strong>${days}d ${hours}h ${minutes}m ${seconds}s</strong>`;
+            el.innerHTML = `<strong>${days}d ${hours}h ${minutes}m ${seconds}s</strong>`;
         });
     }, 1000);
 }
 
 async function handleJoinGiveaway(giveawayId) {
-    if (!currentUser) {
-        alert("You must be logged in to join a giveaway.");
-        return;
+    const token = localStorage.getItem('sts-token');
+    if (!token) { alert("You must be logged in to join a giveaway."); return; }
+
+    const btn = document.getElementById('join-giveaway-btn');
+    btn.disabled = true;
+    btn.textContent = 'Joining...';
+
+    try {
+        const response = await fetch('/.netlify/functions/giveaways-manager', {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ giveawayId })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message);
+        btn.textContent = 'Successfully Joined!';
+        await fetchGiveaways(); // Refrescar datos
+    } catch(e) {
+        alert(`Error: ${e.message}`);
+        btn.disabled = false;
+        btn.textContent = 'Join Giveaway';
     }
-    console.log(`Joining giveaway ${giveawayId}...`);
-    alert("Successfully joined giveaway! (Simulation)");
-    await fetchGiveaways();
+}
+
+// Lógica del modal de creación
+let prizePool = [];
+function openCreateGiveawayModal() {
+    prizePool = []; // Resetea el prize pool
+    renderPrizePoolInModal();
+    UI.openGiveawayModal();
+}
+
+function renderPrizePoolInModal() {
+    const list = document.getElementById('added-prizes-list');
+    list.innerHTML = prizePool.map((prize, index) => {
+        return `<div class="added-prize-item">
+            <span>${getPrizeItemHtml(prize)}</span>
+            <button type="button" class="remove-prize-btn" data-index="${index}">×</button>
+        </div>`;
+    }).join('');
+}
+
+function setupGiveawayModal() {
+    const prizeTypeSelect = document.getElementById('prize-type');
+    const prizeIdContainer = document.getElementById('prize-id-container');
+    const prizeAmountInput = document.getElementById('prize-amount');
+    
+    const allSwords = [...Object.values(appData.cases).flatMap(c => c.rewards), ...appData.otherSwords];
+
+    const updatePrizeIdField = () => {
+        if (prizeTypeSelect.value === 'currency') {
+            prizeIdContainer.innerHTML = `<select id="prize-id">
+                ${Object.keys(appData.currencies).filter(c => c !== 'time' && c !== 'cooldown')
+                .map(c => `<option value="${c}">${appData.currencies[c].name}</option>`).join('')}
+            </select>`;
+        } else { // sword
+            prizeIdContainer.innerHTML = `
+                <input type="text" id="prize-id-search" placeholder="Search for a sword..." autocomplete="off">
+                <input type="hidden" id="prize-id">
+                <div id="prize-search-results-modal" class="search-results-modal"></div>`;
+            
+            const searchInput = document.getElementById('prize-id-search');
+            const hiddenInput = document.getElementById('prize-id');
+            const resultsContainer = document.getElementById('prize-search-results-modal');
+            
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.toLowerCase();
+                if (!query) { resultsContainer.style.display = 'none'; return; }
+                const filtered = allSwords.filter(s => s.name.toLowerCase().includes(query)).slice(0, 5);
+                resultsContainer.innerHTML = filtered.map(s => `<div data-id="${s.id}" data-name="${s.name}">${s.name}</div>`).join('');
+                resultsContainer.style.display = 'block';
+            });
+            resultsContainer.addEventListener('click', (e) => {
+                if (e.target.dataset.id) {
+                    searchInput.value = e.target.dataset.name;
+                    hiddenInput.value = e.target.dataset.id;
+                    resultsContainer.style.display = 'none';
+                }
+            });
+        }
+    };
+    prizeTypeSelect.addEventListener('change', updatePrizeIdField);
+    updatePrizeIdField(); // Carga inicial
+
+    document.getElementById('add-prize-btn').addEventListener('click', () => {
+        const type = prizeTypeSelect.value;
+        const id = document.getElementById('prize-id').value;
+        const amount = parseInt(prizeAmountInput.value, 10);
+
+        if (!id || isNaN(amount) || amount < 1) {
+            alert("Please select a valid item and amount.");
+            return;
+        }
+        prizePool.push({ type, id, amount });
+        renderPrizePoolInModal();
+        // Reset fields
+        prizeAmountInput.value = 1;
+        if(type === 'sword') {
+            document.getElementById('prize-id-search').value = '';
+            document.getElementById('prize-id').value = '';
+        }
+    });
+
+    document.getElementById('added-prizes-list').addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-prize-btn')) {
+            prizePool.splice(parseInt(e.target.dataset.index, 10), 1);
+            renderPrizePoolInModal();
+        }
+    });
 }
 
 async function handleCreateGiveaway(event) {
     event.preventDefault();
-    console.log("Creating giveaway...");
-    alert("Giveaway created successfully! (Simulation)");
-    UI.hideModals();
-    await fetchGiveaways();
-}
-
-function showGiveawayCreationModal() {
-    UI.renderGiveawayCreationForm(handleCreateGiveaway);
-    UI.showModal(UI.modals.giveawayCreation);
-}
-
-
-// --- INICIALIZACIÓN DE MÓDULOS ---
-function initializeTopUI() {
-    const allSwords = [...Object.values(appData.cases).flatMap(c => c.rewards), ...appData.otherSwords];
-    const searchResultsContainer = document.getElementById("search-results");
-
-    UI.inputs.searchBar.addEventListener("input", () => {
-        const query = UI.inputs.searchBar.value.toLowerCase().trim();
-        if (!query) {
-            searchResultsContainer.style.display = "none";
-            return;
-        }
-        const filtered = allSwords.filter(s => s.name.toLowerCase().includes(query)).slice(0, 10);
-        searchResultsContainer.innerHTML = "";
-        if (filtered.length > 0) {
-            filtered.forEach(sword => {
-                const source = findSwordById(sword.id)?.source || { type: "other" };
-                const itemDiv = document.createElement("div");
-                itemDiv.className = `reward-item ${sword.rarity}`;
-                itemDiv.innerHTML = UI.createRewardItemHTML(sword, source);
-                itemDiv.addEventListener("click", () => {
-                    navigateToSubView("swordDetails", { sword: sword, source: source });
-                    UI.inputs.searchBar.value = "";
-                    searchResultsContainer.style.display = "none";
-                });
-                searchResultsContainer.appendChild(itemDiv);
-            });
-            searchResultsContainer.style.display = "block";
-        } else {
-            searchResultsContainer.style.display = "none";
-        }
-    });
-
-    document.addEventListener("click", e => {
-        if (!document.getElementById("search-module").contains(e.target)) {
-            searchResultsContainer.style.display = "none";
-        }
-    });
-
-    const currencies = Object.keys(appData.currencies);
-    function setCurrency(direction, key) {
-        const currency = appData.currencies[key];
-        const nameEl = document.getElementById(`converter-${direction}-name`);
-        const iconEl = document.getElementById(`converter-${direction}-icon`);
-        nameEl.textContent = currency.name;
-        nameEl.dataset.currencyKey = key;
-        if (currency.icon) {
-            iconEl.src = currency.icon;
-            iconEl.style.display = "block";
-        } else {
-            iconEl.style.display = "none";
-        }
+    if (prizePool.length === 0) {
+        alert("The prize pool cannot be empty.");
+        return;
     }
+    const token = localStorage.getItem('sts-token');
+    const form = event.target;
+    const btn = form.querySelector('button[type="submit"]');
+    const feedbackEl = document.getElementById('giveaway-feedback');
 
-    function updateConversion() {
-        const fromValue = parseValue(UI.inputs.converterFrom.value);
-        if (isNaN(fromValue) || fromValue <= 0) {
-            UI.inputs.converterTo.value = "";
-            return;
-        }
-        const fromKey = document.getElementById("converter-from-name").dataset.currencyKey;
-        const toKey = document.getElementById("converter-to-name").dataset.currencyKey;
-        const timeValue = fromValue * getUnitValue(fromKey, fromValue);
-        const toValue = convertTimeValueToCurrency(timeValue, toKey);
+    btn.disabled = true;
+    btn.textContent = 'Creating...';
+    feedbackEl.style.display = 'none';
 
-        UI.inputs.converterTo.value = toValue > 0 ? formatLargeNumber(toValue) : "N/A";
-    }
+    try {
+        const body = {
+            prize_pool: prizePool,
+            start_time: new Date(form.start_time.value).toISOString(),
+            end_time: new Date(form.end_time.value).toISOString(),
+        };
 
-    function cycleCurrency(wrapper) {
-        const nameEl = wrapper.querySelector(".converter-currency-name");
-        const currentKey = nameEl.dataset.currencyKey;
-        const currentIndex = currencies.indexOf(currentKey);
-        const nextIndex = (currentIndex + 1) % currencies.length;
-        const nextKey = currencies[nextIndex];
-        const direction = wrapper.id.includes("from") ? "from" : "to";
-        setCurrency(direction, nextKey);
-        updateConversion();
-    }
-
-    UI.inputs.converterFrom.addEventListener("input", updateConversion);
-    document.getElementById("converter-from-wrapper").addEventListener("click", e => {
-        if (e.target.tagName !== "INPUT") cycleCurrency(e.currentTarget);
-    });
-    document.getElementById("converter-to-wrapper").addEventListener("click", e => cycleCurrency(e.currentTarget));
-
-    setCurrency("from", "time");
-    setCurrency("to", "diamonds");
-}
-
-function initializeCalculator() {
-    const calculateBtn = document.getElementById('calculate-btn');
-    const graphBtn = document.getElementById('calculate-graph-btn');
-    
-    const runCalculation = () => {
-        const quantity = parseInt(UI.inputs.caseQuantity.value, 10);
-        const caseId = appState.currentCaseIdForCalc;
-        if (!caseId || !appData.cases[caseId]) return;
-
-        UI.containers.resultsTable.innerHTML = '';
-        UI.containers.simulationLoot.style.display = 'none';
-
-        if (appState.calculatorMode === 'untilBest') {
-            Calculator.runUntilBestSimulation(caseId, appState);
-        } else if (!isNaN(quantity) && quantity > 0) {
-            switch(appState.calculatorMode) {
-                case 'theoretical':
-                    Calculator.runTheoreticalCalculation(quantity, caseId, appState);
-                    break;
-                case 'simulate':
-                    Calculator.runRealisticSimulation(quantity, caseId, appState);
-                    break;
-            }
-        } else {
-             UI.containers.resultsTable.innerHTML = `<p class="error-message" style="display:block;">Please enter a valid number of cases.</p>`;
-        }
-    };
-
-    const runGraph = () => {
-        const step = parseInt(UI.inputs.graphStep.value, 10);
-        const max = parseInt(UI.inputs.graphMax.value, 10);
-        const caseId = appState.currentCaseIdForCalc;
-        UI.containers.resultsTable.innerHTML = "";
-        UI.containers.simulationLoot.style.display = "none";
-        UI.containers.graph.style.display = "none";
-        if (!caseId || !appData.cases[caseId] || isNaN(step) || isNaN(max) || step <= 0 || max <= 0 || max < step || max / step > MAX_GRAPH_SECTIONS) {
-            UI.containers.resultsTable.innerHTML = `<p class="error-message" style="display:block;">Please enter a valid range and maximum (max ${MAX_GRAPH_SECTIONS} sections).</p>`;
-            return;
-        }
-        Calculator.runGraphSimulation(step, max, caseId);
-    };
-
-    calculateBtn.addEventListener('click', runCalculation);
-    graphBtn.addEventListener('click', runGraph);
-
-    ["mode-theoretical-btn", "mode-simulate-btn", "mode-until-best-btn", "mode-graph-btn"].forEach(id => {
-        document.getElementById(id).addEventListener("click", (e) => {
-            document.querySelector(".calculator-mode-selector .active").classList.remove("active");
-            e.target.classList.add("active");
-            appState.calculatorMode = e.target.id.replace("mode-", "").replace("-btn", "");
-            UI.clearCalculator(appState);
+        const response = await fetch('/.netlify/functions/giveaways-manager', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
         });
-    });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message);
+        
+        feedbackEl.className = 'feedback-message success';
+        feedbackEl.textContent = 'Giveaway created successfully!';
+        form.reset();
+        prizePool = [];
+        await fetchGiveaways();
+        setTimeout(UI.closeGiveawayModal, 1500);
+
+    } catch (e) {
+        feedbackEl.className = 'feedback-message error';
+        feedbackEl.textContent = `Error: ${e.message}`;
+    } finally {
+        feedbackEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Create Giveaway';
+    }
 }
 
-function onLoginSuccess(user) {
-    currentUser = user;
-    fetchGiveaways();
-    setInterval(fetchGiveaways, 30000);
+
+// --- INICIALIZACIÓN DE LA APP ---
+
+function onLoginSuccess(loggedInUser) {
+    currentUser = loggedInUser;
+    // Vuelve a renderizar la vista actual por si depende del estado de login
+    const currentView = Object.keys(UI.dom.views).find(key => UI.dom.views[key].style.display === 'block') || 'cases';
+    navigateToView(currentView);
 }
 
-// --- FUNCIÓN PRINCIPAL DE INICIALIZACIÓN DE LA APP ---
 function initializeApp() {
     initializeAuth(onLoginSuccess);
-    initializeTopUI();
-    initializeCalculator();
+    
+    // Iniciar fetching de giveaways y el timer
+    fetchGiveaways();
+    giveawayUpdateInterval = setInterval(fetchGiveaways, 30000); // Actualizar cada 30 segundos
+    startTimer();
 
+    // Setup de la navegación principal
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', (e) => {
+            if (e.target.classList.contains('disabled')) return;
             e.preventDefault();
-            const view = e.target.dataset.view;
-            if (view && !e.target.classList.contains('disabled')) {
-                navigateToView(view);
-                document.getElementById('main-nav-dropdown').classList.remove('visible');
-                document.getElementById('hamburger-menu').classList.remove('open');
-            }
+            navigateToView(e.target.dataset.view);
+            document.getElementById('main-nav-dropdown').classList.remove('visible');
+            document.getElementById('hamburger-menu').classList.remove('open');
         });
     });
-    
-    document.getElementById('details-to-selection-btn').addEventListener('click', () => navigateToSubView('selection'));
-    document.getElementById('sword-to-details-btn').addEventListener('click', () => navigateToSubView('selection'));
 
-    document.getElementById('other-prev-btn').addEventListener('click', () => {
+    // Setup de los botones "Back"
+    UI.dom.buttons.backToCases.addEventListener('click', () => navigateToView('cases'));
+    UI.dom.buttons.backToSwordList.addEventListener('click', () => {
+        if (navigationContext.view === 'caseDetails') {
+            navigateToSubView('caseDetails', navigationContext.id);
+        } else {
+            navigateToView('cases');
+        }
+    });
+
+    // Setup de la paginación
+    UI.dom.buttons.prevPage.addEventListener('click', () => {
         if (appState.currentPage > 1) {
             appState.currentPage--;
             UI.renderOtherSwords(appState, navigateToSubView);
         }
     });
-    document.getElementById('other-next-btn').addEventListener('click', () => {
+    UI.dom.buttons.nextPage.addEventListener('click', () => {
         const totalPages = Math.ceil(appData.otherSwords.length / appState.itemsPerPage);
         if (appState.currentPage < totalPages) {
             appState.currentPage++;
@@ -360,9 +404,18 @@ function initializeApp() {
         }
     });
 
+    // Setup del modal de creación de sorteos
+    setupGiveawayModal();
+    UI.dom.modals.closeGiveaway.addEventListener('click', UI.closeGiveawayModal);
+    UI.dom.modals.createGiveaway.addEventListener('click', (e) => {
+        if (e.target === UI.dom.modals.createGiveaway) UI.closeGiveawayModal();
+    });
+    document.getElementById('giveaway-creation-form').addEventListener('submit', handleCreateGiveaway);
+
+    // Renderizado inicial
     UI.renderCaseSelection(navigateToSubView);
     UI.renderOtherSwords(appState, navigateToSubView);
-    navigateToView('main');
+    navigateToView('cases');
 
     console.log("STS Values App Initialized!");
 }

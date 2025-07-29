@@ -1,21 +1,23 @@
-/* =================================================================================== */
-/* === ARCHIVO: utils.js === */
-/* === Contiene funciones de utilidad reutilizables en toda la aplicación. === */
-/* =================================================================================== */
+// =================================================================================
+// ARCHIVO: utils.js
+// Contiene funciones de utilidad reutilizables en toda la aplicación.
+// =================================================================================
 
-import { appData, currencyTiers } from './data.js';
+import { appData, currencyTiers, parseValue } from './data.js';
 
 // --- Funciones de Búsqueda ---
 export function findSwordById(swordId) {
+    // Buscar en las recompensas de las cajas
     for (const caseId in appData.cases) {
-        const foundSword = appData.cases[caseId].rewards.find(r => r.id === swordId);
-        if (foundSword) {
-            return { sword: foundSword, source: { type: 'case', id: caseId } };
+        const reward = appData.cases[caseId].rewards.find(r => r.id === swordId);
+        if (reward) {
+            return { sword: reward, source: { type: 'case', id: caseId } };
         }
     }
-    const foundOtherSword = appData.otherSwords.find(s => s.id === swordId);
-    if (foundOtherSword) {
-        return { sword: foundOtherSword, source: { type: 'other' } };
+    // Buscar en la lista de otras espadas
+    const otherSword = appData.otherSwords.find(s => s.id === swordId);
+    if (otherSword) {
+        return { sword: otherSword, source: { type: 'other', id: null } };
     }
     return null;
 }
@@ -25,6 +27,7 @@ export function getUnitValue(currencyKey, totalUnits = 1) {
     if (currencyKey === 'time' || currencyKey === 'cooldown') return 1;
     const tiers = currencyTiers[currencyKey];
     if (!tiers) return 0;
+
     // Encuentra el primer tier cuyo umbral sea menor o igual al total de unidades
     const applicableTier = tiers.find(tier => totalUnits >= tier.threshold);
     return applicableTier ? applicableTier.value : 0;
@@ -46,10 +49,13 @@ export function convertTimeValueToCurrency(timeValue, targetCurrency) {
     return timeValue / tiers[tiers.length - 1].value;
 }
 
+
 // --- Funciones de Formato ---
 export function formatTimeAgo(isoString) {
-    if (!isoString) return '';
+    if (!isoString) return 'date not available';
     const date = new Date(isoString);
+    if (isNaN(date.getTime())) return 'invalid date';
+
     const now = new Date();
     const seconds = Math.round((now - date) / 1000);
 
@@ -68,16 +74,21 @@ export function formatTimeAgo(isoString) {
 
 export function formatLargeNumber(num) {
     if (typeof num !== 'number' || isNaN(num)) return 'N/A';
-    if (Math.abs(num) < 1000) return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    if (num === Infinity) return '∞';
 
-    const units = ['K', 'M', 'B', 'T', 'Qd'];
-    if (num === 0) return '0';
+    const units = ['K', 'M', 'B', 'T', 'Qd', 'Qn', 'Sx', 'Sp', 'Oc', 'No'];
+    if (Math.abs(num) < 1000) {
+        return num.toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+        });
+    }
 
     const tier = Math.floor(Math.log10(Math.abs(num)) / 3);
-    if (tier === 0) return num.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    if (tier === 0) return num.toLocaleString();
 
     const unit = units[tier - 1];
-    if (!unit) return num.toLocaleString();
+    if (!unit) return num.toExponential(2);
 
     const scaled = num / Math.pow(1000, tier);
     return scaled.toFixed(2) + unit;
@@ -85,16 +96,27 @@ export function formatLargeNumber(num) {
 
 export function formatHours(totalHours) {
     if (totalHours < 24) return `${totalHours.toFixed(1)} hours`;
-    
     const days = totalHours / 24;
     if (days < 7) return `${days.toFixed(1)} days`;
-    
     const weeks = days / 7;
     if (weeks < 4.34) return `${weeks.toFixed(1)} weeks`;
-
     const months = days / 30.44;
     if (months < 12) return `${months.toFixed(1)} months`;
-
     const years = days / 365.25;
     return `${years.toFixed(2)} years`;
+}
+
+export function getPrizeItemHtml(prize) {
+    const amount = formatLargeNumber(prize.amount);
+    if (prize.type === 'currency') {
+        const currency = appData.currencies[prize.id] || { name: 'Unknown', icon: '' };
+        return `
+            <img src="${currency.icon || 'images/placeholder.png'}" alt="${currency.name}">
+            <span>${amount} ${currency.name}</span>`;
+    } else { // 'sword'
+        const sword = findSwordById(prize.id)?.sword || { name: 'Unknown Sword', image: 'images/placeholder.png' };
+        return `
+            <img src="${sword.image}" alt="${sword.name}">
+            <span>${amount > 1 ? `${amount}x ` : ''}${sword.name}</span>`;
+    }
 }
