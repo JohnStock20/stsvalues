@@ -5,8 +5,8 @@
 /*
 =======================================================================
 ============ */
-import { appData } from './data.js';
-import { findSwordById, formatLargeNumber, formatHours, formatTimeAgo, getUnitValue, parseValue } from './utils.js';
+import { appData, parseValue } from './data.js'; // <-- CORRECCIÓN AQUÍ
+import { findSwordById, formatLargeNumber, formatHours, formatTimeAgo } from './utils.js';
 
 // --- Selectores del DOM ---
 export const mainViews = {
