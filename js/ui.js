@@ -37,7 +37,6 @@ export const controls = {
     graph: document.getElementById('graph-controls'),
 };
 
-// --- Mapeo de estilos de títulos ---
 export const titleStyles = {
     'player': { text: 'Player', style: 'var(--title-player-color)' },
     'member': { text: 'Member', style: 'var(--title-member-gradient)' },
@@ -47,7 +46,6 @@ export const titleStyles = {
     'tester': { text: 'Tester', style: 'var(--title-tester-gradient)' },
     'owner': { text: 'Owner', style: 'var(--title-owner-gradient)' },
 };
-
 
 // --- Funciones de Control de Vistas ---
 export function showView(viewName) {
@@ -104,8 +102,7 @@ function parseAndSetDescription(element, text, navigateTo) {
 
 export function renderSwordDetails(sword, sourceInfo, navigateTo, onNewInterval) {
     const swordInfoCard = document.getElementById('sword-info-card');
-    swordInfoCard.className = 'sword-info-card';
-    swordInfoCard.classList.add(sword.rarity);
+    swordInfoCard.className = 'sword-info-card'; swordInfoCard.classList.add(sword.rarity);
     const demandIndicator = document.getElementById('sword-demand-indicator');
     if (sword.demand) { demandIndicator.className = 'sword-demand-indicator ' + sword.demand; demandIndicator.style.display = 'block'; }
     else { demandIndicator.style.display = 'none'; }
@@ -116,13 +113,11 @@ export function renderSwordDetails(sword, sourceInfo, navigateTo, onNewInterval)
     const valueEl = document.getElementById('sword-details-value');
     if (typeof sword.value === 'string' && sword.value.toUpperCase().startsWith('O/C')) {
         const match = sword.value.match(/\[(.*?)\]/);
-        valueEl.textContent = 'O/C';
-        valueEl.classList.add('value-oc');
+        valueEl.textContent = 'O/C'; valueEl.classList.add('value-oc');
         valueEl.title = match ? `Owner's Choice: ${match[1]}` : 'Owner\'s Choice';
     } else {
         valueEl.textContent = typeof sword.value === 'number' ? sword.value.toLocaleString() : sword.value;
-        valueEl.classList.remove('value-oc');
-        valueEl.title = '';
+        valueEl.classList.remove('value-oc'); valueEl.title = '';
     }
     document.getElementById('sword-details-stats').textContent = sword.stats;
     const existCount = typeof sword.exist === 'number' ? sword.exist.toLocaleString() : sword.exist;
@@ -171,8 +166,7 @@ export function renderCaseSelection(navigateTo) {
     Object.keys(appData.cases).forEach(caseId => {
         const data = appData.cases[caseId];
         const link = document.createElement('a');
-        link.href = '#';
-        link.className = 'case-link';
+        link.href = '#'; link.className = 'case-link';
         const caseItem = document.createElement('div');
         caseItem.className = 'case-item';
         caseItem.style.setProperty('--case-border-color', data.borderColor || 'var(--main-green)');
@@ -206,8 +200,7 @@ export function updatePaginationControls(appState) {
 }
 
 export function clearCalculator(appState) {
-    containers.simulationLoot.style.display = 'none';
-    containers.resultsTable.innerHTML = '';
+    containers.simulationLoot.style.display = 'none'; containers.resultsTable.innerHTML = '';
     containers.graph.style.display = 'none';
     if (containers.graphSvg) containers.graphSvg.innerHTML = '';
     if (containers.graphLabels) containers.graphLabels.innerHTML = '';
@@ -217,14 +210,11 @@ export function clearCalculator(appState) {
     controls.standard.style.display = isGraphMode ? 'none' : 'flex';
     controls.graph.style.display = isGraphMode ? 'flex' : 'none';
     if (isUntilBestMode) {
-        inputs.caseQuantity.value = '';
-        inputs.caseQuantity.placeholder = "Not applicable";
-        inputs.caseQuantity.disabled = true;
-        calculateBtn.textContent = 'Start Hunt';
+        inputs.caseQuantity.value = ''; inputs.caseQuantity.placeholder = "Not applicable";
+        inputs.caseQuantity.disabled = true; calculateBtn.textContent = 'Start Hunt';
     } else {
         inputs.caseQuantity.placeholder = "Enter amount...";
-        inputs.caseQuantity.disabled = false;
-        calculateBtn.textContent = 'Calculate';
+        inputs.caseQuantity.disabled = false; calculateBtn.textContent = 'Calculate';
     }
 }
 
@@ -266,7 +256,7 @@ export function renderHuntResult(result) {
 }
 
 export function renderProfitGraph(results, MAX_GRAPH_SECTIONS) {
-    if (results.length > MAX_GRAPH_SECTIONS) { containers.resultsTable.innerHTML = `<p class="error-message" style="display:block;">Too many sections requested (Max: ${MAX_GRAPH_SECTIONS}). Please increase the range or decrease the maximum.</p>`; return; }
+    if (results.length > MAX_GRAPH_SECTIONS) { containers.resultsTable.innerHTML = `<p class="error-message" style="display:block;">Too many sections requested (Max: ${MAX_GRAPH_SECTIONS}).</p>`; return; }
     containers.graph.style.display = 'block';
     const tooltip = document.querySelector('.graph-tooltip');
     containers.graphSvg.innerHTML = ''; containers.graphLabels.innerHTML = '';
@@ -352,40 +342,21 @@ export function renderTitlesPage(titlesData, onTitleSelect) {
     if (!titlesData) { container.innerHTML = `<p class="error-message" style="display:block;">Could not load titles.</p>`; return; }
     titlesData.forEach(title => {
         const card = document.createElement('div');
-        card.className = 'title-card';
-        card.classList.add(title.unlocked ? 'unlocked' : 'locked');
+        card.className = 'title-card'; card.classList.add(title.unlocked ? 'unlocked' : 'locked');
         if (title.equipped) { card.classList.add('equipped'); }
         const styleInfo = titleStyles[title.key] || titleStyles['player'];
         let titleNameHTML = `<div class="title-name">${styleInfo.text}</div>`;
         if (styleInfo.style.includes('gradient')) { titleNameHTML = `<div class="title-name gradient" style="background-image: ${styleInfo.style};">${styleInfo.text}</div>`; }
         card.innerHTML = titleNameHTML;
-        if (title.unlocked) {
-            card.addEventListener('click', () => { if (!title.equipped) { onTitleSelect(title.key); } });
-        } else { card.innerHTML += `<div class="lock-icon">🔒</div>`; }
+        if (title.unlocked) { card.addEventListener('click', () => { if (!title.equipped) { onTitleSelect(title.key); } }); }
+        else { card.innerHTML += `<div class="lock-icon">🔒</div>`; }
         container.appendChild(card);
     });
 }
 
-// --- NUEVO: RENDERIZADO DE HERRAMIENTAS DE ADMIN ---
 export function renderAdminTools(onGrantTitle) {
     const container = document.getElementById('devtools-view');
-    container.innerHTML = `
-        <h2 class="section-title">~DEVELOPER TOOLS~</h2>
-        <div class="admin-tool-card">
-            <h3>Grant Title to User</h3>
-            <form id="grant-title-form">
-                <input type="text" name="targetUsername" placeholder="Enter Roblox Username..." required>
-                <select name="titleKey" required>
-                    <option value="" disabled selected>Select a Title to Grant</option>
-                    ${Object.keys(titleStyles).map(key => `<option value="${key}">${titleStyles[key].text}</option>`).join('')}
-                </select>
-                <button type="submit" class="auth-button">Grant Title</button>
-            </form>
-            <div id="admin-feedback" class="feedback-message"></div>
-        </div>
-    `;
-
-    // Añadir el listener al formulario que acabamos de crear
+    container.innerHTML = `<div class="admin-tool-card"><h3>Grant Title to User</h3><form id="grant-title-form"><input type="text" name="targetUsername" placeholder="Enter Roblox Username..." required><select name="titleKey" required><option value="" disabled selected>Select a Title to Grant</option>${Object.keys(titleStyles).map(key => `<option value="${key}">${titleStyles[key].text}</option>`).join('')}</select><button type="submit" class="auth-button">Grant Title</button></form><div id="admin-feedback" class="feedback-message"></div></div>`;
     document.getElementById('grant-title-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const form = e.target;
@@ -393,4 +364,196 @@ export function renderAdminTools(onGrantTitle) {
         const titleKey = form.titleKey.value;
         onGrantTitle(targetUsername, titleKey);
     });
+}
+
+// --- NUEVO: FUNCIONES PARA RENDERIZAR GIVEAWAYS ---
+
+// Función para obtener la descripción del premio
+function getPrizeDescription(giveaway) {
+    const amount = formatLargeNumber(giveaway.prize_amount);
+    if (giveaway.prize_type === 'currency') {
+        const currency = appData.currencies[giveaway.prize_id] || { name: 'Unknown', icon: '' };
+        return {
+            html: `<img src="${currency.icon || ''}" alt="${currency.name}"> ${amount} ${currency.name}`,
+            text: `${amount} ${currency.name}`
+        };
+    } else { // 'sword'
+        const sword = findSwordById(giveaway.prize_id)?.sword || { name: 'Unknown Sword', image: 'images/placeholder.png' };
+        return {
+            html: `<img src="${sword.image}" alt="${sword.name}"> ${amount}x ${sword.name}`,
+            text: `${amount}x ${sword.name}`
+        };
+    }
+}
+
+// Función para renderizar el panel lateral
+export function renderSidebarGiveaways(giveaways, participantsData) {
+    const activeContainer = document.getElementById('sidebar-active-giveaway');
+    const upcomingContainer = document.getElementById('sidebar-upcoming-giveaways');
+    const participantsContainer = document.getElementById('giveaway-participants-list');
+    activeContainer.innerHTML = '<p>No active giveaway at the moment.</p>';
+    upcomingContainer.innerHTML = '';
+    participantsContainer.innerHTML = '';
+
+    const activeGiveaway = giveaways.find(gw => gw.status === 'active');
+
+    if (activeGiveaway) {
+        const prize = getPrizeDescription(activeGiveaway);
+        activeContainer.innerHTML = `
+            <div id="active-giveaway-card">
+                <h4>Current Prize:</h4>
+                <div id="active-giveaway-prize">${prize.html}</div>
+                <div id="giveaway-timer" data-endtime="${activeGiveaway.end_time}"></div>
+                <div id="giveaway-participants-count">Participants: <strong>${activeGiveaway.participant_count || 0}</strong></div>
+            </div>`;
+        
+        // Renderizar participantes
+        if (participantsData && participantsData.length > 0) {
+            participantsContainer.innerHTML = participantsData.map(p => `
+                <div class="participant-item">
+                    <img src="${p.avatar || 'images/placeholder.png'}" alt="${p.username}">
+                    <span>${p.username}</span>
+                </div>
+            `).join('');
+        } else {
+             participantsContainer.innerHTML = '<p>No participants yet.</p>';
+        }
+
+    }
+
+    giveaways.filter(gw => gw.status === 'upcoming').slice(0, 5).forEach(gw => {
+        const prize = getPrizeDescription(gw);
+        const startTime = new Date(gw.start_time).toLocaleString();
+        upcomingContainer.innerHTML += `
+            <div class="upcoming-giveaway-item">
+                <div class="prize">${prize.text}</div>
+                <div class="time">Starts: ${startTime}</div>
+            </div>`;
+    });
+}
+
+// Función para renderizar el contenido de la página principal de sorteos
+export function renderMainGiveawayPage(giveaways, currentUser, onJoin, onCreate) {
+    const creationContainer = document.getElementById('giveaway-creation-container');
+    const displayContainer = document.getElementById('giveaway-display-container');
+    
+    // Mostrar formulario de creación si el usuario está autorizado
+    if (currentUser && ['owner', 'tester'].includes(currentUser.role)) {
+        renderGiveawayCreationForm(onCreate);
+        creationContainer.style.display = 'block';
+    } else {
+        creationContainer.style.display = 'none';
+    }
+
+    // Mostrar el sorteo activo
+    const activeGiveaway = giveaways.find(gw => gw.status === 'active');
+    if (activeGiveaway) {
+        const prize = getPrizeDescription(activeGiveaway);
+        const isJoined = activeGiveaway.participants?.includes(currentUser?.username);
+        displayContainer.innerHTML = `
+            <div id="main-giveaway-card">
+                <h2>A GIVEAWAY IS ACTIVE!</h2>
+                <div id="main-giveaway-prize">${prize.html}</div>
+                <div id="main-giveaway-timer" data-endtime="${activeGiveaway.end_time}"></div>
+                <button id="join-giveaway-btn" class="auth-button" ${isJoined ? 'disabled' : ''}>
+                    ${isJoined ? 'You Have Joined!' : 'Join Giveaway'}
+                </button>
+            </div>`;
+        if(!isJoined) {
+            document.getElementById('join-giveaway-btn').addEventListener('click', () => onJoin(activeGiveaway.id));
+        }
+    } else {
+        displayContainer.innerHTML = '<h2>There are no active giveaways right now. Check back soon!</h2>';
+    }
+}
+
+// Función para renderizar el formulario de creación
+function renderGiveawayCreationForm(onCreate) {
+    const container = document.getElementById('giveaway-creation-container');
+    const timezones = { "CET": "Europe/Madrid", "PST": "America/Los_Angeles", "EST": "America/New_York", "GMT": "Etc/GMT", "JST": "Asia/Tokyo" };
+
+    container.innerHTML = `
+        <form id="giveaway-creation-form">
+            <h3>Create a New Giveaway</h3>
+            <div class="form-grid">
+                <div class="form-field">
+                    <label for="prize-type">Prize Type</label>
+                    <select id="prize-type" name="prize_type">
+                        <option value="currency">Currency</option>
+                        <option value="sword">Sword</option>
+                    </select>
+                </div>
+                 <div class="form-field">
+                    <label for="prize-amount">Amount</label>
+                    <input type="number" id="prize-amount" name="prize_amount" min="1" required>
+                </div>
+            </div>
+            <div class="form-field full-width" id="prize-id-container">
+                <!-- Se llenará dinámicamente -->
+            </div>
+             <div class="form-grid">
+                <div class="form-field">
+                    <label for="start-time">Start Time</label>
+                    <input type="datetime-local" id="start-time" name="start_time" required>
+                </div>
+                 <div class="form-field">
+                    <label for="end-time">End Time</label>
+                    <input type="datetime-local" id="end-time" name="end_time" required>
+                </div>
+            </div>
+            <div class="form-field full-width">
+                <label for="timezone">Timezone (for start/end time)</label>
+                <select id="timezone" name="timezone">
+                    ${Object.entries(timezones).map(([name, value]) => `<option value="${value}" ${name === 'CET' ? 'selected' : ''}>${name}</option>`).join('')}
+                </select>
+            </div>
+            <button type="submit" class="auth-button">Create Giveaway</button>
+            <div id="giveaway-feedback" class="feedback-message"></div>
+        </form>
+    `;
+
+    const prizeTypeSelect = document.getElementById('prize-type');
+    const prizeIdContainer = document.getElementById('prize-id-container');
+
+    const updatePrizeIdField = () => {
+        if (prizeTypeSelect.value === 'currency') {
+            prizeIdContainer.innerHTML = `
+                <label for="prize-id-currency">Currency</label>
+                <select id="prize-id-currency" name="prize_id">
+                    ${Object.keys(appData.currencies).filter(c => c !== 'time').map(c => `<option value="${c}">${appData.currencies[c].name}</option>`).join('')}
+                </select>`;
+        } else {
+            prizeIdContainer.innerHTML = `
+                <label for="prize-id-sword">Search for a Sword</label>
+                <div id="prize-search-container">
+                    <input type="text" id="prize-id-sword-search" placeholder="Start typing a sword name...">
+                    <input type="hidden" id="prize-id-sword" name="prize_id" required>
+                    <div id="prize-search-results"></div>
+                </div>`;
+            
+            const searchInput = document.getElementById('prize-id-sword-search');
+            const hiddenInput = document.getElementById('prize-id-sword');
+            const resultsContainer = document.getElementById('prize-search-results');
+            const allSwords = [...Object.values(appData.cases).flatMap(c => c.rewards), ...appData.otherSwords];
+
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.toLowerCase();
+                if(!query) { resultsContainer.innerHTML = ''; return; }
+                const filtered = allSwords.filter(s => s.name.toLowerCase().includes(query)).slice(0, 5);
+                resultsContainer.innerHTML = filtered.map(s => `<div data-id="${s.id}" data-name="${s.name}">${s.name}</div>`).join('');
+            });
+
+            resultsContainer.addEventListener('click', (e) => {
+                if(e.target.dataset.id) {
+                    searchInput.value = e.target.dataset.name;
+                    hiddenInput.value = e.target.dataset.id;
+                    resultsContainer.innerHTML = '';
+                }
+            });
+        }
+    };
+
+    prizeTypeSelect.addEventListener('change', updatePrizeIdField);
+    document.getElementById('giveaway-creation-form').addEventListener('submit', onCreate);
+    updatePrizeIdField();
 }
