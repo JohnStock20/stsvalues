@@ -56,42 +56,52 @@
 
 .calculator-controls {
     display: flex;
-    gap: 20px;
+    gap: 15px; /* Reducido para mejor ajuste */
     justify-content: center;
     align-items: center;
     margin-bottom: 30px;
 }
 
-/* Input genérico para la calculadora */
-.calculator-input {
+/* Input genérico para la calculadora - ACTUALIZADO */
+.calculator-controls input[type="number"] {
     background-color: var(--dark-bg);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
-    padding: 12px 15px; /* Más padding horizontal */
+    padding: 12px 15px;
     font-size: 1.1em;
     border-radius: var(--border-radius-md);
     text-align: center;
     transition: var(--transition-fast);
-    width: 250px;
-    /* Añadimos un borde interior sutil para dar profundidad */
+    width: 100%; /* Ocupa el espacio disponible */
+    max-width: 280px; /* Ancho máximo */
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
 }
+/* Eliminar flechas de input de número */
+.calculator-controls input[type="number"]::-webkit-outer-spin-button,
+.calculator-controls input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.calculator-controls input[type="number"] {
+  -moz-appearance: textfield;
+}
 
-.calculator-input:focus {
+
+.calculator-controls input[type="number"]:focus {
     outline: none;
     border-color: var(--main-green);
     background-color: var(--panel-bg);
 }
 
-.calculator-input:disabled {
+.calculator-controls input[type="number"]:disabled {
     background-color: #111;
     color: var(--text-secondary);
     cursor: not-allowed;
     opacity: 0.7;
 }
 
-/* Botón genérico para la calculadora */
-.calculator-btn {
+/* Botón genérico para la calculadora - ACTUALIZADO */
+.calculator-controls .calculator-btn {
     background-color: var(--main-green);
     color: var(--dark-bg);
     border: none;
@@ -101,8 +111,9 @@
     cursor: pointer;
     border-radius: var(--border-radius-md);
     transition: var(--transition-fast);
+    flex-shrink: 0; /* Evita que el botón se encoja */
 }
-.calculator-btn:hover {
+.calculator-controls .calculator-btn:hover {
     filter: brightness(1.1);
     box-shadow: var(--shadow-lg);
 }
@@ -190,20 +201,11 @@
     font-weight: bold;
 }
 
-#results-table td.profit {
-    color: var(--common);
-}
-
-#results-table td.loss {
-    color: var(--insane);
-}
+#results-table td.profit { color: var(--common); }
+#results-table td.loss { color: var(--insane); }
 
 /* --- Gráfico de Líneas --- */
-#graph-container {
-    width: 100%;
-    margin-top: 20px;
-}
-
+#graph-container { width: 100%; margin-top: 20px; }
 #graph-plot-area {
     width: 100%;
     height: 350px;
@@ -214,88 +216,19 @@
     padding: 20px;
     box-sizing: border-box;
 }
-
-#graph-plot-area svg {
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-}
-
-.graph-zero-line {
-    stroke: var(--border-color);
-    stroke-width: 1.5;
-    stroke-dasharray: 4, 4;
-}
-
-.graph-profit-line {
-    stroke: var(--main-green);
-    stroke-width: 2.5;
-    fill: none;
-}
-
-.graph-loss-line {
-    stroke: var(--insane);
-    stroke-width: 2.5;
-    fill: none;
-}
-
-.graph-data-point {
-    r: 4; /* Radio del círculo */
-    stroke-width: 2;
-    transition: r 0.2s ease;
-    cursor: pointer;
-}
-
-.graph-data-point.profit {
-    fill: var(--main-green);
-    stroke: var(--dark-bg);
-}
-
-.graph-data-point.loss {
-    fill: var(--insane);
-    stroke: var(--dark-bg);
-}
-
-.graph-data-point:hover {
-    r: 7; /* El punto se hace más grande */
-}
-
-.graph-tooltip {
-    position: absolute;
-    background-color: #000;
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: var(--border-radius-sm);
-    font-size: 0.9em;
-    white-space: nowrap;
-    z-index: 10;
-    border: 1px solid var(--main-green);
-    transform: translate(-50%, -120%);
-    display: none;
-    pointer-events: none;
-    box-shadow: var(--shadow-lg);
-}
-
-.graph-tooltip .tooltip-value {
-    font-weight: bold;
-}
-
-.graph-tooltip .tooltip-value.profit {
-    color: var(--common);
-}
-
-.graph-tooltip .tooltip-value.loss {
-    color: var(--insane);
-}
-
-#graph-labels {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 20px 0 20px;
-    font-size: 0.9em;
-    color: var(--text-secondary);
-}
-
+#graph-plot-area svg { width: 100%; height: 100%; overflow: visible; }
+.graph-zero-line { stroke: var(--border-color); stroke-width: 1.5; stroke-dasharray: 4, 4; }
+.graph-profit-line { stroke: var(--main-green); stroke-width: 2.5; fill: none; }
+.graph-loss-line { stroke: var(--insane); stroke-width: 2.5; fill: none; }
+.graph-data-point { r: 4; stroke-width: 2; transition: r 0.2s ease; cursor: pointer; }
+.graph-data-point.profit { fill: var(--main-green); stroke: var(--dark-bg); }
+.graph-data-point.loss { fill: var(--insane); stroke: var(--dark-bg); }
+.graph-data-point:hover { r: 7; }
+.graph-tooltip { position: absolute; background-color: #000; color: #fff; padding: 8px 12px; border-radius: var(--border-radius-sm); font-size: 0.9em; white-space: nowrap; z-index: 10; border: 1px solid var(--main-green); transform: translate(-50%, -120%); display: none; pointer-events: none; box-shadow: var(--shadow-lg); }
+.graph-tooltip .tooltip-value { font-weight: bold; }
+.graph-tooltip .tooltip-value.profit { color: var(--common); }
+.graph-tooltip .tooltip-value.loss { color: var(--insane); }
+#graph-labels { display: flex; justify-content: space-between; padding: 10px 20px 0 20px; font-size: 0.9em; color: var(--text-secondary); }
 
 /* --- RESPONSIVE PARA LA CALCULADORA --- */
 @media (max-width: 768px) {
@@ -303,7 +236,7 @@
         flex-direction: column;
         width: 100%;
     }
-    .calculator-input {
+    .calculator-controls input[type="number"] {
         width: 100%;
     }
     .calculator-mode-selector {

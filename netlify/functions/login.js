@@ -1,4 +1,4 @@
-// Archivo: netlify/functions/login.js
+// Archivo: netlify/functions/login.js (VERSIÓN ACTUALIZADA)
 
 const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
@@ -12,16 +12,12 @@ const pool = new Pool({
     }
 });
 
-// --- LÓGICA PRINCIPAL DEL SCRIPT ---
-
 exports.handler = async (event) => {
-    // Solo permitimos peticiones de tipo POST
     if (event.httpMethod !== 'POST') {
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
     try {
-        // Obtenemos los datos enviados desde el frontend
         const { username, password } = JSON.parse(event.body);
 
         if (!username || !password) {
@@ -30,31 +26,37 @@ exports.handler = async (event) => {
 
         const client = await pool.connect();
         try {
-            // Paso 1: Buscamos al usuario en nuestra base de datos
-            const result = await client.query('SELECT * FROM users WHERE username = $1', [username]);
+            // Paso 1: Buscamos al usuario y OBTENEMOS LOS NUEVOS DATOS (role, titles, etc.)
+            const result = await client.query(
+                'SELECT id, username, password_hash, roblox_avatar_url, role, equipped_title, unlocked_titles FROM users WHERE username = $1',
+                [username]
+            );
 
-            // Si no devuelve filas, el usuario no existe
             if (result.rows.length === 0) {
                 return { statusCode: 401, body: JSON.stringify({ message: "Invalid username or password." }) };
             }
 
             const user = result.rows[0];
 
-            // Paso 2: Comparamos la contraseña enviada con la encriptada que tenemos
+            // Paso 2: Comparamos la contraseña (sin cambios)
             const passwordIsValid = await bcrypt.compare(password, user.password_hash);
 
             if (!passwordIsValid) {
                 return { statusCode: 401, body: JSON.stringify({ message: "Invalid username or password." }) };
             }
 
-            // Paso 3: Si la contraseña es válida, creamos un token (el "pase VIP")
+            // Paso 3: Creamos el token incluyendo el ROL del usuario para usarlo en el frontend
             const token = jwt.sign(
-                { userId: user.id, username: user.username }, // Información dentro del token
-                process.env.JWT_SECRET, // La clave secreta para firmarlo
-                { expiresIn: '1d' } // El token caduca en 1 día
+                { 
+                    userId: user.id, 
+                    username: user.username,
+                    role: user.role // ¡Importante! Incluimos el rol en el "pase VIP"
+                },
+                process.env.JWT_SECRET,
+                { expiresIn: '1d' }
             );
             
-            // Paso 4: Devolvemos una respuesta de éxito con el token y los datos del usuario
+            // Paso 4: Devolvemos una respuesta de éxito con TODOS LOS DATOS del perfil
             return {
                 statusCode: 200,
                 body: JSON.stringify({ 
@@ -62,12 +64,15 @@ exports.handler = async (event) => {
                     token: token,
                     user: {
                         username: user.username,
-                        avatar: user.roblox_avatar_url // Aquí devolvemos el link del avatar
+                        avatar: user.roblox_avatar_url,
+                        // --- NUEVOS DATOS DEL PERFIL ---
+                        role: user.role,
+                        equippedTitle: user.equipped_title,
+                        unlockedTitles: user.unlocked_titles
                     }
                 })
             };
         } finally {
-            // Asegurarse de liberar la conexión a la BD
             client.release();
         }
     } catch (error) {

@@ -17,6 +17,7 @@
     grid-column: 2;
     padding: 0 40px 40px 40px;
     width: 100%;
+    position: relative; /* Necesario para el posicionamiento absoluto del menú desplegable */
 }
 
 .ad-sidebar {
@@ -25,8 +26,6 @@
     position: sticky; /* Las barras se quedan fijas al hacer scroll */
     top: 0;
     height: 100vh;
-    /* Podríamos añadir un fondo sutil para verlas durante el desarrollo */
-    /* background-color: rgba(0,0,0,0.1); */
 }
 
 .ad-sidebar-left {
@@ -41,7 +40,7 @@
 /* --- CABECERA REDISEÑADA --- */
 .main-header {
     display: grid;
-    /* Grid de 3 columnas para alinear logo, módulos y login */
+    /* Grid de 3 columnas para alinear logo, módulos y login/perfil */
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 20px;
@@ -55,14 +54,14 @@
 
 .logo {
     font-family: 'Anton', sans-serif;
-    font-size: 3.5em; /* Ligeramente más pequeño para un look más limpio */
+    font-size: 3em;
     text-align: center;
     text-transform: uppercase;
     background: linear-gradient(45deg, var(--light-green), var(--main-green));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 25px var(--main-green-transparent, rgba(45, 212, 191, 0.4));
+    text-shadow: 0 0 25px rgba(45, 212, 191, 0.4);
     margin: 0;
     padding: 0;
 }
@@ -70,17 +69,17 @@
 .top-ui-container {
     grid-column: 2;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start; /* Alinea los módulos a la izquierda */
     align-items: center;
-    gap: 20px;
+    gap: 15px;
     flex-wrap: wrap; /* Permite que se apilen en pantallas más pequeñas */
+    padding-left: 30px; /* Separación del logo */
 }
+
 .auth-container {
     grid-column: 3;
     display: flex;
     justify-content: flex-end;
-    position: relative; /* Añadido: Necesario para que z-index funcione */
-    z-index: 2;         /* Añadido: Pone este contenedor por encima de los demás */
 }
 
 
@@ -90,7 +89,7 @@
     font-size: 2.5em;
     color: var(--main-green);
     text-shadow: 0 0 10px rgba(45, 212, 191, 0.2);
-    margin: 60px 0 20px 0;
+    margin: 60px 0 10px 0;
     text-align: left;
 }
 
@@ -98,6 +97,12 @@
     margin-top: 0;
 }
 
+.section-subtitle {
+    color: var(--text-secondary);
+    margin: 0 0 30px 0;
+    font-size: 1.1em;
+    max-width: 800px; /* Para que no se haga muy ancho en pantallas grandes */
+}
 
 /* =================================================================================== */
 /* === ESTILOS RESPONSIVE === */
@@ -127,17 +132,27 @@
     }
 
     .main-header {
-        /* La cabecera se convierte en un layout de una columna, centrando todo */
-        grid-template-columns: 1fr;
-        gap: 25px;
-        margin-bottom: 20px;
+        /* Logo a la izquierda, perfil/menú a la derecha. Módulos abajo. */
+        grid-template-columns: 1fr auto;
+        gap: 20px;
     }
     
-    .logo-container,
-    .top-ui-container,
+    .logo-container {
+        grid-row: 1;
+        grid-column: 1;
+    }
+
+    .top-ui-container {
+        grid-row: 2;
+        grid-column: 1 / -1; /* Ocupa todo el ancho en la segunda fila */
+        justify-content: center;
+        padding-left: 0;
+        margin-top: 20px;
+    }
+    
     .auth-container {
-        grid-column: 1; /* Todos los elementos a la misma columna */
-        justify-content: center; /* Centramos el contenido */
+        grid-row: 1;
+        grid-column: 2;
     }
 }
 
@@ -149,16 +164,24 @@
     }
 
     .logo {
-        font-size: 2.8em;
+        font-size: 2.5em;
     }
 
     .section-title {
         font-size: 2em;
     }
-
-    #unit-converter {
+    
+    .top-ui-container {
         flex-direction: column;
         width: 100%;
         gap: 15px;
+    }
+
+    #unit-converter, #search-module {
+        width: 100%;
+    }
+
+    #unit-converter {
+        flex-direction: column;
     }
 }
