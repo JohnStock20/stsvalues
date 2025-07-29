@@ -76,10 +76,10 @@
                 <!-- Contenedor de Autenticación -->
                 <div class="auth-container">
                     <button id="login-nav-btn" class="nav-button">Login</button>
-                    <div id="user-profile-nav" class="user-profile-nav double-border" style="display: none;">
+                    <div id="user-profile-nav" class="user-profile-nav glow-border" style="display: none;">
                         <img id="user-avatar" src="images/placeholder.png" alt="User Avatar">
                         <div class="user-info">
-                            <span class="user-at">@</span><span id="user-name">Username</span>
+                            <span id="user-name">@Username</span>
                         </div>
                         <div class="dropdown-menu" style="display: none;">
                             <a href="#" id="logout-btn">Logout</a>
@@ -277,7 +277,7 @@
 
             // Asegura que el @ siempre esté delante del nombre, incluso si se actualiza dinámicamente
             window.setUserName = function(username) {
-                document.getElementById('user-name').textContent = username;
+                document.getElementById('user-name').textContent = '@' + username;
             }
             // Ejemplo de uso: window.setUserName('iciphy');
             // El @ siempre estará delante por estructura HTML
