@@ -31,47 +31,63 @@
     border-radius: var(--border-radius-md);
     background-color: var(--panel-bg);
     border: 1px solid var(--border-color);
+    /* Elimina el hover para el menú, ahora lo controla JS */
+}
+
+/* Doble borde y mejoras visuales */
+.user-profile-nav.double-border {
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 4px #222, 0 0 0 8px #fff;
+    border-radius: 16px;
+    padding: 6px 16px 6px 8px;
+    background: #222;
+    transition: box-shadow 0.2s;
+}
+.user-profile-nav.double-border.active,
+.user-profile-nav.double-border:hover {
+    box-shadow: 0 0 0 4px #fff, 0 0 0 8px #4e8cff;
 }
 
 .user-profile-nav #user-avatar {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    border: 2px solid var(--main-green);
+    border: 2px solid #4e8cff;
+    background: #fff;
 }
 
 .user-profile-nav #user-name {
     font-weight: bold;
+    color: #fff;
+    font-family: 'Roboto', sans-serif;
     font-size: 1.1em;
 }
 
+/* Menú dropdown: solo visible cuando JS añade display:block */
 .user-profile-nav .dropdown-menu {
-    display: none;
     position: absolute;
     top: 110%;
     right: 0;
-    background-color: var(--panel-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-lg);
-    z-index: 110;
-    overflow: hidden;
+    background: #222;
+    border: 2px solid #4e8cff;
+    border-radius: 10px;
+    min-width: 120px;
+    z-index: 10;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    display: none;
 }
 
-.user-profile-nav:hover .dropdown-menu {
+.user-profile-nav .dropdown-menu a {
     display: block;
+    color: #fff;
+    padding: 10px 16px;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.15s;
 }
-
-.dropdown-menu a {
-    display: block;
-    padding: 12px 20px;
-    color: var(--text-primary);
-    white-space: nowrap;
-}
-
-.dropdown-menu a:hover {
-    background-color: var(--main-green);
-    color: var(--dark-bg);
+.user-profile-nav .dropdown-menu a:hover {
+    background: #4e8cff;
+    color: #fff;
 }
 
 

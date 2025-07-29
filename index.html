@@ -76,10 +76,10 @@
                 <!-- Contenedor de Autenticación -->
                 <div class="auth-container">
                     <button id="login-nav-btn" class="nav-button">Login</button>
-                    <div id="user-profile-nav" class="user-profile-nav" style="display: none;">
+                    <div id="user-profile-nav" class="user-profile-nav double-border" style="display: none;">
                         <img id="user-avatar" src="images/placeholder.png" alt="User Avatar">
-                        <span id="user-name">Username</span>
-                        <div class="dropdown-menu">
+                        <span id="user-name">@Username</span>
+                        <div class="dropdown-menu" style="display: none;">
                             <a href="#" id="logout-btn">Logout</a>
                         </div>
                     </div>
@@ -245,5 +245,34 @@
 
     <!-- Carga del JS modular -->
     <script type="module" src="js/main.js"></script>
+    <script>
+        // Mostrar/ocultar el menú de logout al hacer clic en el perfil
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileNav = document.getElementById('user-profile-nav');
+            const dropdown = profileNav?.querySelector('.dropdown-menu');
+            let menuOpen = false;
+
+            if (profileNav && dropdown) {
+                profileNav.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    menuOpen = !menuOpen;
+                    dropdown.style.display = menuOpen ? 'block' : 'none';
+                    profileNav.classList.toggle('active', menuOpen);
+                });
+                // Cerrar el menú si se hace clic fuera
+                document.addEventListener('click', function(e) {
+                    if (menuOpen) {
+                        dropdown.style.display = 'none';
+                        profileNav.classList.remove('active');
+                        menuOpen = false;
+                    }
+                });
+                // Evitar que el menú se cierre al hacer clic dentro
+                dropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+        });
+    </script>
 </body>
 </html>
