@@ -5,16 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STS Values</title>
     
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     
+    <!-- Modular CSS -->
     <link rel="stylesheet" href="css/global.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/calculator.css">
     <link rel="stylesheet" href="css/auth.css">
 
+    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4YY08MDW4M"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -27,19 +30,24 @@
 
     <div class="site-wrapper">
 
+        <!-- Left sidebar for Giveaways -->
         <aside class="ad-sidebar ad-sidebar-left" id="giveaway-left-sidebar">
-            <!-- Giveaways sidebar content injected by JS -->
+            <!-- Content will be injected by JS -->
         </aside>
 
+        <!-- Main Content Wrapper -->
         <div class="main-content-wrapper">
             
+            <!-- Redesigned Header -->
             <header class="main-header">
-                <div class="logo-container"><h1 class="logo">STS Values</h1></div>
+                <div class="logo-container">
+                    <h1 class="logo">STS Values</h1>
+                </div>
 
                 <div class="top-ui-container">
                     <div id="unit-converter" class="top-ui-module">
                         <div id="converter-from-wrapper" class="currency-selector-wrapper">
-                            <input type="text" id="converter-from-input" class="converter-input" placeholder="Enter value...">
+                            <input type="text" id="converter-from-input" class="converter-input" placeholder="Enter a value...">
                             <img id="converter-from-icon" class="converter-icon">
                             <span id="converter-from-name" class="converter-currency-name"></span>
                         </div>
@@ -56,8 +64,11 @@
                     </div>
                 </div>
 
+                <!-- Authentication and Profile Container -->
                 <div class="auth-container">
                     <button id="login-nav-btn" class="nav-button">Login</button>
+                    
+                    <!-- User Profile - Hidden by default -->
                     <div id="user-profile-nav" class="user-profile-nav" style="display: none;">
                         <img id="user-avatar" src="images/placeholder.png" alt="User Avatar">
                         <div class="user-info">
@@ -65,11 +76,13 @@
                             <span id="user-title" class="profile-title">Player</span>
                         </div>
                         <div class="menu-icon" id="hamburger-menu">
-                            <span></span><span></span><span></span>
+                            <span></span>
+                            <span></span>
+                            <span></span>
                         </div>
                     </div>
                 </div>
-
+                 <!-- Main Navigation Dropdown - Hidden by default -->
                 <nav id="main-nav-dropdown" class="main-nav-dropdown">
                     <a href="#" class="nav-link" data-view="main">Main Page</a>
                     <a href="#" class="nav-link" data-view="titles">Titles</a>
@@ -82,6 +95,9 @@
             </header>
 
             <main>
+                <!-- ========================================================== -->
+                <!-- === MAIN PAGE VIEW (Cases & Swords) === -->
+                <!-- ========================================================== -->
                 <div id="main-view">
                     <div id="case-selection-view">
                         <h2 class="section-title">~CASES~</h2>
@@ -93,60 +109,71 @@
                             <button id="other-next-btn">→</button>
                         </div>
                     </div>
+
                     <div id="case-details-view" style="display:none;">
-                        <!-- Case details content, already functional -->
+                        <!-- Content remains the same, will be controlled by JS -->
                     </div>
+
                     <div id="sword-details-view" style="display:none;">
-                        <!-- Sword details content, already functional -->
+                       <!-- Content remains the same, will be controlled by JS -->
                     </div>
                 </div>
 
+                <!-- ========================================================== -->
+                <!-- === NEW VIEWS (Hidden by default) === -->
+                <!-- ========================================================== -->
+
+                <!-- Titles View -->
                 <div id="titles-view" class="main-view-panel" style="display: none;">
                     <h2 class="section-title">~TITLES~</h2>
-                    <p class="section-subtitle">Select a title to display on your profile. Unlock more by participating in the community!</p>
-                    <div id="titles-list-container" class="titles-grid"></div>
+                    <p class="section-subtitle">Select a title to display on your profile. Unlock more by playing and participating in the community!</p>
+                    <div id="titles-list-container" class="titles-grid">
+                        <!-- Titles will be injected here by JS -->
+                    </div>
                 </div>
 
-                <!-- NUEVO: Contenedor para la página de Giveaways -->
+                <!-- Giveaways View -->
                 <div id="giveaways-view" class="main-view-panel" style="display: none;">
+                    <h2 class="section-title">~GIVEAWAYS~</h2>
                     <div id="giveaway-creation-container" style="display: none;">
-                        <!-- Admin giveaway creation form injected by JS -->
+                        <!-- Giveaway creation form for admins/testers here -->
                     </div>
-                    <div id="giveaway-public-container">
-                        <!-- Public giveaway view injected by JS -->
+                    <div id="active-giveaway-container">
+                        <!-- Active giveaway display for all users here -->
                     </div>
                 </div>
-                
+
+                <!-- Developer Tools View -->
                 <div id="devtools-view" class="main-view-panel" style="display: none;">
-                    <!-- Admin tools injected by JS -->
+                    <h2 class="section-title">~DEVELOPER TOOLS~</h2>
+                    <!-- Admin tools will be injected here -->
                 </div>
+
             </main>
         </div>
 
+        <!-- Right sidebar for Giveaway Participants -->
         <aside class="ad-sidebar ad-sidebar-right" id="giveaway-right-sidebar">
-            <!-- Giveaway participants sidebar content injected by JS -->
+            <!-- Content will be injected by JS -->
         </aside>
     </div>
 
-    <!-- Modals de Autenticación (sin cambios) -->
+    <!-- Auth Modals remain the same, controlled by JS -->
     <div id="auth-modal-overlay" class="auth-modal-overlay" style="display: none;">
-        <div id="login-modal" class="auth-modal"></div>
-        <div id="register-modal-step1" class="auth-modal" style="display: none;"></div>
-        <div id="register-modal-step2" class="auth-modal" style="display: none;"></div>
-    </div>
-
-    <!-- NUEVO: Modal para selección de premios -->
-    <div id="prize-modal-overlay" class="auth-modal-overlay" style="display:none;">
-        <div id="prize-selection-modal" class="auth-modal">
-            <button class="close-modal-btn">×</button>
-            <h2>Select a Prize</h2>
-            <div id="prize-search-module" class="top-ui-module">
-                <input type="text" id="prize-search-bar" placeholder="Search for a sword...">
-                <div id="prize-search-results"></div>
-            </div>
+        <!-- Login Modal -->
+        <div id="login-modal" class="auth-modal">
+            <!-- Content remains the same -->
+        </div>
+        <!-- Register Modals -->
+        <div id="register-modal-step1" class="auth-modal" style="display: none;">
+            <!-- Content remains the same -->
+        </div>
+        <div id="register-modal-step2" class="auth-modal" style="display: none;">
+            <!-- Content remains the same -->
         </div>
     </div>
-
+    
+    <!-- JS Modules -->
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
