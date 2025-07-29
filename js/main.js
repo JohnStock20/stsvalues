@@ -208,5 +208,14 @@ function initializeApp() {
     console.log("STS Values App Initialized Correctly!");
 }
 
+// Sobrescribe o refuerza la función para mostrar el nombre de usuario con @
+window.setUserName = function(username) {
+    if (!username.startsWith('@')) {
+        document.getElementById('user-name').textContent = '@' + username;
+    } else {
+        document.getElementById('user-name').textContent = username;
+    }
+}
+
 // Punto de entrada: ejecutar todo cuando el DOM esté listo.
 document.addEventListener('DOMContentLoaded', initializeApp);
