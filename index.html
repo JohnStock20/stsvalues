@@ -78,7 +78,9 @@
                     <button id="login-nav-btn" class="nav-button">Login</button>
                     <div id="user-profile-nav" class="user-profile-nav double-border" style="display: none;">
                         <img id="user-avatar" src="images/placeholder.png" alt="User Avatar">
-                        <span id="user-name">@Username</span>
+                        <div class="user-info">
+                            <span class="user-at">@</span><span id="user-name">Username</span>
+                        </div>
                         <div class="dropdown-menu" style="display: none;">
                             <a href="#" id="logout-btn">Logout</a>
                         </div>
@@ -272,6 +274,13 @@
                     e.stopPropagation();
                 });
             }
+
+            // Asegura que el @ siempre esté delante del nombre, incluso si se actualiza dinámicamente
+            window.setUserName = function(username) {
+                document.getElementById('user-name').textContent = username;
+            }
+            // Ejemplo de uso: window.setUserName('iciphy');
+            // El @ siempre estará delante por estructura HTML
         });
     </script>
 </body>
