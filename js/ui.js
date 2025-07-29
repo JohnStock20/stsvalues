@@ -1,13 +1,14 @@
 // =================================================================================
-// ARCHIVO: ui.js (Controlador de la Interfaz de Usuario)
+// ARCHIVO: ui.js (Controlador de la Interfaz de Usuario) - VERSIÓN CORREGIDA
 // =================================================================================
 
-import { appData } from './data.js';
+import { appData, parseValue } from './data.js';
 import { findSwordById, formatLargeNumber, formatTimeAgo, getPrizeItemHtml } from './utils.js';
-import { titleStyles } from './auth.js'; // Importamos los estilos de título
+import { titleStyles } from './auth.js';
 
 // --- Selectores del DOM ---
-const dom = {
+// FIX: Exportamos el objeto 'dom' para que sea accesible desde otros módulos como main.js
+export const dom = {
     // Vistas principales
     views: {
         cases: document.getElementById('cases-view'),
@@ -252,8 +253,10 @@ export function renderTitlesPage(titlesData, selectedKey, onSelect, onEquip) {
         const nameStyle = nameClass === 'title-name gradient' ? `style="background-image: ${styleInfo.style};"` : `style="color: ${styleInfo.style};"`;
         
         item.innerHTML = `
-            <span class="${nameClass}" ${nameStyle}>${styleInfo.text}</span>
-            ${!title.unlocked ? '<span class="lock-icon">🔒</span>' : ''}
+            <div class="title-list-item-content">
+                <span class="${nameClass}" ${nameStyle}>${styleInfo.text}</span>
+                ${!title.unlocked ? '<span class="lock-icon">🔒</span>' : ''}
+            </div>
         `;
         dom.containers.titlesList.appendChild(item);
     });
@@ -299,7 +302,6 @@ export function renderGiveawayPage(giveaways, currentUser, onJoin, onHost) {
     renderUpcomingGiveaways(upcomingGiveaways);
     renderParticipants(activeGiveaway ? activeGiveaway.participants : []);
     
-    // Botón de hostear
     dom.containers.hostGiveawayBtn.innerHTML = '';
     if (currentUser && ['owner', 'tester'].includes(currentUser.role)) {
         const hostBtn = document.createElement('button');
@@ -359,7 +361,7 @@ function renderUpcomingGiveaways(giveaways) {
     giveaways.slice(0, 5).forEach(gw => {
         const prizeText = gw.prize_pool.map(p => {
              const amount = formatLargeNumber(p.amount);
-             const name = p.type === 'currency' ? appData.currencies[p.id]?.name : findSwordById(p.id)?.sword.name;
+             const name = p.type === 'currency' ? (appData.currencies[p.id] ? appData.currencies[p.id].name : p.id) : (findSwordById(p.id) ? findSwordById(p.id).sword.name : p.id);
              return `${amount > 1 ? `${amount}x ` : ''}${name}`;
         }).join(' + ');
         list.innerHTML += `

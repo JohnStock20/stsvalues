@@ -1,8 +1,8 @@
 // =================================================================================
-// ARCHIVO: main.js (NUEVO CEREBRO DE LA APLICACIÓN)
+// ARCHIVO: main.js (NUEVO CEREBRO DE LA APLICACIÓN) - VERSIÓN CORREGIDA
 // =================================================================================
 
-// --- MÓDULOS ---
+// --- MÓDulos ---
 import { appData, parseValue } from './data.js';
 import { findSwordById, getPrizeItemHtml } from './utils.js';
 import * as UI from './ui.js';
@@ -19,12 +19,15 @@ let selectedTitleKey = null; // Para la página de títulos
 const appState = {
     currentPage: 1,
     itemsPerPage: 10,
+    // FIX: Inicializamos el estado de la vista actual para evitar errores
+    currentNavigationView: { view: 'cases', id: null, type: 'cases' }
 };
 
 // --- GESTIÓN DE VISTAS Y NAVEGACIÓN ---
 
 function navigateToView(viewName) {
     UI.showView(viewName);
+    appState.currentNavigationView = { view: viewName, id: null, type: viewName };
 
     if (viewName === 'titles') {
         loadAndRenderTitles();
@@ -40,17 +43,19 @@ function navigateToView(viewName) {
 }
 
 function navigateToSubView(view, data) {
-    // Limpiar intervalos de actualización de espada si existen
     if (window.swordUpdateInterval) clearInterval(window.swordUpdateInterval);
+
+    // FIX: Guardamos el contexto de la vista *actual* ANTES de navegar a la nueva.
+    navigationContext = { ...appState.currentNavigationView };
+    
+    // Actualizamos la vista actual en el estado global
+    appState.currentNavigationView = { view, id: data, type: view === 'caseDetails' ? 'case' : 'sword' };
 
     switch (view) {
         case 'caseDetails':
-            navigationContext = { view: 'cases', id: null, type: 'cases' };
             UI.renderCaseDetails(data, navigateToSubView);
             break;
         case 'swordDetails':
-            // Guardamos el contexto actual ANTES de navegar a los detalles
-            navigationContext = { ...appState.currentNavigationView };
             UI.renderSwordDetails(data.sword, data.source, navigateToSubView, (intervalId) => {
                 window.swordUpdateInterval = intervalId;
             });
@@ -61,8 +66,6 @@ function navigateToSubView(view, data) {
             UI.showView('cases');
             break;
     }
-    // Actualizamos la vista actual en el estado global
-    appState.currentNavigationView = { view, id: data, type: view === 'caseDetails' ? 'case' : 'sword' };
 }
 
 
@@ -81,7 +84,6 @@ async function loadAndRenderTitles() {
         if (!response.ok) throw new Error('Failed to fetch titles');
         const titlesData = await response.json();
         
-        // El primer título desbloqueado es el seleccionado por defecto
         const defaultSelected = titlesData.find(t => t.equipped) || titlesData.find(t => t.unlocked);
         selectedTitleKey = defaultSelected ? defaultSelected.key : null;
 
@@ -89,13 +91,14 @@ async function loadAndRenderTitles() {
 
     } catch (e) {
         console.error("Error loading titles:", e);
-        document.getElementById('titles-list-container').innerHTML = `<p class="error-message" style="display:block;">Could not load titles.</p>`;
+        UI.dom.containers.titlesList.innerHTML = `<p class="error-message" style="display:block;">Could not load titles.</p>`;
     }
 }
 
 function handleTitleSelection(newKey) {
     selectedTitleKey = newKey;
-    loadAndRenderTitles(); // Recarga todo para actualizar la vista
+    // La UI se actualiza sin necesidad de volver a llamar a la API
+    loadAndRenderTitles();
 }
 
 async function handleTitleEquip(newTitleKey) {
@@ -109,12 +112,12 @@ async function handleTitleEquip(newTitleKey) {
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
         
-        // Actualizar el usuario localmente
         currentUser.equippedTitle = result.equippedTitle;
         localStorage.setItem('sts-user', JSON.stringify(currentUser));
         
-        // Actualizar UI
-        initializeAuth(onLoginSuccess); // Llama a la función de auth para refrescar el header
+        // Llamada a la función específica de auth para actualizar solo el header
+        initializeAuth(onLoginSuccess);
+        // Volver a cargar los títulos para mostrar el estado "Equipped"
         loadAndRenderTitles();
 
     } catch (e) {
@@ -157,10 +160,9 @@ async function handleGrantTitle(targetUsername, titleKey) {
 async function fetchGiveaways() {
     try {
         const response = await fetch('/.netlify/functions/giveaways-manager');
-        if (!response.ok) throw new Error('Failed to fetch giveaways');
+        if (!response.ok) return; // No hacer nada si falla la petición
         activeGiveaways = await response.json();
         
-        // Si el usuario está en la página de giveaways, la volvemos a renderizar
         if (document.getElementById('giveaways-view').style.display === 'block') {
             UI.renderGiveawayPage(activeGiveaways, currentUser, handleJoinGiveaway, openCreateGiveawayModal);
         }
@@ -178,8 +180,10 @@ function startTimer() {
             const distance = endTime - now;
 
             if (distance < 0) {
-                el.textContent = "Giveaway Ended";
-                // Podríamos llamar a fetchGiveaways() aquí para actualizar al finalizar
+                if (el.textContent !== "Giveaway Ended") {
+                    el.textContent = "Giveaway Ended";
+                    fetchGiveaways(); // Actualiza la lista cuando un sorteo termina
+                }
                 return;
             }
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
@@ -251,7 +255,7 @@ function setupGiveawayModal() {
             prizeIdContainer.innerHTML = `
                 <input type="text" id="prize-id-search" placeholder="Search for a sword..." autocomplete="off">
                 <input type="hidden" id="prize-id">
-                <div id="prize-search-results-modal" class="search-results-modal"></div>`;
+                <div id="prize-search-results-modal" style="position: absolute; background: var(--panel-bg); border: 1px solid var(--border-color); z-index: 1002; width: 100%; display: none;"></div>`;
             
             const searchInput = document.getElementById('prize-id-search');
             const hiddenInput = document.getElementById('prize-id');
@@ -261,7 +265,7 @@ function setupGiveawayModal() {
                 const query = searchInput.value.toLowerCase();
                 if (!query) { resultsContainer.style.display = 'none'; return; }
                 const filtered = allSwords.filter(s => s.name.toLowerCase().includes(query)).slice(0, 5);
-                resultsContainer.innerHTML = filtered.map(s => `<div data-id="${s.id}" data-name="${s.name}">${s.name}</div>`).join('');
+                resultsContainer.innerHTML = filtered.map(s => `<div data-id="${s.id}" data-name="${s.name}" style="padding: 10px; cursor: pointer;">${s.name}</div>`).join('');
                 resultsContainer.style.display = 'block';
             });
             resultsContainer.addEventListener('click', (e) => {
@@ -355,20 +359,17 @@ async function handleCreateGiveaway(event) {
 
 function onLoginSuccess(loggedInUser) {
     currentUser = loggedInUser;
-    // Vuelve a renderizar la vista actual por si depende del estado de login
-    const currentView = Object.keys(UI.dom.views).find(key => UI.dom.views[key].style.display === 'block') || 'cases';
-    navigateToView(currentView);
+    const currentViewKey = Object.keys(UI.dom.views).find(key => UI.dom.views[key].style.display === 'block') || 'cases';
+    navigateToView(currentViewKey);
 }
 
 function initializeApp() {
     initializeAuth(onLoginSuccess);
     
-    // Iniciar fetching de giveaways y el timer
     fetchGiveaways();
     giveawayUpdateInterval = setInterval(fetchGiveaways, 30000); // Actualizar cada 30 segundos
     startTimer();
 
-    // Setup de la navegación principal
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', (e) => {
             if (e.target.classList.contains('disabled')) return;
@@ -379,17 +380,19 @@ function initializeApp() {
         });
     });
 
-    // Setup de los botones "Back"
-    UI.dom.buttons.backToCases.addEventListener('click', () => navigateToView('cases'));
+    UI.dom.buttons.backToCases.addEventListener('click', () => navigateToSubView('cases'));
     UI.dom.buttons.backToSwordList.addEventListener('click', () => {
-        if (navigationContext.view === 'caseDetails') {
-            navigateToSubView('caseDetails', navigationContext.id);
+        if (navigationContext && navigationContext.view) {
+            if(navigationContext.type === 'case') {
+                 navigateToSubView('caseDetails', navigationContext.id);
+            } else {
+                 navigateToSubView('cases');
+            }
         } else {
-            navigateToView('cases');
+            navigateToSubView('cases');
         }
     });
 
-    // Setup de la paginación
     UI.dom.buttons.prevPage.addEventListener('click', () => {
         if (appState.currentPage > 1) {
             appState.currentPage--;
@@ -404,7 +407,6 @@ function initializeApp() {
         }
     });
 
-    // Setup del modal de creación de sorteos
     setupGiveawayModal();
     UI.dom.modals.closeGiveaway.addEventListener('click', UI.closeGiveawayModal);
     UI.dom.modals.createGiveaway.addEventListener('click', (e) => {
@@ -412,7 +414,6 @@ function initializeApp() {
     });
     document.getElementById('giveaway-creation-form').addEventListener('submit', handleCreateGiveaway);
 
-    // Renderizado inicial
     UI.renderCaseSelection(navigateToSubView);
     UI.renderOtherSwords(appState, navigateToSubView);
     navigateToView('cases');
