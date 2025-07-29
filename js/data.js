@@ -64,7 +64,7 @@ export const currencyTiers = {
     ]
 };
 
-const appData = {
+export const appData = {
     currencies: {
         "time": { name: "Time", icon: null },
         "diamonds": { name: "Diamonds", icon: "images/diamonds.png" },
