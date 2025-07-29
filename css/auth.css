@@ -31,104 +31,47 @@
     border-radius: var(--border-radius-md);
     background-color: var(--panel-bg);
     border: 1px solid var(--border-color);
-    /* Elimina el hover para el menú, ahora lo controla JS */
-}
-
-/* Quita el doble borde anterior y usa glow-border */
-.user-profile-nav {
-    border: none;
-    background: transparent;
-    min-width: 260px;
-    min-height: 56px;
-    padding: 0;
-    box-shadow: none;
-    justify-content: flex-start;
-    gap: 16px;
-}
-
-.user-profile-nav.glow-border {
-    padding: 10px 36px 10px 18px;
-    background: #181b20;
-    border-radius: 16px;
-    min-width: 260px;
-    min-height: 56px;
-    box-shadow: 0 0 16px 2px #4e8cff, 0 0 0 2px #222 inset;
-    border: 2px solid #4e8cff;
-    transition: box-shadow 0.2s, border-color 0.2s;
-}
-
-.user-profile-nav.glow-border.active,
-.user-profile-nav.glow-border:hover {
-    box-shadow: 0 0 24px 4px #4e8cff, 0 0 0 2px #222 inset;
-    border-color: #7fd7ff;
 }
 
 .user-profile-nav #user-avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    border: 2px solid #4e8cff;
-    background: #fff;
-}
-
-.user-profile-nav .user-info {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 1.18em;
-    font-family: 'Roboto', sans-serif;
-    color: #fff;
-    font-weight: bold;
-    letter-spacing: 0.5px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.user-profile-nav .user-at {
-    color: #fff;
-    font-weight: bold;
-    font-size: 1.1em;
-    margin-right: 2px;
+    border: 2px solid var(--main-green);
 }
 
 .user-profile-nav #user-name {
-    color: #fff;
     font-weight: bold;
     font-size: 1.1em;
-    font-family: 'Roboto', sans-serif;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 120px;
-    display: inline-block;
-    vertical-align: middle;
 }
 
-/* Menú dropdown: solo visible cuando JS añade display:block */
 .user-profile-nav .dropdown-menu {
+    display: none;
     position: absolute;
     top: 110%;
     right: 0;
-    background: #222;
-    border: 2px solid #4e8cff;
-    border-radius: 10px;
-    min-width: 120px;
-    z-index: 10;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-    display: none;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 110;
+    overflow: hidden;
 }
 
-.user-profile-nav .dropdown-menu a {
+.user-profile-nav:hover .dropdown-menu {
     display: block;
-    color: #fff;
-    padding: 10px 16px;
-    text-decoration: none;
-    border-radius: 8px;
-    transition: background 0.15s;
 }
-.user-profile-nav .dropdown-menu a:hover {
-    background: #4e8cff;
-    color: #fff;
+
+.dropdown-menu a {
+    display: block;
+    padding: 12px 20px;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.dropdown-menu a:hover {
+    background-color: var(--main-green);
+    color: var(--dark-bg);
 }
 
 
