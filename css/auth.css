@@ -1,117 +1,117 @@
-/* =================================================================================
-   ARCHIVO: auth.css
-   Estilos para los modales de login/registro y el perfil de usuario.
-   ================================================================================= */
+/*
+=======================================================================
+==========
+ ARCHIVO: auth.css
+ Estilos para los modales de login/registro y el perfil de usuario.
+ 
+=======================================================================
+========== */
 
 /* --- BOTÓN DE LOGIN Y PERFIL DE USUARIO --- */
 .nav-button {
-    background-color: var(--main-green);
-    color: var(--dark-bg);
-    border: none;
-    padding: 10px 25px;
-    font-size: 1.1em;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: var(--border-radius-md);
-    transition: var(--transition-fast);
+	background-color: var(--main-green);
+	color: var(--dark-bg);
+	border: none;
+	padding: 10px 25px;
+	font-size: 1.1em;
+	font-weight: bold;
+	cursor: pointer;
+	border-radius: var(--border-radius-md);
+	transition: var(--transition-fast);
 }
 .nav-button:hover {
-    filter: brightness(1.1);
-    box-shadow: var(--shadow-md);
+	filter: brightness(1.1);
+	box-shadow: var(--shadow-md);
 }
 
+/* CONTENEDOR DEL PERFIL DE USUARIO CON DOBLE BORDE */
 .user-profile-nav {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 8px;
-    border-radius: var(--border-radius-lg);
-    background-color: transparent;
-    border: none;
-    transition: var(--transition-fast);
+    background-color: transparent; /* El fondo lo manejan los pseudo-elementos */
+    border: none; /* El borde lo manejan los pseudo-elementos */
     cursor: pointer;
+    transition: var(--transition-fast);
     overflow: hidden;
+    padding: 2px; /* Espacio para el borde exterior */
+    border-radius: var(--border-radius-lg);
+    background: var(--border-gradient, var(--main-green)); /* Borde exterior dinámico */
 }
-/* Doble borde para el perfil */
-.user-profile-nav::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 3px; /* Grosor del borde */
-    background: var(--border-gradient, var(--main-green));
-    -webkit-mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-            mask-composite: exclude;
-    z-index: 0;
+
+/* Contenido interior que crea el "segundo borde" */
+.user-profile-nav-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 8px; /* Padding reducido para el contenido */
+    border-radius: var(--border-radius-md);
+    background-color: var(--panel-bg);
+    width: 100%;
+    height: 100%;
     transition: var(--transition-fast);
 }
-.user-profile-nav::after {
-    content: '';
-    position: absolute;
-    inset: 3px;
-    background-color: var(--panel-bg);
-    border-radius: var(--border-radius-md);
-    z-index: 0;
-}
-.user-profile-nav > * {
-    position: relative;
-    z-index: 1;
-}
-.user-profile-nav:hover::before {
-    filter: brightness(1.2);
+
+.user-profile-nav:hover {
+    transform: translateY(-2px);
+    --glow-color: var(--border-gradient, var(--main-green));
+    box-shadow: 0 0 15px -2px var(--glow-color);
 }
 
 .user-profile-nav #user-avatar {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    border: 2px solid var(--dark-bg);
-    object-fit: cover;
+	width: 45px;
+	height: 45px;
+	border-radius: 50%;
+	border: 2px solid var(--dark-bg);
+	object-fit: cover;
+    z-index: 1;
 }
+
 .user-info {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+    z-index: 1;
 }
+
 #user-name {
-    font-weight: bold;
-    font-size: 1.1em;
-    line-height: 1.2;
+	font-weight: bold;
+	font-size: 1.1em;
+	line-height: 1.2;
 }
+
 #user-title {
-    font-size: 0.9em;
-    font-weight: bold;
-    color: var(--title-player-color);
+	font-size: 0.9em;
+	font-weight: bold;
+	color: var(--title-player-color);
 }
+
 #user-title.gradient {
-    background-clip: text;
-    -webkit-background-clip: text;
-    color: transparent;
-    -webkit-text-fill-color: transparent;
+	background-clip: text;
+	-webkit-background-clip: text;
+	color: transparent;
+	-webkit-text-fill-color: transparent;
 }
 
 
 /* --- ICONO DE MENÚ (HAMBURGER) --- */
 .menu-icon {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    width: 28px;
-    height: 22px;
-    cursor: pointer;
-    margin-left: 10px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	width: 28px;
+	height: 22px;
+	cursor: pointer;
+	margin-left: 10px;
+    z-index: 1;
 }
 .menu-icon span {
-    width: 100%;
-    height: 3px;
-    background-color: var(--text-primary);
-    border-radius: 2px;
-    transition: var(--transition-normal);
-    transform-origin: center;
+	width: 100%;
+	height: 3px;
+	background-color: var(--text-primary);
+	border-radius: 2px;
+	transition: var(--transition-normal);
+	transform-origin: center;
 }
 .menu-icon.open span:nth-child(1) { transform: translateY(9.5px) rotate(45deg); }
 .menu-icon.open span:nth-child(2) { opacity: 0; }
@@ -120,186 +120,217 @@
 
 /* --- MENÚ DESPLEGABLE PRINCIPAL --- */
 .main-nav-dropdown {
-    position: absolute;
-    top: calc(100% + 10px);
-    right: 0;
-    background-color: var(--panel-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius-md);
-    box-shadow: var(--shadow-lg);
-    z-index: 1000;
-    overflow: hidden;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-10px);
-    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
-    min-width: 200px;
+	position: absolute;
+	top: calc(100% + 10px);
+	right: 0;
+	background-color: var(--panel-bg);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md);
+	box-shadow: var(--shadow-lg);
+	z-index: 1000;
+	overflow: hidden;
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(-10px);
+	transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+	min-width: 200px;
 }
-.main-nav-dropdown.visible {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-.main-nav-dropdown .nav-link { display: block; padding: 12px 25px; color: var(--text-primary); font-weight: 500; white-space: nowrap; border-bottom: 1px solid var(--border-color); transition: var(--transition-fast); }
-.main-nav-dropdown .nav-link:last-child { border-bottom: none; }
-.main-nav-dropdown .nav-link:hover { background-color: var(--main-green); color: var(--dark-bg); }
-.main-nav-dropdown .nav-link.logout { color: var(--text-danger); font-weight: bold; }
-.main-nav-dropdown .nav-link.logout:hover { background-color: var(--text-danger); color: var(--text-primary); }
-.main-nav-dropdown .nav-link.disabled { color: var(--text-secondary); cursor: not-allowed; background-color: transparent !important; opacity: 0.5; }
 
+.main-nav-dropdown.visible {
+	opacity: 1;
+	visibility: visible;
+	transform: translateY(0);
+}
+
+.main-nav-dropdown .nav-link { display: block; padding: 12px 25px;
+color: var(--text-primary); font-weight: 500; white-space: nowrap;
+border-bottom: 1px solid var(--border-color); transition:
+var(--transition-fast); }
+.main-nav-dropdown .nav-link:last-child { border-bottom: none; }
+.main-nav-dropdown .nav-link:hover { background-color:
+var(--main-green); color: var(--dark-bg); }
+.main-nav-dropdown .nav-link.logout { color: var(--text-danger);
+font-weight: bold; }
+.main-nav-dropdown .nav-link.logout:hover { background-color:
+var(--text-danger); color: var(--text-primary); }
+.main-nav-dropdown .nav-link.disabled { color: var(--text-secondary);
+cursor: not-allowed; background-color: transparent !important; opacity:
+0.5; }
 
 /* --- MODAL Y OVERLAY --- */
 .auth-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    -webkit-backdrop-filter: blur(5px);
-    backdrop-filter: blur(5px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1001;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.8);
+	-webkit-backdrop-filter: blur(5px);
+	backdrop-filter: blur(5px);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1001;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.3s ease, visibility 0.3s ease;
 }
+
 .auth-modal-overlay.visible {
-    opacity: 1;
-    visibility: visible;
+	opacity: 1;
+	visibility: visible;
 }
+
 .auth-modal {
-    background-color: var(--panel-bg);
-    padding: 30px;
-    border-radius: var(--border-radius-lg);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-lg);
-    width: 100%;
-    max-width: 450px;
-    position: relative;
-    transform: scale(0.95);
-    transition: transform 0.3s ease;
+	background-color: var(--panel-bg);
+	padding: 30px;
+	border-radius: var(--border-radius-lg);
+	border: 1px solid var(--border-color);
+	box-shadow: var(--shadow-lg);
+	width: 100%;
+	max-width: 450px;
+	position: relative;
+	transform: scale(0.95);
+	transition: transform 0.3s ease;
 }
+
 .auth-modal-overlay.visible .auth-modal {
-    transform: scale(1);
+	transform: scale(1);
 }
+
 .close-modal-btn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    background: none;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 2em;
-    cursor: pointer;
-    line-height: 1;
-    transition: var(--transition-fast);
+	position: absolute;
+	top: 10px;
+	right: 15px;
+	background: none;
+	border: none;
+	color: var(--text-secondary);
+	font-size: 2em;
+	cursor: pointer;
+	line-height: 1;
+	transition: var(--transition-fast);
 }
 .close-modal-btn:hover {
-    color: var(--text-primary);
+	color: var(--text-primary);
 }
 
 
 /* --- FORMULARIOS DE AUTENTICACIÓN --- */
-.auth-modal h2 { text-align: center; color: var(--main-green); margin-top: 0; margin-bottom: 25px; }
+.auth-modal h2 { text-align: center; color: var(--main-green);
+margin-top: 0; margin-bottom: 25px; }
 .auth-modal form { display: flex; flex-direction: column; gap: 15px; }
-.auth-modal input[type="text"], .auth-modal input[type="password"], .auth-modal select {
-    background-color: var(--dark-bg);
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    padding: 14px;
-    font-size: 1.1em;
-    border-radius: var(--border-radius-md);
-    transition: var(--transition-fast);
-    width: 100%; /* Asegurar que ocupe todo el ancho */
+.auth-modal input[type="text"], .auth-modal input[type="password"],
+.auth-modal select {
+	background-color: var(--dark-bg);
+	border: 1px solid var(--border-color);
+	color: var(--text-primary);
+	padding: 14px;
+	font-size: 1.1em;
+	border-radius: var(--border-radius-md);
+	transition: var(--transition-fast);
+	width: 100%; /* Asegurar que ocupe todo el ancho */
 }
 .auth-modal input:focus, .auth-modal select:focus {
-    outline: none;
-    border-color: var(--main-green);
+	outline: none;
+	border-color: var(--main-green);
 }
+
 .auth-button {
-    background-color: var(--main-green);
-    color: var(--dark-bg);
-    border: none;
-    padding: 14px;
-    font-size: 1.2em;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: var(--border-radius-md);
-    transition: var(--transition-fast);
-    margin-top: 10px;
+	background-color: var(--main-green);
+	color: var(--dark-bg);
+	border: none;
+	padding: 14px;
+	font-size: 1.2em;
+	font-weight: bold;
+	cursor: pointer;
+	border-radius: var(--border-radius-md);
+	transition: var(--transition-fast);
+	margin-top: 10px;
 }
 .auth-button:hover { filter: brightness(1.1); }
-.auth-button:disabled { background-color: var(--border-color); cursor: not-allowed; }
+.auth-button:disabled { background-color: var(--border-color); cursor:
+not-allowed; }
+
 .error-message {
-    color: var(--insane);
-    background-color: rgba(244, 63, 94, 0.1);
-    border: 1px solid var(--insane);
-    padding: 10px;
-    border-radius: var(--border-radius-md);
-    text-align: center;
-    font-size: 0.9em;
-    display: none; /* Se muestra con JS */
+	color: var(--insane);
+	background-color: rgba(244, 63, 94, 0.1);
+	border: 1px solid var(--insane);
+	padding: 10px;
+	border-radius: var(--border-radius-md);
+	text-align: center;
+	font-size: 0.9em;
+	display: none; /* Se muestra con JS */
 }
+
 .feedback-message {
-    margin-top: 15px;
-    padding: 10px;
-    border-radius: var(--border-radius-md);
-    text-align: center;
-    font-weight: bold;
-    display: none; /* Oculto por defecto, se muestra con JS */
+	margin-top: 15px;
+	padding: 10px;
+	border-radius: var(--border-radius-md);
+	text-align: center;
+	font-weight: bold;
+	display: none; /* Oculto por defecto, se muestra con JS */
 }
 .feedback-message.success {
-    background-color: rgba(74, 222, 128, 0.1);
-    border: 1px solid var(--common);
-    color: var(--common);
+	background-color: rgba(74, 222, 128, 0.1);
+	border: 1px solid var(--common);
+	color: var(--common);
 }
 .feedback-message.error {
-    background-color: rgba(244, 63, 94, 0.1);
-    border: 1px solid var(--insane);
-    color: var(--insane);
+	background-color: rgba(244, 63, 94, 0.1);
+	border: 1px solid var(--insane);
+	color: var(--insane);
 }
-.auth-switch { text-align: center; color: var(--text-secondary); margin-top: 15px; }
+
+.auth-switch { text-align: center; color: var(--text-secondary);
+margin-top: 15px; }
 .auth-switch a { font-weight: bold; color: var(--main-green); }
 .g-recaptcha { margin: 10px auto; }
-.verification-steps { padding-left: 20px; color: var(--text-secondary); line-height: 1.6; }
+
+.verification-steps { padding-left: 20px; color: var(--text-secondary);
+line-height: 1.6; }
 .verification-steps li { margin-bottom: 15px; }
-#verification-code-container { display: flex; align-items: center; gap: 10px; background-color: var(--dark-bg); padding: 10px; border-radius: var(--border-radius-md); margin-top: 5px; }
-#verification-code { flex-grow: 1; font-family: monospace; font-size: 1.2em; color: var(--text-primary); }
-#copy-code-btn { background-color: var(--border-color); color: var(--text-primary); border: none; padding: 8px 12px; border-radius: var(--border-radius-sm); cursor: pointer; transition: var(--transition-fast); }
-#copy-code-btn:hover { background-color: var(--main-green); color: var(--dark-bg); }
-.sub-text { font-size: 0.9em; color: var(--text-secondary); text-align: center; margin-top: 20px; }
+#verification-code-container { display: flex; align-items: center; gap:
+10px; background-color: var(--dark-bg); padding: 10px; border-radius:
+var(--border-radius-md); margin-top: 5px; }
+#verification-code { flex-grow: 1; font-family: monospace; font-size:
+1.2em; color: var(--text-primary); }
+#copy-code-btn { background-color: var(--border-color); color:
+var(--text-primary); border: none; padding: 8px 12px; border-radius:
+var(--border-radius-sm); cursor: pointer; transition:
+var(--transition-fast); }
+#copy-code-btn:hover { background-color: var(--main-green); color:
+var(--dark-bg); }
+.sub-text { font-size: 0.9em; color: var(--text-secondary); text-align:
+center; margin-top: 20px; }
 
 
 /* --- RESPONSIVE PARA MODALES --- */
 @media (max-width: 480px) {
-    .auth-modal { width: 90%; padding: 20px; }
-    .auth-modal h2 { font-size: 1.5em; }
-    .main-nav-dropdown { right: 15px; width: calc(100% - 30px); }
+	.auth-modal { width: 90%; padding: 20px; }
+	.auth-modal h2 { font-size: 1.5em; }
+	.main-nav-dropdown { right: 15px; width: calc(100% - 30px); }
 }
 
 
 /* --- ESTILOS PARA HERRAMIENTAS DE ADMIN --- */
 .admin-tool-card {
-    background-color: var(--panel-bg);
-    padding: 25px;
-    border-radius: var(--border-radius-lg);
-    border: 1px solid var(--border-color);
-    max-width: 500px;
-    margin: 20px auto;
+	background-color: var(--panel-bg);
+	padding: 25px;
+	border-radius: var(--border-radius-lg);
+	border: 1px solid var(--border-color);
+	max-width: 500px;
+	margin: 20px auto;
 }
 .admin-tool-card h3 {
-    margin-top: 0;
-    margin-bottom: 20px;
-    color: var(--main-green);
-    text-align: center;
-    font-family: 'Anton', sans-serif;
-    font-size: 1.8em;
+	margin-top: 0;
+	margin-bottom: 20px;
+	color: var(--main-green);
+	text-align: center;
+	font-family: 'Anton', sans-serif;
+	font-size: 1.8em;
 }
 #grant-title-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
 }

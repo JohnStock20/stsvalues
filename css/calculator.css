@@ -1,199 +1,265 @@
-/* Archivo: calculator.css (MODIFICADO)
-   Todos los estilos específicos para la sección de la calculadora.
-*/
+/* =================================================================================== */
+/* === ARCHIVO: calculator.css === */
+/* === Todos los estilos específicos para la sección de la calculadora. === */
+/* =================================================================================== */
 
 #calculator-section {
-  margin-top: 60px;
-  background-color: var(--panel-bg);
-  border: 1px solid var(--main-green); /* Borde exterior */
-  border-radius: var(--border-radius-lg);
-  padding: 25px;
-  box-shadow: var(--shadow-md), inset 0 0 0 2px var(--main-green); /* Borde interior */
+    margin-top: 60px;
+    background-color: var(--panel-bg);
+    border: 1px solid var(--main-green); /* Borde exterior */
+    border-radius: var(--border-radius-lg);
+    padding: 25px;
+    box-shadow: var(--shadow-md), inset 0 0 0 2px var(--main-green); /* Borde interior */
 }
 
 .calculator-mode-selector {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 25px;
-  background-color: var(--dark-bg);
-  border-radius: var(--border-radius-md);
-  border: 1px solid var(--border-color);
-  overflow: hidden;
-  width: 100%;
-  max-width: 520px;
-  margin-left: auto;
-  margin-right: auto;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 25px;
+    background-color: var(--dark-bg);
+    border-radius: var(--border-radius-md);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    width: 100%;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
 }
+
 .calculator-mode-selector button {
-  flex: 1;
-  padding: 12px;
-  font-size: 1em;
-  font-weight: bold;
-  color: var(--text-secondary);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: var(--transition-fast);
-  border-right: 1px solid var(--border-color);
+    flex: 1;
+    padding: 12px;
+    font-size: 1em;
+    font-weight: bold;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    border-right: 1px solid var(--border-color);
 }
+
 .calculator-mode-selector button:last-child {
-  border-right: none;
+    border-right: none;
 }
-.calculator-mode-selector button:not(.active):hover {
-  background-color: #27272a;
-  color: var(--text-primary);
-}
+
 .calculator-mode-selector button.active {
-  background-color: var(--main-green);
-  color: var(--dark-bg);
-  box-shadow: 0 0 10px rgba(45, 212, 191, 0.5);
+    background-color: var(--main-green);
+    color: var(--dark-bg);
+    box-shadow: 0 0 10px rgba(45, 212, 191, 0.5);
+}
+
+.calculator-mode-selector button:not(.active):hover {
+    background-color: #27272a;
+    color: var(--text-primary);
 }
 
 .calculator-controls {
-  display: flex;
-  gap: 15px;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 30px;
+    display: flex;
+    gap: 15px; /* Reducido para mejor ajuste */
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
 }
 
-/* Input genérico para la calculadora */
+/* Input genérico para la calculadora - ACTUALIZADO */
 .calculator-controls input[type="number"] {
-  background-color: var(--dark-bg);
-  border: 1px solid var(--border-color);
-  color: var(--text-primary);
-  padding: 12px 15px;
-  font-size: 1.1em;
-  border-radius: var(--border-radius-md);
-  text-align: center;
-  transition: var(--transition-fast);
-  width: 100%; 
-  max-width: 280px; 
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    background-color: var(--dark-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 12px 15px;
+    font-size: 1.1em;
+    border-radius: var(--border-radius-md);
+    text-align: center;
+    transition: var(--transition-fast);
+    width: 100%; /* Ocupa el espacio disponible */
+    max-width: 280px; /* Ancho máximo */
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+/* Eliminar flechas de input de número */
+.calculator-controls input[type="number"]::-webkit-outer-spin-button,
+.calculator-controls input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.calculator-controls input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+
+.calculator-controls input[type="number"]:focus {
+    outline: none;
+    border-color: var(--main-green);
+    background-color: var(--panel-bg);
+}
+
+.calculator-controls input[type="number"]:disabled {
+    background-color: #111;
+    color: var(--text-secondary);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Botón genérico para la calculadora - ACTUALIZADO */
+.calculator-controls .calculator-btn {
+    background-color: var(--main-green);
+    color: var(--dark-bg);
+    border: none;
+    padding: 12px 25px;
+    font-size: 1.2em;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: var(--border-radius-md);
+    transition: var(--transition-fast);
+    flex-shrink: 0; /* Evita que el botón se encoja */
+}
+.calculator-controls .calculator-btn:hover {
+    filter: brightness(1.1);
+    box-shadow: var(--shadow-lg);
+}
+
+#calculator-results-container {
+    margin-top: 20px;
 }
 
 /* --- Resumen del Botín (Loot Summary) --- */
 #simulation-loot-summary {
-  text-align: center;
-  margin-bottom: 20px;
-  padding: 15px;
-  background-color: var(--dark-bg);
-  border-radius: var(--border-radius-lg);
-  border: 1px solid var(--border-color);
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: var(--dark-bg);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid var(--border-color);
 }
+
 #simulation-loot-summary h4 {
-  margin: 0 0 10px 0;
-  color: var(--main-green);
-  text-transform: uppercase;
-  font-weight: 700;
+    margin: 0 0 10px 0;
+    color: var(--main-green);
+    text-transform: uppercase;
+    font-weight: 700;
 }
+
 #simulation-loot-summary ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  color: var(--text-secondary);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    color: var(--text-secondary);
 }
+
 #simulation-loot-summary li {
-  font-size: 1.1em;
-  margin-bottom: 5px;
+    font-size: 1.1em;
+    margin-bottom: 5px;
 }
+
 #simulation-loot-summary .rarity-text {
-  font-weight: bold;
-  margin-left: 5px;
+    font-weight: bold;
+    margin-left: 5px;
 }
 
 /* --- Tabla de Resultados --- */
 #results-table-container {
-  overflow-x: auto; /* Permite el scroll horizontal en móviles */
+    overflow-x: auto; /* Permite el scroll horizontal en móviles */
 }
+
 #results-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: var(--dark-bg);
-  border-radius: var(--border-radius-md);
-  overflow: hidden;
-  border: 1px solid var(--border-color);
-  white-space: nowrap; 
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--dark-bg);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    white-space: nowrap; /* Evita que el texto se rompa en varias líneas */
 }
-#results-table th, #results-table td {
-  padding: 15px;
-  text-align: center;
+
+#results-table th,
+#results-table td {
+    padding: 15px;
+    text-align: center;
 }
+
 #results-table thead {
-  background-color: var(--panel-bg);
+    background-color: var(--panel-bg);
 }
+
 #results-table th {
-  font-size: 1em;
-  color: var(--main-green);
-  text-transform: uppercase;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+    font-size: 1em;
+    color: var(--main-green);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
+
 #results-table tbody tr {
-  border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
 }
 #results-table tbody tr:last-child {
-  border-bottom: none;
+    border-bottom: none;
 }
-#results-table td {
-  font-size: 1.3em;
-  font-weight: bold;
-}
-#results-table td.profit { color: var(--success-color); }
-#results-table td.loss { color: var(--text-danger); }
 
+#results-table td {
+    font-size: 1.3em;
+    font-weight: bold;
+}
+
+#results-table td.profit { color: var(--common); }
+#results-table td.loss { color: var(--insane); }
 
 /* --- Gráfico de Líneas --- */
 #graph-container { width: 100%; margin-top: 20px; }
 #graph-plot-area {
-  width: 100%;
-  height: 350px;
-  background-color: var(--dark-bg);
-  border: 1px solid var(--border-color);
-  border-radius: var(--border-radius-md);
-  position: relative;
-  padding: 20px;
-  box-sizing: border-box;
+    width: 100%;
+    height: 350px;
+    background-color: var(--dark-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    position: relative;
+    padding: 20px;
+    box-sizing: border-box;
 }
 #graph-plot-area svg { width: 100%; height: 100%; overflow: visible; }
 .graph-zero-line { stroke: var(--border-color); stroke-width: 1.5; stroke-dasharray: 4, 4; }
-.graph-profit-line { stroke: var(--success-color); stroke-width: 2.5; fill: none; }
-.graph-loss-line { stroke: var(--text-danger); stroke-width: 2.5; fill: none; }
+.graph-profit-line { stroke: var(--main-green); stroke-width: 2.5; fill: none; }
+.graph-loss-line { stroke: var(--insane); stroke-width: 2.5; fill: none; }
 .graph-data-point { r: 4; stroke-width: 2; transition: r 0.2s ease; cursor: pointer; }
-.graph-data-point.profit { fill: var(--success-color); stroke: var(--dark-bg); }
-.graph-data-point.loss { fill: var(--text-danger); stroke: var(--dark-bg); }
+.graph-data-point.profit { fill: var(--main-green); stroke: var(--dark-bg); }
+.graph-data-point.loss { fill: var(--insane); stroke: var(--dark-bg); }
 .graph-data-point:hover { r: 7; }
-.graph-tooltip {
-    position: absolute;
-    background-color: #000;
-    color: #fff;
-    padding: 8px 12px;
-    border-radius: var(--border-radius-sm);
-    font-size: 0.9em;
-    white-space: nowrap;
-    z-index: 10;
-    border: 1px solid var(--main-green);
-    transform: translate(-50%, -120%);
-    display: none;
-    pointer-events: none;
-    box-shadow: var(--shadow-lg);
-}
+.graph-tooltip { position: absolute; background-color: #000; color: #fff; padding: 8px 12px; border-radius: var(--border-radius-sm); font-size: 0.9em; white-space: nowrap; z-index: 10; border: 1px solid var(--main-green); transform: translate(-50%, -120%); display: none; pointer-events: none; box-shadow: var(--shadow-lg); }
 .graph-tooltip .tooltip-value { font-weight: bold; }
-.graph-tooltip .tooltip-value.profit { color: var(--success-color); }
-.graph-tooltip .tooltip-value.loss { color: var(--text-danger); }
-
+.graph-tooltip .tooltip-value.profit { color: var(--common); }
+.graph-tooltip .tooltip-value.loss { color: var(--insane); }
 #graph-labels { display: flex; justify-content: space-between; padding: 10px 20px 0 20px; font-size: 0.9em; color: var(--text-secondary); }
 
 /* --- RESPONSIVE PARA LA CALCULADORA --- */
 @media (max-width: 768px) {
-  .calculator-controls { flex-direction: column; width: 100%; }
-  .calculator-controls input[type="number"] { width: 100%; }
-  .calculator-mode-selector { flex-wrap: wrap; }
-  .calculator-mode-selector button { flex-basis: 50%; border-right: none; border-bottom: 1px solid var(--border-color); }
+    .calculator-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+    .calculator-controls input[type="number"] {
+        width: 100%;
+    }
+    .calculator-mode-selector {
+        flex-wrap: wrap;
+    }
+    .calculator-mode-selector button {
+        flex-basis: 50%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+    }
 }
 @media (max-width: 480px) {
-  #calculator-section { padding: 15px; }
-  #results-table td { font-size: 1.1em; padding: 10px 8px; }
-  .calculator-mode-selector button { flex-basis: 100%; }
-  #graph-plot-area { height: 250px; }
+    #calculator-section {
+        padding: 15px;
+    }
+    #results-table td {
+        font-size: 1.1em;
+        padding: 10px 8px;
+    }
+    .calculator-mode-selector button {
+        flex-basis: 100%; /* Un botón por fila */
+    }
+    #graph-plot-area {
+        height: 250px;
+    }
 }

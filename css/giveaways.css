@@ -1,232 +1,318 @@
-/* Archivo: giveaways.css (MODIFICADO)
-   Estilos para todas las funcionalidades de Sorteos (Giveaways).
-*/
+/*
+=======================================================================
+==========
+ ARCHIVO: giveaways.css
+ Estilos para todas las funcionalidades de Sorteos (Giveaways).
+ 
+=======================================================================
+========== */
 
 /* --- LAYOUT PRINCIPAL DE LA PÁGINA DE SORTEOS --- */
 .giveaways-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr); /* Columnas flexibles */
-  gap: 40px;
-  align-items: flex-start;
+	display: grid;
+	grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr); /* Columnas flexibles */
+	gap: 40px;
+	align-items: flex-start;
 }
 
 /* --- PANEL IZQUIERDO: SORTEO ACTIVO Y PRÓXIMOS --- */
 .giveaway-main-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
+	display: flex;
+	flex-direction: column;
+	gap: 30px;
 }
 
+/* FIX: Usando el nuevo sistema de doble borde */
 .giveaway-card {
-  background-color: var(--panel-bg);
-  border-radius: var(--border-radius-lg);
-  padding: 30px;
-  position: relative;
-  overflow: hidden;
-  border: none;
+    position: relative;
+    padding: 2px; /* Grosor del borde */
+    border-radius: var(--border-radius-lg);
+    background: linear-gradient(45deg, var(--main-green), var(--epic));
+    border: none;
 }
-/* Efecto de doble borde con gradiente */
-.giveaway-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: var(--border-radius-lg);
-  padding: 2px; /* Grosor del borde */
-  background: linear-gradient(45deg, var(--main-green), var(--epic));
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-}
-.giveaway-card > * {
-  position: relative;
-  z-index: 1;
+.giveaway-card-inner {
+    padding: 30px;
+    background-color: var(--panel-bg);
+    border-radius: var(--border-radius-lg);
 }
 
 .card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 20px;
-  flex-wrap: wrap; /* Para responsividad */
-  gap: 10px;
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	margin-bottom: 20px;
+	flex-wrap: wrap; /* Para responsividad */
+	gap: 10px;
 }
 .card-header h2 {
-  font-family: 'Anton', sans-serif;
-  font-size: 2em;
-  color: var(--text-primary);
-  margin: 0;
+	font-family: 'Anton', sans-serif;
+	font-size: 2em;
+	color: var(--text-primary);
+	margin: 0;
 }
 .host-info, .winner-info {
-  font-size: 0.9em;
-  color: var(--text-secondary);
+	font-size: 0.9em;
+	color: var(--text-secondary);
 }
 .host-info strong, .winner-info strong {
-  color: var(--text-primary);
-  font-weight: bold;
+	color: var(--text-primary);
+	font-weight: bold;
 }
 
 #prize-pool-container {
-  margin: 20px 0;
+	margin: 20px 0;
 }
 .prize-pool-title {
-  text-transform: uppercase;
-  font-weight: bold;
-  color: var(--text-secondary);
-  margin-bottom: 15px;
-  font-size: 0.9em;
-  letter-spacing: 1px;
+	text-transform: uppercase;
+	font-weight: bold;
+	color: var(--text-secondary);
+	margin-bottom: 15px;
+	font-size: 0.9em;
+	letter-spacing: 1px;
 }
 #prize-pool-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 15px;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	gap: 15px;
 }
 .prize-item {
-  background: var(--dark-bg);
-  padding: 10px 15px;
-  border-radius: var(--border-radius-md);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 1.1em;
-  overflow: hidden;
+	background: var(--dark-bg);
+	padding: 10px 15px;
+	border-radius: var(--border-radius-md);
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	font-size: 1.1em;
+	overflow: hidden;
 }
 .prize-item img {
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
+	width: 32px;
+	height: 32px;
+	flex-shrink: 0;
 }
 .prize-item span {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 #giveaway-timer-container {
-  text-align: center;
-  margin: 30px 0;
+	text-align: center;
+	margin: 30px 0;
 }
 #giveaway-timer {
-  font-size: 2.2em;
-  font-weight: bold;
-  color: var(--main-green);
-  letter-spacing: 2px;
+	font-size: 2.2em;
+	font-weight: bold;
+	color: var(--main-green);
+	letter-spacing: 2px;
 }
 .timer-label {
-  display: block;
-  color: var(--text-secondary);
-  font-size: 0.8em;
-  margin-top: 5px;
+	display: block;
+	color: var(--text-secondary);
+	font-size: 0.8em;
+	margin-top: 5px;
 }
 
-#join-giveaway-btn { /* Ya no se necesita #host-giveaway-btn aquí */
-  width: 100%;
-  font-size: 1.5em;
-  padding: 15px 40px;
+#join-giveaway-btn, #host-giveaway-btn {
+	width: 100%;
+	font-size: 1.5em;
+	padding: 15px 40px;
+}
+
+/* FIX: Host giveaway button no es gigante */
+#host-giveaway-btn {
+    margin-top: 20px;
+    background-color: var(--panel-bg);
+    border: 2px solid var(--main-green);
+    width: auto; /* No ocupa todo el ancho */
+    padding: 10px 25px; /* Más pequeño */
+    font-size: 1.1em; /* Más pequeño */
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+#host-giveaway-btn:hover {
+	background-color: var(--main-green);
+	color: var(--dark-bg);
 }
 
 #upcoming-giveaways-container h3 {
-  margin-bottom: 15px;
+	margin-bottom: 15px;
 }
 #upcoming-giveaways-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
 }
 .upcoming-giveaway-item {
-  background-color: var(--panel-bg);
-  padding: 15px;
-  border-radius: var(--border-radius-md);
-  border: 1px solid var(--border-color);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
+	background-color: var(--panel-bg);
+	padding: 15px;
+	border-radius: var(--border-radius-md);
+	border: 1px solid var(--border-color);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
 }
 .upcoming-giveaway-item .prize {
-  font-weight: bold;
-  color: var(--main-green);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+	font-weight: bold;
+	color: var(--main-green);
 }
 .upcoming-giveaway-item .time {
-  font-size: 0.9em;
-  color: var(--text-secondary);
-  text-align: right;
+	font-size: 0.9em;
+	color: var(--text-secondary);
+	text-align: right;
 }
 
 /* --- PANEL DERECHO: PARTICIPANTES Y GANADORES --- */
 .giveaway-sidebar {
-  position: sticky;
-  top: 120px;
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
+	position: sticky;
+	top: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
 }
 .giveaway-sidebar h3 {
-  margin-bottom: 15px;
+	margin-bottom: 15px;
 }
 #giveaway-participants-container, #giveaway-winners-container {
-  background: var(--panel-bg);
-  border-radius: var(--border-radius-lg);
-  padding: 20px;
-  border: 1px solid var(--border-color);
+	background: var(--panel-bg);
+	border-radius: var(--border-radius-lg);
+	padding: 20px;
+	border: 1px solid var(--border-color);
 }
 #giveaway-participants-list, #giveaway-winners-list {
-  max-height: 40vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-right: 10px; /* Espacio para la barra de scroll */
+	max-height: 40vh;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding-right: 10px; /* Espacio para la barra de scroll */
 }
 .participant-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background-color: var(--dark-bg);
-  padding: 8px;
-  border-radius: var(--border-radius-md);
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	background-color: var(--dark-bg);
+	padding: 8px;
+	border-radius: var(--border-radius-md);
 }
 .participant-item img {
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
+	width: 35px;
+	height: 35px;
+	border-radius: 50%;
 }
 .participant-item span {
-  font-weight: 500;
+	font-weight: 500;
 }
 .winner-item {
-  background-color: var(--dark-bg);
-  border-radius: var(--border-radius-md);
-  padding: 10px;
-  font-size: 0.9em;
+	background-color: var(--dark-bg);
+	border-radius: var(--border-radius-md);
+	padding: 10px;
+	font-size: 0.9em;
 }
 .winner-item .winner-name {
-  font-weight: bold;
-  color: var(--main-green);
+	font-weight: bold;
+	color: var(--main-green);
 }
 .winner-item .winner-prize {
-  color: var(--text-secondary);
-  display: flex; /* Para alinear bien el premio */
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 5px;
+	color: var(--text-secondary);
+	font-size: 0.9em;
+	margin-top: 5px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* --- ESTILOS PARA EL MODAL DE CREAR SORTEO --- */
+.form-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 20px;
+}
+.form-field {
+	display: flex;
+	flex-direction: column;
+}
+.form-field.full-width {
+	grid-column: 1 / -1;
+}
+.form-field label {
+	margin-bottom: 8px;
+	font-weight: bold;
+	color: var(--text-secondary);
+}
+.form-field input, .form-field select {
+	background-color: var(--dark-bg);
+	border: 1px solid var(--border-color);
+	color: var(--text-primary);
+	padding: 12px;
+	font-size: 1em;
+	border-radius: var(--border-radius-md);
+	width: 100%;
+}
+.form-field input:focus, .form-field select:focus {
+	border-color: var(--main-green);
+	outline: none;
+}
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+	filter: invert(1);
+	cursor: pointer;
+}
+
+#prize-pool-builder {
+	border: 1px dashed var(--border-color);
+	padding: 15px;
+	border-radius: var(--border-radius-md);
+	min-height: 100px;
+}
+#add-prize-form {
+	display: grid;
+	grid-template-columns: 1fr 1fr 100px auto;
+	gap: 10px;
+	margin-top: 15px;
+	align-items: flex-end;
+}
+#added-prizes-list {
+	margin-top: 15px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+.added-prize-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	background-color: var(--dark-bg);
+	padding: 5px 10px;
+	border-radius: var(--border-radius-sm);
+}
+.added-prize-item img {
+	width: 24px;
+	height: 24px;
+	margin-right: 8px;
+}
+.remove-prize-btn {
+	background: none;
+	border: none;
+	color: var(--text-danger);
+	cursor: pointer;
+	font-size: 1.2em;
 }
 
 /* --- RESPONSIVE --- */
 @media (max-width: 900px) {
-  .giveaways-layout {
-    grid-template-columns: 1fr;
-  }
-  .giveaway-sidebar {
-    position: static;
-    margin-top: 30px;
-  }
+	.giveaways-layout {
+		grid-template-columns: 1fr;
+	}
+	.giveaway-sidebar {
+		position: static;
+		margin-top: 30px;
+	}
+}
+@media (max-width: 600px) {
+	#add-prize-form {
+		grid-template-columns: 1fr; /* Apilar controles para añadir premios */
+	}
 }
