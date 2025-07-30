@@ -1,10 +1,9 @@
-// Archivo: js/ui/giveaways.js (NUEVO)
+// Archivo: js/ui/giveaways.js (VERSIÓN FINAL CORREGIDA)
 // Propósito: Renderizar todos los componentes de la UI de la página de Sorteos.
 
 import { dom } from './dom.js';
-import { getPrizeItemHtml, showView } from './core.js';
-// LA LÍNEA SIGUIENTE ES LA CORRECCIÓN:
-import { getPrizeItemHtml } from '../utils.js';
+import { showView } from './core.js';
+import { getPrizeItemHtml } from '../utils.js'; // ÚNICA importación de esta función
 
 // --- Funciones de Renderizado de Componentes de Sorteos ---
 
@@ -38,7 +37,6 @@ function renderActiveGiveaway(giveaway, currentUser, onJoin) {
     </div>
   `;
   
-  // Asignar el evento solo si el usuario puede unirse
   if (currentUser && !isJoined) {
     const joinBtn = document.getElementById('join-giveaway-btn');
     joinBtn.onclick = () => onJoin(giveaway.id);
@@ -102,14 +100,6 @@ function renderRecentWinners(winners) {
 
 // --- Función Principal de Renderizado de la Página ---
 
-/**
- * Orquesta el renderizado de toda la página de sorteos.
- * @param {Array} giveaways - Lista de sorteos activos y próximos.
- * @param {Array} recentWinners - Lista de ganadores recientes.
- * @param {object} currentUser - El usuario actual.
- * @param {function} onJoin - Callback para unirse a un sorteo.
- * @param {function} onHost - Callback para abrir el modal de crear sorteo.
- */
 export function renderGiveawayPage(giveaways, recentWinners, currentUser, onJoin, onHost) {
   const activeGiveaway = giveaways.find(gw => gw.status === 'active');
   const upcomingGiveaways = giveaways.filter(gw => gw.status === 'upcoming');
@@ -119,14 +109,13 @@ export function renderGiveawayPage(giveaways, recentWinners, currentUser, onJoin
   renderParticipants(activeGiveaway ? activeGiveaway.participants : []);
   renderRecentWinners(recentWinners);
 
-  // Renderizar el botón de Host
   dom.containers.hostGiveawayBtn.innerHTML = '';
   if (currentUser && ['owner', 'tester'].includes(currentUser.role)) {
     const hostBtn = document.createElement('button');
     hostBtn.id = 'host-giveaway-btn';
-    hostBtn.className = 'auth-button'; // Botón de tamaño normal
+    hostBtn.className = 'auth-button';
     hostBtn.textContent = 'Host a Giveaway';
-    hostBtn.style.width = '100%'; // Para que ocupe el ancho de su contenedor
+    hostBtn.style.width = '100%';
     hostBtn.onclick = onHost;
     dom.containers.hostGiveawayBtn.appendChild(hostBtn);
   }
