@@ -1,4 +1,4 @@
-/* Archivo: components.css (MODIFICADO)
+/* Archivo: components.css (COMPLETO Y CORREGIDO)
    Define los estilos para elementos reutilizables: tarjetas, botones, inputs...
 */
 
@@ -144,7 +144,7 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-  position: sticky; /* Se mantiene en su lugar al hacer scroll */
+  position: sticky;
   top: 120px;
 }
 
@@ -200,7 +200,7 @@
 
 /* Estilo unificado de Tarjeta con Doble Borde */
 .reward-item {
-  --shadow-color: rgba(165, 180, 252, 0.4); /* Sombra por defecto */
+  --shadow-color: rgba(165, 180, 252, 0.4); /* Color de sombra por defecto */
   background-color: transparent;
   border-radius: 10px;
   padding: 15px;
@@ -218,11 +218,12 @@
   position: absolute;
   inset: 0;
   border-radius: 10px;
-  background: var(--border-color);
+  background: var(--border-color); /* Color por defecto */
   padding: 2px; /* Grosor del borde */
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box,
+                linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
-  mask-composite: exclude;
+          mask-composite: exclude;
   z-index: 0;
 }
 .reward-item::after {
@@ -242,10 +243,10 @@
 /* --- Efecto Hover y Colores de Borde --- */
 .reward-item:hover {
   transform: translateY(-5px);
-  box-shadow: 0 0 25px 5px var(--shadow-color);
+  box-shadow: 0 0 30px 8px var(--shadow-color);
 }
 .reward-item:hover::after {
-    background-color: #27272a; /* Fondo un poco más claro al hacer hover */
+    background-color: #27272a;
 }
 
 /* Colores de Sombra por Rareza */
@@ -328,6 +329,9 @@
   display: none;
   z-index: 1001;
   box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 /* Estilo para los items dentro de la búsqueda para que sean consistentes */
 #search-results .reward-item {
@@ -365,7 +369,6 @@
   padding: 2px;
   background: var(--border-color); /* Usa la variable */
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
   mask-composite: exclude;
   transition: padding 0.2s ease-out;
 }
