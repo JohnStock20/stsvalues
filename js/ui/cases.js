@@ -1,4 +1,4 @@
-// Archivo: js/ui/cases.js (NUEVO)
+// Archivo: js/ui/cases.js (CORREGIDO)
 // Propósito: Renderizar la selección de cajas y la vista de detalles de una caja.
 
 import { dom } from './dom.js';
@@ -24,12 +24,13 @@ export function renderCaseSelection(navigateTo) {
 
     const caseItem = document.createElement('div');
     caseItem.className = 'case-item';
+    // Se usa una variable CSS para que la hoja de estilos pueda aplicar el borde
     caseItem.style.setProperty('--case-border-color', data.borderColor || 'var(--main-green)');
     
     caseItem.innerHTML = `
       <img class="case-content-image" src="${data.image}" alt="${data.name}">
       <h3 class="case-title">${data.name}</h3>
-      <div class="case-price">${getCurrencyHTML(data.currency, data.price)}</div>
+      <div class.case-price">${getCurrencyHTML(data.currency, data.price)}</div>
     `;
 
     link.appendChild(caseItem);
@@ -47,13 +48,17 @@ export function renderCaseDetails(caseId, navigateTo) {
   if (!data) return;
 
   // Poblar la columna de información (panel derecho)
-  document.getElementById('details-case-image').src = data.image;
-  document.getElementById('details-case-name').textContent = data.name;
-  document.getElementById('details-case-price').innerHTML = getCurrencyHTML(data.currency, data.price);
-  
-  // Asignar el color de borde correcto al panel
   const infoColumn = document.querySelector('#case-details-view .info-column');
-  infoColumn.style.setProperty('--case-border-color', data.borderColor || 'var(--main-green)');
+  if (infoColumn) {
+    infoColumn.innerHTML = `
+        <img id="details-case-image" src="${data.image}" alt="Case Image">
+        <h3 id="details-case-name">${data.name}</h3>
+        <hr class="info-divider">
+        <div id="details-case-price">${getCurrencyHTML(data.currency, data.price)}</div>
+    `;
+    // Asignar el color de borde correcto al panel usando la variable CSS
+    infoColumn.style.setProperty('--card-border-color', data.borderColor || 'var(--main-green)');
+  }
 
   // Renderizar la lista de recompensas (panel izquierdo)
   dom.containers.rewards.innerHTML = '';
