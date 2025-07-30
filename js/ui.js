@@ -469,9 +469,9 @@ export function renderTitlesPage(titlesData, selectedKey, onSelect, onEquip) {
     item.className = `title-list-item ${title.unlocked ? 'unlocked' : 'locked'}`;
     if (title.key === selectedKey) item.classList.add('selected');
     
-    // NUEVO: Se aplican variables CSS dinámicamente para el borde y el resplandor
-    const-title-border-style = styleInfo.style.includes('gradient') ? styleInfo.style : styleInfo.style;
-    const-title-glow-color = styleInfo.style.includes('gradient') ? 'rgba(255,255,255,0.4)' : styleInfo.style;
+    // CORREGIDO: Se eliminan los guiones de los nombres de las variables.
+    const titleBorderStyle = styleInfo.style.includes('gradient') ? styleInfo.style : styleInfo.style;
+    const titleGlowColor = styleInfo.style.includes('gradient') ? 'rgba(255,255,255,0.4)' : styleInfo.style;
 
     item.style.setProperty('--title-border-style', titleBorderStyle);
     item.style.setProperty('--title-glow-color', titleGlowColor);
@@ -492,14 +492,13 @@ function renderTitleDetails(title, onEquip) {
   const container = dom.containers.titleDetails;
   if (!title) {
     container.innerHTML = '<p>Select a title from the list to see its details.</p>';
-    // Limpiar el borde si no hay título seleccionado
     container.style.setProperty('--selected-title-border', 'var(--border-color)');
     return;
   }
   const styleInfo = titleStyles[title.key] || titleStyles['player'];
   
-  // NUEVO: Se actualiza el color del borde del panel de detalles
-  const-title-border-style = styleInfo.style.includes('gradient') ? styleInfo.style : styleInfo.style;
+  // CORREGIDO: Se eliminan los guiones del nombre de la variable.
+  const titleBorderStyle = styleInfo.style.includes('gradient') ? styleInfo.style : styleInfo.style;
   container.style.setProperty('--selected-title-border', titleBorderStyle);
 
   container.innerHTML = `
@@ -518,7 +517,6 @@ function renderTitleDetails(title, onEquip) {
     equipBtn.disabled = true;
   }
 }
-
 
 export function renderGiveawayPage(giveaways, recentWinners, currentUser, onJoin, onHost) {
     const activeGiveaway = giveaways.find(gw => gw.status === 'active');
