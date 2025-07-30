@@ -1,6 +1,8 @@
 // Archivo: main.js (NUEVO CEREBRO DE LA APLICACIÓN) - VERSIÓN FINAL CORREGIDA
 // Propósito: Orquestar toda la aplicación, inicializar módulos y manejar la navegación.
 
+// LA LÍNEA SIGUIENTE ES LA CORRECCIÓN:
+import { appData } from './data.js'; 
 import * as State from './state.js';
 import * as api from './api.js';
 import * as Utils from './utils.js';
@@ -133,7 +135,6 @@ async function fetchGiveaways() {
         State.appDataCache.giveaways = data.giveaways;
         State.appDataCache.recentWinners = data.recentWinners;
         
-        // Renderizar solo si la vista de sorteos está activa
         if (dom.views.giveaways.style.display === 'block') {
             UIGiveaways.renderGiveawayPage(data.giveaways, data.recentWinners, State.currentUser, handleJoinGiveaway, openCreateGiveawayModal);
         }
@@ -151,7 +152,7 @@ function startTimer() {
             if (distance < 0) {
                 if (el.textContent !== "Giveaway Ended") {
                     el.textContent = "Giveaway Ended";
-                    fetchGiveaways(); // Actualizar datos cuando termina
+                    fetchGiveaways();
                 }
                 return;
             }
@@ -179,10 +180,7 @@ async function handleJoinGiveaway(giveawayId) {
     }
 }
 
-// Lógica para el modal de creación de sorteos (simplificada)
 function openCreateGiveawayModal() {
-    // Aquí iría la lógica completa del modal de creación si fuera necesario.
-    // Por ahora, solo abre el modal.
     console.log("Opening create giveaway modal...");
 }
 
@@ -190,7 +188,6 @@ function openCreateGiveawayModal() {
 // --- INICIALIZACIÓN DE COMPONENTES DE UI ---
 
 function initializeTopUI() {
-    // Lógica para el conversor y la barra de búsqueda
     const allSwords = [...Object.values(appData.cases).flatMap(c => c.rewards), ...appData.otherSwords];
 
     dom.inputs.searchBar.addEventListener("input", () => {
@@ -204,7 +201,6 @@ function initializeTopUI() {
         if (results.length > 0) {
             results.forEach(sword => {
                 const source = Utils.findSwordById(sword.id)?.source || { type: 'other' };
-                // Usamos createRewardItem para mantener un estilo consistente.
                 const item = UICore.createRewardItem(sword, source, navigateToSubView);
                 dom.containers.searchResults.appendChild(item);
             });
@@ -214,7 +210,6 @@ function initializeTopUI() {
         }
     });
     
-    // Ocultar resultados de búsqueda al hacer clic fuera
     document.addEventListener('click', (e) => {
         if (!document.getElementById('search-module').contains(e.target)) {
             dom.containers.searchResults.style.display = 'none';
@@ -226,7 +221,6 @@ function initializeTopUI() {
 // --- INICIALIZACIÓN DE LA APP ---
 function onLoginSuccess(loggedInUser) {
     State.setCurrentUser(loggedInUser);
-    // Recargar la vista actual para reflejar el estado de login
     navigateToView(State.appState.currentNavigationView.view);
 }
 
@@ -235,7 +229,6 @@ function initializeApp() {
     initializeTopUI();
     UICalculator.initializeCalculatorUI(State.appState);
 
-    // Configurar listeners de navegación principales
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', (e) => {
             if (e.target.classList.contains('disabled')) return;
@@ -269,7 +262,6 @@ function initializeApp() {
         }
     });
     
-    // Carga inicial
     navigateToView('cases');
     console.log("STS Values App Initialized!");
 }
