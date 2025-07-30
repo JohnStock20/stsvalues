@@ -9,7 +9,7 @@
 /* --- LAYOUT PRINCIPAL DE LA PÁGINA DE SORTEOS --- */
 .giveaways-layout {
   display: grid;
-  grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr); /* Columnas flexibles */
+  grid-template-columns: minmax(0, 2.5fr) minmax(0, 1fr);
   gap: 40px;
   align-items: flex-start;
 }
@@ -131,10 +131,19 @@
   font-size: 1.5em;
   padding: 15px 40px;
 }
+.host-giveaway-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 30px; /* Espacio antes del contenido principal */
+}
+/* MODIFICADO: Estilo del botón "Host a Giveaway" más pequeño */
 #host-giveaway-btn {
-  margin-top: 20px;
+  width: auto; /* Ancho automático */
+  font-size: 1.1em; /* Fuente más pequeña */
+  padding: 10px 30px; /* Padding reducido */
   background-color: var(--panel-bg);
   border: 2px solid var(--main-green);
+  color: var(--text-primary);
 }
 #host-giveaway-btn:hover {
   background-color: var(--main-green);

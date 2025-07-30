@@ -385,27 +385,37 @@ function initializeTopUI() {
     setCurrency('converter-to', 'diamonds');
 
     const allSwords = [...Object.values(appData.cases).flatMap(c=>c.rewards), ...appData.otherSwords];
-    UI.dom.inputs.searchBar.addEventListener("input", () => { // FIX: Use UI.dom.inputs
-        const query = UI.dom.inputs.searchBar.value.toLowerCase().trim();
-        if(!query) { UI.dom.containers.searchResults.style.display = 'none'; return; }
-        const results = allSwords.filter(s=>s.name.toLowerCase().includes(query)).slice(0,10);
-        UI.dom.containers.searchResults.innerHTML = '';
-        if(results.length > 0){
-            results.forEach(sword => {
-                const source = findSwordById(sword.id)?.source || { type: 'other' };
-                const item = UI.createRewardItem(sword, source, navigateToSubView);
-                item.addEventListener('click', () => {
-                    navigateToSubView("swordDetails", { sword, source });
-                    UI.dom.inputs.searchBar.value = '';
-                    UI.dom.containers.searchResults.style.display = 'none';
-                });
-                UI.dom.containers.searchResults.appendChild(item);
-            });
-            UI.dom.containers.searchResults.style.display = 'block';
-        } else {
-            UI.dom.containers.searchResults.style.display = 'none';
-        }
-    });
+  UI.dom.inputs.searchBar.addEventListener("input", () => {
+    const query = UI.dom.inputs.searchBar.value.toLowerCase().trim();
+    if (!query) {
+      UI.dom.containers.searchResults.style.display = 'none';
+      return;
+    }
+    const results = allSwords.filter(s => s.name.toLowerCase().includes(query)).slice(0, 10);
+    UI.dom.containers.searchResults.innerHTML = '';
+
+    if (results.length > 0) {
+      results.forEach(sword => {
+        const source = findSwordById(sword.id)?.source || { type: 'other' };
+        
+        // MODIFICACIÓN CLAVE:
+        // Llamamos a la función de ui.js y le pasamos 'true' como
+        // último argumento para indicarle que queremos la vista simple.
+        const item = UI.createRewardItem(sword, source, navigateToSubView, true);
+        
+        // El resto de la lógica para el clic
+        item.addEventListener('click', () => {
+          navigateToSubView("swordDetails", { sword, source });
+          UI.dom.inputs.searchBar.value = '';
+          UI.dom.containers.searchResults.style.display = 'none';
+        });
+        UI.dom.containers.searchResults.appendChild(item);
+      });
+      UI.dom.containers.searchResults.style.display = 'block';
+    } else {
+      UI.dom.containers.searchResults.style.display = 'none';
+    }
+  });
 
     document.addEventListener('click', (e) => {
         if (!document.getElementById('search-module').contains(e.target)) {

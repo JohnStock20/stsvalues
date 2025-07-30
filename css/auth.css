@@ -34,15 +34,20 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 8px; /* Padding ajustado */
+  padding: 8px;
   border-radius: var(--border-radius-lg);
   background-color: transparent;
-  border: 2px solid var(--border-color); /* Borde exterior oscuro AÑADIDO */
-  transition: var(--transition-fast);
+  border: 2px solid var(--border-color);
+  transition: var(--transition-fast), box-shadow 0.2s; /* Se añade transición para el resplandor */
   cursor: pointer;
   overflow: hidden;
+  --user-title-glow-color: rgba(45, 212, 191, 0.4); /* Color por defecto */
 }
 
+/* NUEVO: Resplandor dinámico en hover */
+.user-profile-nav:hover {
+  box-shadow: 0 0 20px 5px var(--user-title-glow-color);
+}
 /* Doble borde para el perfil */
 .user-profile-nav::before {
   content: '';

@@ -138,32 +138,47 @@ export function updatePaginationControls(appState) {
 
 // --- Renderizado de Detalles (Caja y Espada) ---
 
+// 1. Modifica createRewardItemHTML para que acepte el nuevo parámetro
+function createRewardItemHTML(reward, source, isSimpleView = false) {
+  const isCaseReward = source.type === 'case';
+  const valueDisplayHTML = (typeof reward.value === 'string' && reward.value.toUpperCase().startsWith('O/C'))
+    ? `<span class="value-oc" title="Owner's Choice">O/C</span>`
+    : formatLargeNumber(parseValue(reward.value));
+  
+  // Si se solicita la vista simple, devolvemos solo imagen y nombre.
+  if (isSimpleView) {
+    return `
+      <div class="reward-info">
+        <div class="reward-image-placeholder"><img src="${reward.image}" alt="${reward.name}"></div>
+        <span class="reward-name">${reward.name}</span>
+      </div>
+    `;
+  }
 
-export function createRewardItem(reward, source, navigateTo) {
-    const item = document.createElement('div');
-    item.className = `reward-item ${reward.rarity}`;
-    const itemHTML = createRewardItemHTML(reward, source);
-    item.innerHTML = itemHTML;
-    item.addEventListener('click', () => navigateTo('swordDetails', { sword: reward, source }));
-    return item;
+  // De lo contrario, devolvemos la vista completa con estadísticas.
+  return `
+    <div class="reward-info">
+      <div class="reward-image-placeholder"><img src="${reward.image}" alt="${reward.name}"></div>
+      <span class="reward-name">${reward.name}</span>
+    </div>
+    <div class="reward-stats">
+      ${isCaseReward ? `<span>${reward.chance}%</span>` : '<span class="no-chance">--</span>'}
+      <span class="reward-value">${valueDisplayHTML}</span>
+      <span>${reward.stats}</span>
+    </div>`;
 }
 
-
-function createRewardItemHTML(reward, source) {
-    const isCaseReward = source.type === 'case';
-    const valueDisplayHTML = (typeof reward.value === 'string' && reward.value.toUpperCase().startsWith('O/C'))
-        ? `<span class="value-oc" title="Owner's Choice">O/C</span>`
-        : formatLargeNumber(parseValue(reward.value));
-    return `
-        <div class="reward-info">
-            <div class="reward-image-placeholder"><img src="${reward.image}" alt="${reward.name}"></div>
-            <span class="reward-name">${reward.name}</span>
-        </div>
-        <div class="reward-stats">
-            ${isCaseReward ? `<span>${reward.chance}%</span>` : '<span class="no-chance">--</span>'}
-            <span class="reward-value">${valueDisplayHTML}</span>
-            <span>${reward.stats}</span>
-        </div>`;
+// 2. Modifica createRewardItem para que pase el nuevo parámetro
+export function createRewardItem(reward, source, navigateTo, isSimpleView = false) {
+  const item = document.createElement('div');
+  item.className = `reward-item ${reward.rarity}`;
+  
+  // Le pasamos el parámetro a la función que genera el HTML
+  const itemHTML = createRewardItemHTML(reward, source, isSimpleView);
+  item.innerHTML = itemHTML;
+  
+  item.addEventListener('click', () => navigateTo('swordDetails', { sword: reward, source }));
+  return item;
 }
 
 
@@ -443,45 +458,65 @@ export function renderProfitGraph(results, MAX_GRAPH_SECTIONS) {
 
 // --- Renderizado de Títulos, Sorteos y Admin ---
 export function renderTitlesPage(titlesData, selectedKey, onSelect, onEquip) {
-    dom.containers.titlesList.innerHTML = '';
-    if (!titlesData) { dom.containers.titlesList.innerHTML = '<p>Could not load titles.</p>'; return; }
-    titlesData.forEach(title => {
-        const styleInfo = titleStyles[title.key] || titleStyles['player'];
-        const item = document.createElement('div');
-        item.className = `title-list-item ${title.unlocked ? 'unlocked' : 'locked'}`;
-        if (title.key === selectedKey) item.classList.add('selected');
-        item.onclick = () => { if (title.unlocked) onSelect(title.key); };
-        item.innerHTML = `
-            <span class="title-name ${styleInfo.style.includes('gradient') ? 'gradient' : ''}"
-                  style="${styleInfo.style.includes('gradient') ? `background-image: ${styleInfo.style}` : `color: ${styleInfo.style}`}">
-                ${styleInfo.text}
-            </span>
-            ${!title.unlocked ? '<span class="lock-icon">🔒</span>' : ''}`;
-        dom.containers.titlesList.appendChild(item);
-    });
-    renderTitleDetails(titlesData.find(t => t.key === selectedKey), onEquip);
+  dom.containers.titlesList.innerHTML = '';
+  if (!titlesData) {
+    dom.containers.titlesList.innerHTML = '<p>Could not load titles.</p>';
+    return;
+  }
+  titlesData.forEach(title => {
+    const styleInfo = titleStyles[title.key] || titleStyles['player'];
+    const item = document.createElement('div');
+    item.className = `title-list-item ${title.unlocked ? 'unlocked' : 'locked'}`;
+    if (title.key === selectedKey) item.classList.add('selected');
+    
+    // NUEVO: Se aplican variables CSS dinámicamente para el borde y el resplandor
+    const-title-border-style = styleInfo.style.includes('gradient') ? styleInfo.style : styleInfo.style;
+    const-title-glow-color = styleInfo.style.includes('gradient') ? 'rgba(255,255,255,0.4)' : styleInfo.style;
+
+    item.style.setProperty('--title-border-style', titleBorderStyle);
+    item.style.setProperty('--title-glow-color', titleGlowColor);
+
+    item.onclick = () => { if (title.unlocked) onSelect(title.key); };
+    item.innerHTML = `
+      <span class="title-name ${styleInfo.style.includes('gradient') ? 'gradient' : ''}"
+            style="${styleInfo.style.includes('gradient') ? `background-image: ${styleInfo.style}` : `color: ${styleInfo.style}`}">
+        ${styleInfo.text}
+      </span>
+      ${!title.unlocked ? '<span class="lock-icon">🔒</span>' : ''}`;
+    dom.containers.titlesList.appendChild(item);
+  });
+  renderTitleDetails(titlesData.find(t => t.key === selectedKey), onEquip);
 }
 
-
 function renderTitleDetails(title, onEquip) {
-    const container = dom.containers.titleDetails;
-    if (!title) { container.innerHTML = '<p>Select a title from the list to see its details.</p>'; return; }
-    const styleInfo = titleStyles[title.key] || titleStyles['player'];
-    container.innerHTML = `
-        <h3 class="${styleInfo.style.includes('gradient') ? 'gradient' : ''}"
-            style="${styleInfo.style.includes('gradient') ? `background-image: ${styleInfo.style}` : `color: ${styleInfo.style}`}">
-            ${styleInfo.text}
-        </h3>
-        <p>${titleStyles[title.key]?.description || 'No description available.'}</p>
-        <button id="equip-title-btn" class="auth-button ${title.equipped ? 'equipped' : ''}">
-            ${title.equipped ? 'Equipped' : 'Equip Title'}
-        </button>`;
-    const equipBtn = document.getElementById('equip-title-btn');
-    if (title.unlocked && !title.equipped) {
-        equipBtn.onclick = () => onEquip(title.key);
-    } else {
-        equipBtn.disabled = true;
-    }
+  const container = dom.containers.titleDetails;
+  if (!title) {
+    container.innerHTML = '<p>Select a title from the list to see its details.</p>';
+    // Limpiar el borde si no hay título seleccionado
+    container.style.setProperty('--selected-title-border', 'var(--border-color)');
+    return;
+  }
+  const styleInfo = titleStyles[title.key] || titleStyles['player'];
+  
+  // NUEVO: Se actualiza el color del borde del panel de detalles
+  const-title-border-style = styleInfo.style.includes('gradient') ? styleInfo.style : styleInfo.style;
+  container.style.setProperty('--selected-title-border', titleBorderStyle);
+
+  container.innerHTML = `
+    <h3 class="${styleInfo.style.includes('gradient') ? 'gradient' : ''}"
+        style="${styleInfo.style.includes('gradient') ? `background-image: ${styleInfo.style}` : `color: ${styleInfo.style}`}">
+      ${styleInfo.text}
+    </h3>
+    <p>${titleStyles[title.key]?.description || 'No description available.'}</p>
+    <button id="equip-title-btn" class="auth-button ${title.equipped ? 'equipped' : ''}">
+      ${title.equipped ? 'Equipped' : 'Equip Title'}
+    </button>`;
+  const equipBtn = document.getElementById('equip-title-btn');
+  if (title.unlocked && !title.equipped) {
+    equipBtn.onclick = () => onEquip(title.key);
+  } else {
+    equipBtn.disabled = true;
+  }
 }
 
 
