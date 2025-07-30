@@ -206,17 +206,15 @@
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-  /* La transición ahora también afecta al box-shadow */
-  transition: transform 0.2s, box-shadow 0.2s; 
+  transition: transform 0.2s, box-shadow 0.2s;
   position: relative;
   overflow: hidden;
-  flex-shrink: 0;
   border: none;
-  /* 
-    NUEVO: Se añade un resplandor sutil por defecto para crear el efecto de doble borde.
-    Esto hace que las espadas se vean como las cajas.
+  /*
+    NUEVO: Se añade un box-shadow que simula el borde exterior oscuro,
+    igual que tienen las cajas.
   */
-  box-shadow: 0 0 10px 2px var(--shadow-color);
+  box-shadow: 0 0 0 3px var(--border-color);
 }
 .reward-item::before {
     content: '';
@@ -246,8 +244,10 @@
 /* --- Efecto Hover y Colores de Borde --- */
 .reward-item:hover {
   transform: translateY(-3px);
-  /* Se aumenta la intensidad del resplandor en el hover para un efecto dinámico */
-  box-shadow: 0 0 20px 5px var(--shadow-color);
+  /* 
+    AHORA: El hover mantiene el borde oscuro y añade el resplandor de color.
+  */
+  box-shadow: 0 0 0 3px var(--border-color), 0 0 20px 5px var(--shadow-color);
 }
 .reward-item.common { --shadow-color: rgba(74, 222, 128, 0.6); }
 .reward-item.uncommon { --shadow-color: rgba(34, 211, 238, 0.6); }
