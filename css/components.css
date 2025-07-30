@@ -198,19 +198,25 @@
 
 /* --- Estilo unificado de Tarjeta con Doble Borde --- */
 .reward-item {
-    --shadow-color: rgba(165, 180, 252, 0.4); /* Color de sombra por defecto */
-    background-color: transparent;
-    border-radius: 10px;
-    padding: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    position: relative;
-    overflow: hidden;
-    flex-shrink: 0;
-    border: none;
+  --shadow-color: rgba(165, 180, 252, 0.4); /* Color de sombra por defecto */
+  background-color: transparent;
+  border-radius: 10px;
+  padding: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  /* La transición ahora también afecta al box-shadow */
+  transition: transform 0.2s, box-shadow 0.2s; 
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: none;
+  /* 
+    NUEVO: Se añade un resplandor sutil por defecto para crear el efecto de doble borde.
+    Esto hace que las espadas se vean como las cajas.
+  */
+  box-shadow: 0 0 10px 2px var(--shadow-color);
 }
 .reward-item::before {
     content: '';
@@ -239,8 +245,9 @@
 
 /* --- Efecto Hover y Colores de Borde --- */
 .reward-item:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 0 20px 5px var(--shadow-color);
+  transform: translateY(-3px);
+  /* Se aumenta la intensidad del resplandor en el hover para un efecto dinámico */
+  box-shadow: 0 0 20px 5px var(--shadow-color);
 }
 .reward-item.common { --shadow-color: rgba(74, 222, 128, 0.6); }
 .reward-item.uncommon { --shadow-color: rgba(34, 211, 238, 0.6); }
@@ -513,75 +520,6 @@
 #equip-title-btn { width: 100%; padding: 15px; font-size: 1.2em; }
 #equip-title-btn.equipped { background-color: var(--main-green); color: var(--dark-bg); cursor: default; border-color: var(--main-green); }
 #equip-title-btn:disabled:not(.equipped) { background-color: var(--border-color); cursor: not-allowed; }
-
-/* --- ESTILO BASE PARA PANELES CON BORDE TRIPLE --- */
-.triple-border-panel {
-    --shadow-color: rgba(45, 212, 191, 0.4); /* Color por defecto (main-green) */
-    background-color: transparent;
-    position: relative;
-    border: none;
-    overflow: hidden;
-}
-.triple-border-panel::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 3px;
-    background: var(--border-color);
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    z-index: 0;
-}
-.triple-border-panel::after {
-    content: '';
-    position: absolute;
-    inset: 3px;
-    background: var(--panel-bg);
-    border-radius: calc(var(--border-radius-lg) - 3px);
-    z-index: -1;
-}
-.triple-border-panel > * {
-    position: relative;
-    z-index: 1;
-}
-.triple-border-panel:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 20px 5px var(--shadow-color);
-}
-
-/* Aplicar el nuevo estilo a los componentes existentes */
-.info-column,
-.stat-box,
-#title-details-view,
-.user-profile-nav,
-.top-ui-module {
-    @extend .triple-border-panel;
-}
-
-/* Modificar los estilos existentes para adaptarse al nuevo diseño */
-.info-column {
-    --shadow-color: var(--case-border-color, rgba(45, 212, 191, 0.4));
-}
-.info-column::before {
-    background: var(--case-border-color, var(--main-green));
-}
-
-.user-profile-nav {
-    --shadow-color: rgba(45, 212, 191, 0.4);
-}
-.user-profile-nav::before {
-    background: var(--main-green);
-}
-
-/* Actualizar los media queries existentes */
-@media (max-width: 768px) {
-    /* ...existing code... */
-    .triple-border-panel:hover {
-        transform: none;
-    }
-}
 
 /* --- RESPONSIVE ADAPTATIONS FOR COMPONENTS --- */
 @media (max-width: 768px) {
