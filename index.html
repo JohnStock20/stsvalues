@@ -1,316 +1,277 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STS Values</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STS Values</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  
+  <!-- Modular CSS -->
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/giveaways.css">
+  <link rel="stylesheet" href="css/calculator.css">
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    
-    <!-- Modular CSS -->
-    <link rel="stylesheet" href="css/global.css">
-    <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/auth.css">
-    <link rel="stylesheet" href="css/giveaways.css">
-    
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4YY08MDW4M"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-4YY08MDW4M');
-    </script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-4YY08MDW4M"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-4YY08MDW4M');
+  </script>
 </head>
 <body>
-    <!-- Envoltura principal del sitio para el layout de 3 columnas -->
-    <div class="site-wrapper">
 
-        <!-- Barra lateral izquierda (futuros anuncios) -->
-        <aside class="ad-sidebar ad-sidebar-left"></aside>
+  <!-- Envoltura principal del sitio para el layout de 3 columnas -->
+  <div class="site-wrapper">
 
-        <!-- Contenedor principal del contenido -->
-        <div class="main-content-wrapper">
+    <!-- Barra lateral izquierda (futuros anuncios) -->
+    <aside class="ad-sidebar ad-sidebar-left"></aside>
 
-            <!-- Cabecera de la página -->
-            <header class="main-header">
-                <div class="logo-container">
-                    <h1 class="logo">STS VALUES</h1>
-                </div>
-                <div class="top-ui-container">
-                    <!-- Módulo Conversor de Unidades -->
-                    <div id="unit-converter" class="top-ui-module">
-                        <div id="converter-from-wrapper" class="currency-selector-wrapper">
-                            <input type="text" id="converter-from-input" class="converter-input" placeholder="Enter a value...">
-                            <img id="converter-from-icon" class="converter-icon" src="" alt="From currency">
-                            <span id="converter-from-name" class="converter-currency-name"></span>
-                        </div>
-                        <div class="converter-equals">=</div>
-                        <div id="converter-to-wrapper" class="currency-selector-wrapper">
-                            <input type="text" id="converter-to-input" class="converter-input" readonly>
-                            <img id="converter-to-icon" class="converter-icon" src="" alt="To currency">
-                            <span id="converter-to-name" class="converter-currency-name"></span>
-                        </div>
-                    </div>
-                    <!-- Módulo de Búsqueda -->
-                    <div id="search-module" class="top-ui-module">
-                        <input type="text" id="search-bar" placeholder="Search for a sword...">
-                        <div id="search-results"></div>
-                    </div>
-                </div>
-                <!-- Contenedor de Autenticación y Perfil -->
-                <div class="auth-container">
-                    <button id="login-nav-btn" class="nav-button">Login</button>
-                    <div id="user-profile-nav" class="user-profile-nav" style="display: none;">
-                        <img id="user-avatar" src="images/placeholder.png" alt="User Avatar">
-                        <div class="user-info">
-                            <span id="user-name">@Username</span>
-                            <span id="user-title" class="title-name">Player</span>
-                        </div>
-                        <div class="menu-icon" id="hamburger-menu">
-                            <span></span>
-                            <span></span>
-                            <span></span>
-                        </div>
-                    </div>
-                    <nav id="main-nav-dropdown" class="main-nav-dropdown">
-                        <a href="#" class="nav-link" data-view="cases">Main Page</a>
-                        <a href="#" class="nav-link" data-view="titles">Titles</a>
-                        <a href="#" class="nav-link" data-view="giveaways">Giveaways</a>
-                        <a href="#" class="nav-link disabled" data-view="donations">Donations</a>
-                        <a href="#" id="dev-tools-link" class="nav-link" data-view="devtools" style="display: none;">Developer Tools</a>
-                        <a href="#" id="logout-btn" class="nav-link logout">Logout</a>
-                    </nav>
-                </div>
-            </header>
+    <!-- Contenedor principal del contenido -->
+    <div class="main-content-wrapper">
 
-            <!-- Contenido principal que cambia dinámicamente -->
-            <main>
-
-                <!-- VISTA 1: SELECCIÓN DE CAJAS Y ESPADAS -->
-                <div id="cases-view" class="main-view-panel">
-                    <section id="case-selection-section">
-                        <h2 class="section-title">~CASES~</h2>
-                        <div class="cases-container"></div>
-                    </section>
-                    <section id="other-swords-section">
-                         <h2 class="section-title">~OTHER SWORDS~</h2>
-                        <div id="other-swords-container"></div>
-                        <div class="pagination-controls">
-                            <button id="other-prev-btn">←</button>
-                            <button id="other-next-btn">→</button>
-                        </div>
-                    </section>
-                </div>
-
-                <!-- VISTA 2: DETALLES DE CAJA Y CALCULADORA -->
-                <div id="case-details-view" class="main-view-panel">
-                    <button class="back-btn" id="details-to-cases-btn">← Back to Selection</button>
-                    <div class="details-content">
-                        <div class="rewards-column">
-                            <h2 class="section-title">~Swords in this Case~</h2>
-                            <div class="rewards-list-header">
-                                <span>Chance</span>
-                                <span>Value</span>
-                                <span>Stats</span>
-                            </div>
-                            <div id="rewards-list-container"></div>
-                        </div>
-                        <div class="info-column">
-                            <img id="details-case-image" src="" alt="Case Image">
-                            <h3 id="details-case-name"></h3>
-                            <hr class="info-divider">
-                            <div id="details-case-price"></div>
-                        </div>
-                    </div>
-                    <!-- CALCULADORA RESTAURADA CON TODOS LOS MODOS -->
-                    <div id="calculator-section">
-                        <h2 class="section-title">~PROFIT CALCULATOR~</h2>
-                        <div class="calculator-mode-selector">
-                            <button id="mode-theoretical-btn" class="active">Theoretical</button>
-                            <button id="mode-simulate-btn">Simulate</button>
-                            <button id="mode-until-best-btn">Until Best</button>
-                            <button id="mode-graph-btn">Graph</button>
-                        </div>
-                        <div id="standard-controls" class="calculator-controls">
-                             <input type="number" id="case-quantity-input" placeholder="Enter amount of cases to open...">
-                             <button id="calculate-btn" class="auth-button">Calculate</button>
-                        </div>
-                         <div id="graph-controls" class="calculator-controls" style="display: none;">
-                            <input type="number" id="graph-step-input" placeholder="Range (e.g., 100)">
-                            <input type="number" id="graph-max-input" placeholder="Maximum (e.g., 5000)">
-                            <button id="calculate-graph-btn" class="auth-button">Generate Graph</button>
-                        </div>
-                        <div id="calculator-results-container">
-                             <div id="simulation-loot-summary" style="display: none;"></div>
-                             <div id="results-table-container"></div>
-                             <div id="graph-container" style="display: none;">
-                                <div id="graph-plot-area"><svg></svg><div class="graph-tooltip"></div></div>
-                                <div id="graph-labels"></div>
-                             </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- VISTA 3: DETALLES DE ESPADA -->
-                <div id="sword-details-view" class="main-view-panel">
-                     <button class="back-btn" id="details-to-sword-list-btn">← Back</button>
-                     <div class="sword-details-content">
-                        <div id="sword-info-card">
-                            <div id="sword-demand-indicator"></div>
-                            <div id="sword-details-image-container"></div>
-                            <h3 id="sword-details-name"></h3>
-                            <p id="sword-details-description"></p>
-                        </div>
-                        <div class="sword-stats-container">
-                             <div class="stat-box"><h4>VALUE</h4><p id="sword-details-value"></p><span id="sword-details-updated" class="sub-text"></span></div>
-                             <div class="stat-box"><h4>STATS</h4><p id="sword-details-stats"></p></div>
-                             <div class="stat-box"><h4>MORE</h4><p id="sword-details-more"></p></div>
-                        </div>
-                     </div>
-                </div>
-
-                <!-- VISTA 4: TÍTULOS -->
-                <div id="titles-view" class="main-view-panel">
-                    <h2 class="section-title">~TITLES~</h2>
-                    <p class="section-subtitle">Select a title to display on your profile. Unlock more by playing and participating in the community!</p>
-                    <div class="titles-view-container">
-                        <div id="titles-list-container"></div>
-                        <div id="title-details-view"></div>
-                    </div>
-                </div>
-
-                <!-- VISTA 5: SORTEOS -->
-                <div id="giveaways-view" class="main-view-panel">
-                    <div class="giveaways-layout">
-                        <div class="giveaway-main-panel">
-                            <div id="active-giveaway-container"></div>
-                            <div id="upcoming-giveaways-container"></div>
-                            <div id="host-giveaway-btn-container"></div>
-                        </div>
-                        <aside class="giveaway-sidebar">
-                            <div id="giveaway-participants-container">
-                                <h3>PARTICIPANTS</h3>
-                                <div id="giveaway-participants-list"></div>
-                            </div>
-                            <div id="giveaway-winners-container">
-                                <h3>RECENT WINNERS</h3>
-                                <div id="giveaway-winners-list"></div>
-                            </div>
-                        </aside>
-                    </div>
-                </div>
-                
-                <!-- VISTA 6: HERRAMIENTAS DE DESARROLLADOR -->
-                <div id="devtools-view" class="main-view-panel"></div>
-
-            </main>
+      <!-- Cabecera de la página -->
+      <header class="main-header">
+        <div class="logo-container">
+          <h1 class="logo">STS VALUES</h1>
         </div>
 
-        <!-- Barra lateral derecha (futuros anuncios) -->
-        <aside class="ad-sidebar ad-sidebar-right"></aside>
+        <div class="top-ui-container">
+          <!-- Módulo Conversor de Unidades -->
+          <div id="unit-converter" class="top-ui-module">
+             <div id="converter-from-wrapper" class="currency-selector-wrapper">
+                <input type="text" id="converter-from-input" class="converter-input" placeholder="Enter a value...">
+                <img id="converter-from-icon" class="converter-icon" src="" alt="From currency">
+                <span id="converter-from-name" class="converter-currency-name"></span>
+            </div>
+            <div class="converter-equals">=</div>
+            <div id="converter-to-wrapper" class="currency-selector-wrapper">
+                <input type="text" id="converter-to-input" class="converter-input" readonly>
+                <img id="converter-to-icon" class="converter-icon" src="" alt="To currency">
+                <span id="converter-to-name" class="converter-currency-name"></span>
+            </div>
+          </div>
+          <!-- Módulo de Búsqueda -->
+          <div id="search-module" class="top-ui-module">
+            <input type="text" id="search-bar" placeholder="Search for a sword...">
+            <div id="search-results"></div>
+          </div>
+        </div>
 
+        <!-- Contenedor de Autenticación y Perfil -->
+        <div class="auth-container">
+          <button id="login-nav-btn" class="nav-button">Login</button>
+          
+          <div id="user-profile-nav" class="user-profile-nav" style="display: none;">
+            <img id="user-avatar" src="images/placeholder.png" alt="User Avatar">
+            <div class="user-info">
+              <span id="user-name">@Username</span>
+              <span id="user-title" class="title-name">Player</span>
+            </div>
+            <div class="menu-icon" id="hamburger-menu">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+          
+          <nav id="main-nav-dropdown" class="main-nav-dropdown">
+            <a href="#" class="nav-link" data-view="cases">Main Page</a>
+            <a href="#" class="nav-link" data-view="titles">Titles</a>
+            <a href="#" class="nav-link" data-view="giveaways">Giveaways</a>
+            <a href="#" class="nav-link disabled" data-view="donations">Donations</a>
+            <a href="#" id="dev-tools-link" class="nav-link" data-view="devtools" style="display: none;">Developer Tools</a>
+            <a href="#" id="logout-btn" class="nav-link logout">Logout</a>
+          </nav>
+        </div>
+      </header>
+
+      <!-- Contenido principal que cambia dinámicamente -->
+      <main>
+        <!-- VISTA 1: SELECCIÓN DE CAJAS Y ESPADAS -->
+        <div id="cases-view" class="main-view-panel">
+            <section id="case-selection-section">
+                <h2 class="section-title">~CASES~</h2>
+                <div class="cases-container"></div>
+            </section>
+            <section id="other-swords-section">
+                <h2 class="section-title">~OTHER SWORDS~</h2>
+                <div id="other-swords-container"></div>
+                <div class="pagination-controls">
+                    <button id="other-prev-btn">←</button>
+                    <button id="other-next-btn">→</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- VISTA 2: DETALLES DE CAJA Y CALCULADORA -->
+        <div id="case-details-view" class="main-view-panel">
+            <button class="back-btn" id="details-to-cases-btn">← Back to Selection</button>
+            <div class="details-content">
+                <div class="rewards-column">
+                    <h2 class="section-title">~Swords in this Case~</h2>
+                    <div class="rewards-list-header">
+                        <span>Chance</span>
+                        <span>Value</span>
+                        <span>Stats</span>
+                    </div>
+                    <div id="rewards-list-container"></div>
+                </div>
+                <div class="info-column">
+                    <img id="details-case-image" src="" alt="Case Image">
+                    <h3 id="details-case-name"></h3>
+                    <hr class="info-divider">
+                    <div id="details-case-price"></div>
+                </div>
+            </div>
+            <div id="calculator-section">
+                <h2 class="section-title">~PROFIT CALCULATOR~</h2>
+                <div class="calculator-mode-selector">
+                    <button id="mode-theoretical-btn" class="active">Theoretical</button>
+                    <button id="mode-simulate-btn">Simulate</button>
+                    <button id="mode-until-best-btn">Until Best</button>
+                    <button id="mode-graph-btn">Graph</button>
+                </div>
+                <div id="standard-controls" class="calculator-controls">
+                    <input type="number" id="case-quantity-input" placeholder="Enter amount of cases to open...">
+                    <button id="calculate-btn" class="auth-button">Calculate</button>
+                </div>
+                <div id="graph-controls" class="calculator-controls" style="display: none;">
+                    <input type="number" id="graph-step-input" placeholder="Range (e.g., 100)">
+                    <input type="number" id="graph-max-input" placeholder="Maximum (e.g., 5000)">
+                    <button id="calculate-graph-btn" class="auth-button">Generate Graph</button>
+                </div>
+                <div id="calculator-results-container">
+                    <div id="simulation-loot-summary" style="display: none;"></div>
+                    <div id="results-table-container"></div>
+                    <div id="graph-container" style="display: none;">
+                        <div id="graph-plot-area"><svg></svg><div class="graph-tooltip"></div></div>
+                        <div id="graph-labels"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA 3: DETALLES DE ESPADA -->
+        <div id="sword-details-view" class="main-view-panel">
+            <button class="back-btn" id="details-to-sword-list-btn">← Back</button>
+            <div class="sword-details-content">
+                <div id="sword-info-card">
+                    <div id="sword-demand-indicator"></div>
+                    <div id="sword-details-image-container"></div>
+                    <h3 id="sword-details-name"></h3>
+                    <p id="sword-details-description"></p>
+                </div>
+                <div class="sword-stats-container">
+                    <div class="stat-box"><h4>VALUE</h4><p id="sword-details-value"></p><span id="sword-details-updated" class="sub-text"></span></div>
+                    <div class="stat-box"><h4>STATS</h4><p id="sword-details-stats"></p></div>
+                    <div class="stat-box"><h4>MORE</h4><p id="sword-details-more"></p></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- VISTA 4: TÍTULOS -->
+        <div id="titles-view" class="main-view-panel">
+            <h2 class="section-title">~TITLES~</h2>
+            <p class="section-subtitle">Select a title to display on your profile. Unlock more by playing and participating in the community!</p>
+            <div class="titles-view-container">
+                <div id="titles-list-container"></div>
+                <div id="title-details-view"></div>
+            </div>
+        </div>
+
+        <!-- VISTA 5: SORTEOS -->
+        <div id="giveaways-view" class="main-view-panel">
+            <div class="giveaways-layout">
+                <div class="giveaway-main-panel">
+                    <div id="active-giveaway-container"></div>
+                    <div id="upcoming-giveaways-container"></div>
+                    <div id="host-giveaway-btn-container"></div>
+                </div>
+                <aside class="giveaway-sidebar">
+                    <div id="giveaway-participants-container">
+                        <h3>PARTICIPANTS</h3>
+                        <div id="giveaway-participants-list"></div>
+                    </div>
+                    <div id="giveaway-winners-container">
+                        <h3>RECENT WINNERS</h3>
+                        <div id="giveaway-winners-list"></div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+        
+        <!-- VISTA 6: HERRAMIENTAS DE DESARROLLADOR -->
+        <div id="devtools-view" class="main-view-panel"></div>
+
+      </main>
     </div>
 
-    <!-- ========= MODALES DE AUTENTICACIÓN ========= -->
-    <div id="auth-modal-overlay" class="auth-modal-overlay">
-        <!-- Modal de Login -->
-        <div id="login-modal" class="auth-modal">
-            <button class="close-modal-btn">×</button>
-            <h2>Login</h2>
-            <form id="login-form">
-                <p class="error-message" id="login-error"></p>
-                <input type="text" name="username" placeholder="Roblox Username" required>
-                <input type="password" name="password" placeholder="Password" required>
-                <button type="submit" class="auth-button">Login</button>
-                <p class="auth-switch">Don't have an account? <a href="#" id="show-register-link">Register here</a></p>
-            </form>
-        </div>
-        <!-- Modal de Registro (Paso 1) -->
-        <div id="register-modal-step1" class="auth-modal">
-            <button class="close-modal-btn">×</button>
-            <h2>Register - Step 1/2</h2>
-            <form id="register-form-step1">
-                <p class="error-message" id="register-error-step1"></p>
-                <input type="text" name="username" placeholder="Roblox Username" required>
-                <input type="password" name="password" placeholder="Create a Password" required>
-                <input type="password" name="confirm_password" placeholder="Confirm Password" required>
-                <button type="submit" class="auth-button">Next: Verify Account</button>
-                <p class="auth-switch">Already have an account? <a href="#" id="show-login-link">Login here</a></p>
-            </form>
-        </div>
-        <!-- Modal de Registro (Paso 2) -->
-        <div id="register-modal-step2" class="auth-modal">
-            <button class="close-modal-btn">×</button>
-            <h2>Register - Step 2/2</h2>
-            <p>To verify you own this Roblox account, please complete the following steps:</p>
-            <ol class="verification-steps">
-                <li>Copy the following unique code:</li>
-                <div id="verification-code-container">
-                    <strong id="verification-code"></strong>
-                    <button id="copy-code-btn">Copy</button>
-                </div>
-                <li>Go to your Roblox profile settings.</li>
-                <li>Paste the code into your "About" section and save.</li>
-                <li>Come back here and click "Verify".</li>
-            </ol>
-            <p class="error-message" id="register-error-step2"></p>
-            <button id="verify-account-btn" class="auth-button">Verify & Create Account</button>
-            <p class="sub-text">(You can remove the code from your profile after verification is complete)</p>
-        </div>
+    <!-- Barra lateral derecha (futuros anuncios) -->
+    <aside class="ad-sidebar ad-sidebar-right"></aside>
+
+  </div>
+
+  <!-- ========= MODALES DE AUTENTICACIÓN ========= -->
+  <div id="auth-modal-overlay" class="auth-modal-overlay">
+    <!-- Modal de Login -->
+    <div id="login-modal" class="auth-modal">
+      <button class="close-modal-btn">×</button>
+      <h2>Login</h2>
+      <form id="login-form">
+        <p class="error-message" id="login-error"></p>
+        <input type="text" name="username" placeholder="Roblox Username" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit" class="auth-button">Login</button>
+        <p class="auth-switch">Don't have an account? <a href="#" id="show-register-link">Register here</a></p>
+      </form>
     </div>
 
-    <!-- ========= MODAL PARA CREAR SORTEO ========= -->
-    <div id="create-giveaway-modal-overlay" class="auth-modal-overlay">
-        <div id="create-giveaway-modal" class="auth-modal" style="max-width: 700px;">
-             <button class="close-modal-btn">×</button>
-             <h2>Create a New Giveaway</h2>
-             <form id="giveaway-creation-form">
-                <div class="form-field full-width">
-                    <label>Prize Pool</label>
-                    <div id="prize-pool-builder">
-                        <div id="added-prizes-list"></div>
-                    </div>
-                     <div id="add-prize-form">
-                        <div class="form-field">
-                            <label for="prize-type">Type</label>
-                            <select id="prize-type">
-                                <option value="currency">Currency</option>
-                                <option value="sword">Sword</option>
-                            </select>
-                        </div>
-                        <div class="form-field">
-                            <label for="prize-id">Item</label>
-                            <div id="prize-id-container"></div>
-                        </div>
-                        <div class="form-field">
-                             <label for="prize-amount">Amount</label>
-                            <input type="number" id="prize-amount" value="1" min="1">
-                        </div>
-                        <button type="button" id="add-prize-btn" class="auth-button" style="margin-top: 0;">Add</button>
-                    </div>
-                </div>
-                <div class="form-grid">
-                    <div class="form-field">
-                        <label for="start-time">Start Time</label>
-                        <input type="datetime-local" id="start-time" name="start_time" required>
-                    </div>
-                    <div class="form-field">
-                        <label for="end-time">End Time</label>
-                        <input type="datetime-local" id="end-time" name="end_time" required>
-                    </div>
-                </div>
-                <p class="feedback-message" id="giveaway-feedback"></p>
-                <button type="submit" class="auth-button">Create Giveaway</button>
-             </form>
-        </div>
+    <!-- Modal de Registro (Paso 1) -->
+    <div id="register-modal-step1" class="auth-modal">
+        <button class="close-modal-btn">×</button>
+        <h2>Register - Step 1/2</h2>
+        <form id="register-form-step1">
+            <p class="error-message" id="register-error-step1"></p>
+            <input type="text" name="username" placeholder="Roblox Username" required>
+            <input type="password" name="password" placeholder="Create a Password" required>
+            <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+            <button type="submit" class="auth-button">Next: Verify Account</button>
+            <p class="auth-switch">Already have an account? <a href="#" id="show-login-link">Login here</a></p>
+        </form>
     </div>
 
-    <!-- Carga del JavaScript principal -->
-    <script type="module" src="js/main.js"></script>
+    <!-- Modal de Registro (Paso 2) -->
+    <div id="register-modal-step2" class="auth-modal">
+        <button class="close-modal-btn">×</button>
+        <h2>Register - Step 2/2</h2>
+        <p>To verify you own this Roblox account, please complete the following steps:</p>
+        <ol class="verification-steps">
+            <li>Copy the following unique code:</li>
+            <div id="verification-code-container">
+                <strong id="verification-code"></strong>
+                <button id="copy-code-btn">Copy</button>
+            </div>
+            <li>Go to your Roblox profile settings.</li>
+            <li>Paste the code into your "About" section and save.</li>
+            <li>Come back here and click "Verify".</li>
+        </ol>
+        <p class="error-message" id="register-error-step2"></p>
+        <button id="verify-account-btn" class="auth-button">Verify & Create Account</button>
+        <p class="sub-text">(You can remove the code from your profile after verification is complete)</p>
+    </div>
+  </div>
+
+  <!-- Carga del JavaScript principal -->
+  <script type="module" src="js/main.js"></script>
+
 </body>
 </html>

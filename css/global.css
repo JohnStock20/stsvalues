@@ -1,7 +1,6 @@
-/* =================================================================================
-   ARCHIVO: global.css
+/* Archivo: global.css (MODIFICADO)
    Define las variables de color, fuentes y estilos base para toda la página.
-   ================================================================================= */
+*/
 
 :root {
   /* Paleta de Colores Principal */
@@ -12,8 +11,14 @@
   --border-color: #27272a;
   --text-primary: #f8fafc;
   --text-secondary: #a1a1aa;
-  --text-danger: #ef4444; /* Para el logout y errores */
+  
+  /* Colores Semánticos */
+  --text-danger: #ef4444;     /* Para el logout y errores */
   --vengeful-red: #f43f5e;
+  --success-color: #4ade80;   /* Verde para éxito */
+  --warning-color: #facc15;   /* Amarillo para advertencias */
+  --ban-color: #f43f5e;       /* Rojo para baneos */
+
 
   /* Rarezas Base */
   --common: #4ade80;
@@ -22,7 +27,7 @@
   --epic: #c084fc;
   --legendary: #facc15;
   --insane: #f43f5e;
-
+  
   /* Gradientes de Rareza */
   --godly-gradient: linear-gradient(135deg, #f9a8d4, #f5d0fe);
   --subzero-gradient: linear-gradient(135deg, #7dd3fc, #e0f2fe);
@@ -45,15 +50,15 @@
   --title-tester-gradient: var(--subzero-gradient); /* Mismo que Subzero */
   --title-owner-gradient: linear-gradient(135deg, #ec4899, #a5b4fc); /* Rosado-Azulado */
 
-  /* Sombras */
+  /* Sombras (sombra -lg AUMENTADA para mayor efecto hover) */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.1);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.15), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.2);
+  --shadow-lg: 0 10px 20px -5px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.2);
 
   /* Radio de Bordes */
   --border-radius-sm: 0.375rem; /* 6px */
-  --border-radius-md: 0.5rem; /* 8px */
-  --border-radius-lg: 0.75rem; /* 12px */
+  --border-radius-md: 0.5rem;   /* 8px */
+  --border-radius-lg: 0.75rem;  /* 12px */
 
   /* Transiciones */
   --transition-fast: all 0.2s ease-in-out;
@@ -108,7 +113,18 @@ a:hover {
   background: var(--main-green);
 }
 
-/* Clases de utilidad para vistas (No se usa activamente con el nuevo router de JS, pero se mantiene por si acaso) */
+/* Clases de utilidad para vistas (No se usa activamente con el nuevo
+   router de JS, pero se mantiene por si acaso) */
 .main-view-panel {
-  display: none;
+  display: none; /* Se activa con JS */
+}
+
+/* Estilo para la vista activa */
+.main-view-panel[style*="block"] {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
