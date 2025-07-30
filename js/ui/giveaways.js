@@ -3,6 +3,8 @@
 
 import { dom } from './dom.js';
 import { getPrizeItemHtml, showView } from './core.js';
+// LA LÍNEA SIGUIENTE ES LA CORRECCIÓN:
+import { getPrizeItemHtml } from '../utils.js';
 
 // --- Funciones de Renderizado de Componentes de Sorteos ---
 
