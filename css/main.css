@@ -1,0 +1,36 @@
+/* =================================================================================
+ARCHIVO: main.css (Estilos Generales) - VERSIÓN 100% COMPLETA
+================================================================================= */
+
+/* ...existing styles... */
+
+
+/* Doble borde con resplandor para contenedores principales y cards */
+.double-border-glow {
+    background: #232323; /* Gris oscuro de fondo */
+    border-radius: 18px;
+    padding: 10px;
+    position: relative;
+    box-shadow:
+        0 0 0 3px #00ffe7, /* Primer borde cian */
+        0 0 0 8px #232323, /* Segundo borde igual al fondo */
+        0 0 16px 4px #00ffe7; /* Resplandor externo */
+    /* Ajusta los valores para más/menos grosor o glow */
+}
+
+/* Opcional: para que el contenido interno no se pegue al borde */
+.double-border-glow > * {
+    border-radius: 12px;
+}
+
+/* Aplica el mismo efecto a los case-item si quieres que cada caja tenga el borde */
+.case-item.double-border-glow {
+    background: #232323;
+    border-radius: 18px;
+    box-shadow:
+        0 0 0 3px #00ffe7,
+        0 0 0 8px #232323,
+        0 0 16px 4px #00ffe7;
+}
+
+/* ...existing styles... */
