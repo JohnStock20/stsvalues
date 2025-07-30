@@ -514,6 +514,151 @@
 #equip-title-btn.equipped { background-color: var(--main-green); color: var(--dark-bg); cursor: default; border-color: var(--main-green); }
 #equip-title-btn:disabled:not(.equipped) { background-color: var(--border-color); cursor: not-allowed; }
 
+/* --- ESTILO BASE PARA PANELES --- */
+.panel-style {
+    --shadow-color: rgba(45, 212, 191, 0.4); /* Color de sombra por defecto (main-green) */
+    background-color: transparent;
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+.panel-style::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 3px;
+    background: var(--border-color);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    z-index: 0;
+}
+.panel-style::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: var(--panel-bg);
+    border-radius: inherit;
+    z-index: -1;
+}
+.panel-style:hover::before {
+    background: var(--main-green);
+}
+.panel-style:hover {
+    box-shadow: 0 0 20px 5px var(--shadow-color);
+}
+.panel-style > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Aplicar el estilo a los componentes existentes */
+.info-column {
+    border: none; /* Eliminar borde anterior */
+    background: transparent;
+}
+.info-column::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 3px;
+    background: var(--case-border-color, var(--main-green));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+.info-column::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: var(--panel-bg);
+    border-radius: inherit;
+    z-index: -1;
+}
+
+/* Aplicar a más componentes */
+.stat-box {
+    border: none;
+    background: transparent;
+}
+.stat-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 3px;
+    background: var(--main-green);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+.stat-box::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: var(--panel-bg);
+    border-radius: inherit;
+    z-index: -1;
+}
+
+/* Aplicar a los módulos UI superiores */
+.top-ui-module {
+    border: none;
+    background: transparent;
+}
+.top-ui-module::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 3px;
+    background: var(--border-color);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+.top-ui-module::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: var(--panel-bg);
+    border-radius: inherit;
+    z-index: -1;
+}
+.top-ui-module:hover::before {
+    background: var(--main-green);
+}
+
+/* Aplicar a title-details-view */
+#title-details-view {
+    border: none;
+    background: transparent;
+}
+#title-details-view::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 3px;
+    background: var(--border-color);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+}
+#title-details-view::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: var(--panel-bg);
+    border-radius: inherit;
+    z-index: -1;
+}
+#title-details-view:hover::before {
+    background: var(--main-green);
+}
+
 /* --- RESPONSIVE ADAPTATIONS FOR COMPONENTS --- */
 @media (max-width: 768px) {
     .details-content, .sword-details-content { grid-template-columns: 1fr; }
