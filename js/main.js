@@ -1,12 +1,11 @@
 // =================================================================================
-// ARCHIVO: main.js (NUEVO CEREBRO DE LA APLICACIÓN) - VERSIÓN FINAL COMPLETA
+// ARCHIVO: main.js (NUEVO CEREBRO DE LA APLICACIÓN) - VERSIÓN FINAL CORREGIDA
 // =================================================================================
 
 // --- MÓDULOS ---
 import { appData, parseValue } from './data.js';
 import { findSwordById, getPrizeItemHtml, getUnitValue, convertTimeValueToCurrency, formatLargeNumber } from './utils.js';
-// FIX: Se importan explícitamente los objetos necesarios desde UI para evitar errores
-import { dom, inputs, buttons, showView, renderCaseSelection, renderOtherSwords, renderGiveawayPage, openGiveawayModal, closeGiveawayModal, renderAdminTools, updateProfileHeader, renderTitlesPage, renderCaseDetails, renderSwordDetails, createRewardItem } from './ui.js';
+import * as UI from './ui.js';
 import { initializeAuth, titleStyles } from './auth.js';
 import * as Calculator from './calculator.js';
 
@@ -360,16 +359,16 @@ function initializeTopUI() {
     }
 
     function updateConverter() {
-        const fromValue = parseFloat(UI.inputs.converterFrom.value);
-        if (isNaN(fromValue) || fromValue <= 0) { UI.inputs.converterTo.value = ''; return; }
+        const fromValue = parseFloat(UI.dom.inputs.converterFrom.value); // FIX: Use UI.dom.inputs
+        if (isNaN(fromValue) || fromValue <= 0) { UI.dom.inputs.converterTo.value = ''; return; }
         const fromKey = document.getElementById('converter-from-name').dataset.currencyKey;
         const toKey = document.getElementById('converter-to-name').dataset.currencyKey;
         const timeValue = fromValue * getUnitValue(fromKey, fromValue);
         const result = convertTimeValueToCurrency(timeValue, toKey);
-        UI.inputs.converterTo.value = result > 0 ? formatLargeNumber(result) : 'N/A';
+        UI.dom.inputs.converterTo.value = result > 0 ? formatLargeNumber(result) : 'N/A';
     }
 
-    UI.inputs.converterFrom.addEventListener('input', updateConverter);
+    UI.dom.inputs.converterFrom.addEventListener('input', updateConverter); // FIX: Use UI.dom.inputs
 
     currencySelectors.forEach(wrapper => {
         wrapper.addEventListener('click', (e) => {
@@ -386,43 +385,43 @@ function initializeTopUI() {
     setCurrency('converter-to', 'diamonds');
 
     const allSwords = [...Object.values(appData.cases).flatMap(c=>c.rewards), ...appData.otherSwords];
-    UI.inputs.searchBar.addEventListener("input", () => {
-        const query = UI.inputs.searchBar.value.toLowerCase().trim();
-        if(!query) { UI.containers.searchResults.style.display = 'none'; return; }
+    UI.dom.inputs.searchBar.addEventListener("input", () => { // FIX: Use UI.dom.inputs
+        const query = UI.dom.inputs.searchBar.value.toLowerCase().trim();
+        if(!query) { UI.dom.containers.searchResults.style.display = 'none'; return; }
         const results = allSwords.filter(s=>s.name.toLowerCase().includes(query)).slice(0,10);
-        UI.containers.searchResults.innerHTML = '';
+        UI.dom.containers.searchResults.innerHTML = '';
         if(results.length > 0){
             results.forEach(sword => {
                 const source = findSwordById(sword.id)?.source || { type: 'other' };
                 const item = UI.createRewardItem(sword, source, navigateToSubView);
                 item.addEventListener('click', () => {
                     navigateToSubView("swordDetails", { sword, source });
-                    UI.inputs.searchBar.value = '';
-                    UI.containers.searchResults.style.display = 'none';
+                    UI.dom.inputs.searchBar.value = '';
+                    UI.dom.containers.searchResults.style.display = 'none';
                 });
-                UI.containers.searchResults.appendChild(item);
+                UI.dom.containers.searchResults.appendChild(item);
             });
-            UI.containers.searchResults.style.display = 'block';
+            UI.dom.containers.searchResults.style.display = 'block';
         } else {
-            UI.containers.searchResults.style.display = 'none';
+            UI.dom.containers.searchResults.style.display = 'none';
         }
     });
 
     document.addEventListener('click', (e) => {
         if (!document.getElementById('search-module').contains(e.target)) {
-            UI.containers.searchResults.style.display = 'none';
+            UI.dom.containers.searchResults.style.display = 'none';
         }
     });
 }
 
 function initializeCalculator() {
-    UI.buttons.calculate.addEventListener('click', () => {
-        const quantity = parseInt(UI.inputs.caseQuantity.value, 10);
+    UI.dom.buttons.calculate.addEventListener('click', () => { // FIX: Use UI.dom.buttons
+        const quantity = parseInt(UI.dom.inputs.caseQuantity.value, 10); // FIX: Use UI.dom.inputs
         const caseId = appState.currentCaseIdForCalc;
         if (caseId && appData.cases[caseId] && !isNaN(quantity) && quantity > 0) {
             Calculator.runTheoreticalCalculation(quantity, caseId, appState);
         } else {
-            UI.containers.resultsTable.innerHTML = `<p class="error-message" style="display:block;">Please enter a valid number of cases.</p>`;
+            UI.dom.containers.resultsTable.innerHTML = `<p class="error-message" style="display:block;">Please enter a valid number of cases.</p>`;
         }
     });
 }
