@@ -5,7 +5,8 @@
 // --- MÓDULOS ---
 import { appData, parseValue } from './data.js';
 import { findSwordById, getPrizeItemHtml, getUnitValue, convertTimeValueToCurrency, formatLargeNumber } from './utils.js';
-import * as UI from './ui.js';
+// FIX: Se importan explícitamente los objetos necesarios desde UI para evitar errores
+import { dom, inputs, buttons, showView, renderCaseSelection, renderOtherSwords, renderGiveawayPage, openGiveawayModal, closeGiveawayModal, renderAdminTools, updateProfileHeader, renderTitlesPage, renderCaseDetails, renderSwordDetails, createRewardItem } from './ui.js';
 import { initializeAuth, titleStyles } from './auth.js';
 import * as Calculator from './calculator.js';
 

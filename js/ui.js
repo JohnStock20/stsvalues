@@ -63,7 +63,6 @@ export const dom = {
     converterFromName: document.getElementById('converter-from-name'),
     converterToName: document.getElementById('converter-to-name'),
 };
-
 // --- Funciones de Control de Vistas ---
 
 export function showView(viewName) {
