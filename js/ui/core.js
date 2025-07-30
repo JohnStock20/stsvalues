@@ -1,9 +1,10 @@
-// Archivo: js/ui/core.js (NUEVO)
+// Archivo: js/ui/core.js (CORREGIDO)
 // Propósito: Contiene funciones de UI fundamentales y reutilizables.
 
 import { dom } from './dom.js';
 import { appData, parseValue } from '../data.js';
-import { formatLargeNumber } from '../utils.js';
+// LA LÍNEA SIGUIENTE ES LA CORRECCIÓN:
+import { formatLargeNumber, formatHours } from '../utils.js';
 import { titleStyles } from '../auth.js';
 
 // --- Funciones de Control de Vistas ---
@@ -53,8 +54,6 @@ function createRewardItemHTML(reward, source) {
     ? `<span class="value-oc" title="Owner's Choice">O/C</span>`
     : formatLargeNumber(parseValue(reward.value));
 
-  // Aumentamos el brillo del hover modificando el shadow-color en el CSS
-  // y podemos añadir un efecto más pronunciado aquí si es necesario.
   return `
     <div class="reward-info">
       <div class="reward-image-placeholder">
@@ -72,7 +71,6 @@ function createRewardItemHTML(reward, source) {
 
 export function createRewardItem(reward, source, navigateTo) {
   const item = document.createElement('div');
-  // Se añade la clase de hover para el brillo prominente
   item.className = `reward-item ${reward.rarity}`;
   item.innerHTML = createRewardItemHTML(reward, source);
 
@@ -85,6 +83,7 @@ export function createRewardItem(reward, source, navigateTo) {
 
 export function getCurrencyHTML(currencyKey, price) {
   if (currencyKey === 'cooldown') {
+    // ESTA LÍNEA DABA EL ERROR. AHORA FUNCIONARÁ.
     return `<span class="currency-text">Free (Every ${formatHours(price)} hr)</span>`;
   }
   const currency = appData.currencies[currencyKey];
