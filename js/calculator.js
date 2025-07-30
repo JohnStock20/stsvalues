@@ -1,11 +1,11 @@
-/* =================================================================================== */
-/* === ARCHIVO: calculator.js === */
-/* === Toda la lógica de negocio y cálculos para la calculadora de profit. === */
-/* =================================================================================== */
+// =================================================================================
+// ARCHIVO: calculator.js
+// Toda la lógica de negocio y cálculos para la calculadora de profit.
+// =================================================================================
 
-import { appData } from './data.js';
-import { parseValue } from './data.js';
+import { appData, parseValue } from './data.js';
 import { getUnitValue } from './utils.js';
+// FIX: Se restauran todas las importaciones necesarias desde ui.js
 import { renderResultsTable, renderSimulationLoot, renderHuntResult, renderProfitGraph } from './ui.js';
 
 // --- Funciones de Cálculo de Coste ---
@@ -33,8 +33,10 @@ function prepareSimulationData(caseData) {
 
 export function runTheoreticalCalculation(quantity, caseId, appState) {
     const caseData = appData.cases[caseId];
+    if (!caseData) return;
+
     let expectedValuePerCase = 0;
-    
+
     caseData.rewards.forEach(reward => {
         const numericValue = parseValue(reward.value);
         const chance = reward.chance / 100;
@@ -101,14 +103,13 @@ export function runUntilBestSimulation(caseId, appState) {
     }
 
     const totalCost = calculateTotalCost(caseData.currency, caseData.price, casesOpened);
-    
+
     renderHuntResult({
         found: hasFoundBest,
         casesOpened,
         bestReward,
         maxAttempts: MAX_ATTEMPTS
     });
-
     renderResultsTable({
         totalCost,
         totalValueGained,
@@ -129,10 +130,8 @@ export function runGraphSimulation(step, max, caseId) {
         if (wonReward) {
             totalValueGained += parseValue(wonReward.value);
         }
-
         if (i % step === 0 || i === max) {
             const totalCost = calculateTotalCost(caseData.currency, caseData.price, i);
-            
             if (totalCost > 0) {
                 const profitPercentage = ((totalValueGained - totalCost) / totalCost) * 100;
                 results.push({ cases: i, value: profitPercentage, isPercentage: true });

@@ -1,9 +1,9 @@
 // =================================================================================
-// ARCHIVO: ui.js (Controlador de la Interfaz de Usuario) - VERSIÓN FINAL CORREGIDA
+// ARCHIVO: ui.js (Controlador de la Interfaz de Usuario) - VERSIÓN 100% COMPLETA
 // =================================================================================
 
 import { appData, parseValue } from './data.js';
-import { findSwordById, formatLargeNumber, formatTimeAgo, getPrizeItemHtml } from './utils.js';
+import { findSwordById, formatLargeNumber, formatTimeAgo, getPrizeItemHtml, formatHours } from './utils.js';
 import { titleStyles } from './auth.js';
 
 // --- Selectores del DOM ---
@@ -30,6 +30,11 @@ export const dom = {
         adminTools: document.getElementById('devtools-view'),
         searchResults: document.getElementById('search-results'),
         resultsTable: document.getElementById('results-table-container'),
+        simulationLoot: document.getElementById('simulation-loot-summary'),
+        graph: document.getElementById('graph-container'),
+        graphPlotArea: document.getElementById('graph-plot-area'),
+        graphLabels: document.getElementById('graph-labels'),
+        graphSvg: document.querySelector('#graph-plot-area svg'),
     },
     buttons: {
         backToCases: document.getElementById('details-to-cases-btn'),
@@ -37,16 +42,23 @@ export const dom = {
         prevPage: document.getElementById('other-prev-btn'),
         nextPage: document.getElementById('other-next-btn'),
         calculate: document.getElementById('calculate-btn'),
+        calculateGraph: document.getElementById('calculate-graph-btn'),
     },
     inputs: {
         converterFrom: document.getElementById('converter-from-input'),
         converterTo: document.getElementById('converter-to-input'),
         searchBar: document.getElementById('search-bar'),
         caseQuantity: document.getElementById('case-quantity-input'),
+        graphStep: document.getElementById('graph-step-input'),
+        graphMax: document.getElementById('graph-max-input'),
     },
     modals: {
         createGiveaway: document.getElementById('create-giveaway-modal-overlay'),
         closeGiveaway: document.querySelector('#create-giveaway-modal .close-modal-btn'),
+    },
+    controls: {
+        standard: document.getElementById('standard-controls'),
+        graph: document.getElementById('graph-controls'),
     },
     converterFromName: document.getElementById('converter-from-name'),
     converterToName: document.getElementById('converter-to-name'),
@@ -155,6 +167,7 @@ export function renderCaseDetails(caseId, navigateTo) {
         const item = createRewardItem(reward, source, navigateTo);
         dom.containers.rewards.appendChild(item);
     });
+    clearCalculator({ calculatorMode: 'theoretical' });
     showView('caseDetails');
 }
 
@@ -221,11 +234,186 @@ export function renderSwordDetails(sword, sourceInfo, navigateTo, onNewInterval)
     showView('swordDetails');
 }
 
-// --- Renderizado de Títulos ---
 
+// --- Renderizado de la Calculadora ---
+
+export function clearCalculator(appState) {
+    dom.containers.simulationLoot.style.display = 'none';
+    dom.containers.resultsTable.innerHTML = '';
+    dom.containers.graph.style.display = 'none';
+    if (dom.containers.graphSvg) dom.containers.graphSvg.innerHTML = '';
+    if (dom.containers.graphLabels) dom.containers.graphLabels.innerHTML = '';
+
+    const isGraphMode = appState.calculatorMode === 'graph';
+    const isUntilBestMode = appState.calculatorMode === 'untilBest';
+
+    dom.controls.standard.style.display = isGraphMode ? 'none' : 'flex';
+    dom.controls.graph.style.display = isGraphMode ? 'flex' : 'none';
+
+    if (isUntilBestMode) {
+        dom.inputs.caseQuantity.value = '';
+        dom.inputs.caseQuantity.placeholder = "Not applicable";
+        dom.inputs.caseQuantity.disabled = true;
+        dom.buttons.calculate.textContent = 'Start Hunt';
+    } else {
+        dom.inputs.caseQuantity.placeholder = "Enter amount...";
+        dom.inputs.caseQuantity.disabled = false;
+        dom.buttons.calculate.textContent = 'Calculate';
+    }
+}
+
+export function renderResultsTable(data, appState) {
+    dom.containers.resultsTable.innerHTML = '';
+    const quantity = data.quantityOverride || parseInt(dom.inputs.caseQuantity.value, 10) || 1;
+    const resultClass = data.result >= 0 ? 'profit' : 'loss';
+    const resultSign = data.result >= 0 ? '+' : '';
+    const profitPerCase = data.result / quantity;
+    const profitPercentage = data.totalCost > 0 ? (data.result / data.totalCost) * 100 : (data.result > 0 ? Infinity : 0);
+    const profitPercentageDisplay = isFinite(profitPercentage) ? `${profitPercentage.toFixed(2)}%` : `∞%`;
+    let totalCostDisplay;
+    const currentCaseData = appData.cases[appState.currentCaseIdForCalc];
+    if (currentCaseData && currentCaseData.currency === 'cooldown') {
+        totalCostDisplay = formatHours(data.totalCost);
+    } else {
+        totalCostDisplay = formatLargeNumber(data.totalCost);
+    }
+    const tableHTML = `
+        <table id="results-table">
+            <thead>
+                <tr>
+                    <th>${appState.calculatorMode === 'theoretical' ? 'Expected Value' : 'Total Value'}</th>
+                    <th>Total Cost</th>
+                    <th>Net Result</th>
+                    <th>Result/Case</th>
+                    <th>Profit %</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>${formatLargeNumber(data.totalValueGained)}</td>
+                    <td>${totalCostDisplay}</td>
+                    <td class="${resultClass}">${resultSign}${formatLargeNumber(data.result)}</td>
+                    <td class="${resultClass}">${resultSign}${formatLargeNumber(profitPerCase)}</td>
+                    <td class="${resultClass}">${profitPercentageDisplay}</td>
+                </tr>
+            </tbody>
+        </table>`;
+    dom.containers.resultsTable.innerHTML = tableHTML;
+}
+
+export function renderSimulationLoot(wonItems) {
+    dom.containers.simulationLoot.style.display = 'block';
+    if (Object.keys(wonItems).length === 0) {
+        dom.containers.simulationLoot.innerHTML = '<h4>Loot Summary</h4><p>No items won in this simulation.</p>';
+        return;
+    }
+    let listHTML = '<h4>Loot Summary</h4><ul>';
+    for (const rewardId in wonItems) {
+        const rewardData = findSwordById(rewardId)?.sword;
+        if (rewardData) {
+            listHTML += `<li>${wonItems[rewardId]}x <span class="rarity-text ${rewardData.rarity}">${rewardData.name}</span></li>`;
+        }
+    }
+    listHTML += '</ul>';
+    dom.containers.simulationLoot.innerHTML = listHTML;
+}
+
+export function renderHuntResult(result) {
+    dom.containers.simulationLoot.style.display = 'block';
+    if (result.found) {
+        dom.containers.simulationLoot.innerHTML = `<h4>Hunt Result</h4><p>It took <strong>${result.casesOpened.toLocaleString()}</strong> cases to find <span class="rarity-text ${result.bestReward.rarity}">${result.bestReward.name}</span>!</p>`;
+    } else {
+        dom.containers.simulationLoot.innerHTML = `<h4>Hunt Result</h4><p style="color:var(--insane);">Did not find the ${result.bestReward.name} within ${result.maxAttempts.toLocaleString()} cases. This is a super rare item!</p>`;
+    }
+}
+
+export function renderProfitGraph(results, MAX_GRAPH_SECTIONS) {
+    if (results.length > MAX_GRAPH_SECTIONS) {
+        dom.containers.resultsTable.innerHTML = `<p class="error-message" style="display:block;">Too many sections requested (Max: ${MAX_GRAPH_SECTIONS}).</p>`;
+        return;
+    }
+    dom.containers.graph.style.display = 'block';
+    const tooltip = document.querySelector('.graph-tooltip');
+    dom.containers.graphSvg.innerHTML = '';
+    dom.containers.graphLabels.innerHTML = '';
+    if (results.length < 2) return;
+    
+    const isPercentage = results[0].isPercentage;
+    const yAxisLabel = isPercentage ? 'Profit %' : 'Net Gain (Time)';
+    const padding = { top: 20, right: 20, bottom: 20, left: 20 };
+    const width = dom.containers.graphSvg.clientWidth;
+    const height = dom.containers.graphSvg.clientHeight;
+    if (width === 0 || height === 0) return;
+    const chartWidth = width - padding.left - padding.right;
+    const chartHeight = height - padding.top - padding.bottom;
+    const minCases = results[0].cases;
+    const maxCases = results[results.length - 1].cases;
+    const yValues = results.map(r => r.value);
+    const yMin = Math.min(0, ...yValues);
+    const yMax = Math.max(0, ...yValues);
+    const yRange = (yMax - yMin) === 0 ? 1 : (yMax - yMin);
+    const yDomainMin = yMin - yRange * 0.1;
+    const yDomainMax = yMax + yRange * 0.1;
+
+    const xScale = (cases) => padding.left + ((cases - minCases) / (maxCases - minCases)) * chartWidth;
+    const yScale = (val) => padding.top + chartHeight - ((val - yDomainMin) / (yDomainMax - yDomainMin)) * chartHeight;
+
+    const createLineSegment = (p1, p2, isPositive) => {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', p1.x); line.setAttribute('y1', p1.y);
+        line.setAttribute('x2', p2.x); line.setAttribute('y2', p2.y);
+        line.setAttribute('class', isPositive ? 'graph-profit-line' : 'graph-loss-line');
+        dom.containers.graphSvg.appendChild(line);
+    };
+
+    const zeroY = yScale(0);
+    if (zeroY >= padding.top && zeroY <= height - padding.bottom) {
+        const zeroLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        zeroLine.setAttribute('x1', padding.left); zeroLine.setAttribute('y1', zeroY);
+        zeroLine.setAttribute('x2', width - padding.right); zeroLine.setAttribute('y2', zeroY);
+        zeroLine.setAttribute('class', 'graph-zero-line');
+        dom.containers.graphSvg.appendChild(zeroLine);
+    }
+    for (let i = 0; i < results.length - 1; i++) {
+        const p1 = results[i]; const p2 = results[i + 1];
+        const p1_coords = { x: xScale(p1.cases), y: yScale(p1.value) };
+        const p2_coords = { x: xScale(p2.cases), y: yScale(p2.value) };
+        if (p1.value * p2.value < 0) {
+            const m = (p2.value - p1.value) / (p2.cases - p1.cases);
+            const x_intersect = p1.cases - p1.value / m;
+            const intersect_coords = { x: xScale(x_intersect), y: yScale(0) };
+            createLineSegment(p1_coords, intersect_coords, p1.value >= 0);
+            createLineSegment(intersect_coords, p2_coords, p2.value >= 0);
+        } else { createLineSegment(p1_coords, p2_coords, p1.value >= 0); }
+    }
+    results.forEach(d => {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        const cx = xScale(d.cases); const cy = yScale(d.value);
+        circle.setAttribute('cx', cx); circle.setAttribute('cy', cy);
+        circle.setAttribute('class', `graph-data-point ${d.value >= 0 ? 'profit' : 'loss'}`);
+        circle.addEventListener('mouseover', () => {
+            tooltip.style.display = 'block';
+            tooltip.style.left = `${cx}px`; tooltip.style.top = `${cy}px`;
+            const sign = d.value > 0 ? '+' : '';
+            const valueText = isPercentage ? `${sign}${d.value.toFixed(2)}%` : `${sign}${formatLargeNumber(d.value)}`;
+            tooltip.innerHTML = `Cases: <strong>${d.cases.toLocaleString()}</strong><br>${yAxisLabel}: <strong class="tooltip-value ${d.value >= 0 ? 'profit' : 'loss'}">${valueText}</strong>`;
+        });
+        circle.addEventListener('mouseout', () => { tooltip.style.display = 'none'; });
+        dom.containers.graphSvg.appendChild(circle);
+    });
+
+    const numLabels = Math.min(results.length, 6);
+    const labelIndices = numLabels <= 1 ? [0] : Array.from({ length: numLabels }, (_, i) => Math.floor(i * (results.length - 1) / (numLabels - 1)));
+    if (results.length > 0) {
+        dom.containers.graphLabels.innerHTML = labelIndices.map(i => `<span>${formatLargeNumber(results[i].cases)}</span>`).join('');
+    }
+}
+
+
+// --- Renderizado de Títulos, Sorteos y Admin ---
 export function renderTitlesPage(titlesData, selectedKey, onSelect, onEquip) {
     dom.containers.titlesList.innerHTML = '';
-    if (!titlesData) { /* ... */ return; }
+    if (!titlesData) { dom.containers.titlesList.innerHTML = '<p>Could not load titles.</p>'; return; }
     titlesData.forEach(title => {
         const styleInfo = titleStyles[title.key] || titleStyles['player'];
         const item = document.createElement('div');
@@ -245,7 +433,7 @@ export function renderTitlesPage(titlesData, selectedKey, onSelect, onEquip) {
 
 function renderTitleDetails(title, onEquip) {
     const container = dom.containers.titleDetails;
-    if (!title) { container.innerHTML = '<p>Select a title to see its details.</p>'; return; }
+    if (!title) { container.innerHTML = '<p>Select a title from the list to see its details.</p>'; return; }
     const styleInfo = titleStyles[title.key] || titleStyles['player'];
     container.innerHTML = `
         <h3 class="${styleInfo.style.includes('gradient') ? 'gradient' : ''}" 
@@ -263,9 +451,6 @@ function renderTitleDetails(title, onEquip) {
         equipBtn.disabled = true;
     }
 }
-
-
-// --- Renderizado de Sorteos ---
 
 export function renderGiveawayPage(giveaways, recentWinners, currentUser, onJoin, onHost) {
     const activeGiveaway = giveaways.find(gw => gw.status === 'active');
@@ -324,7 +509,7 @@ function renderUpcomingGiveaways(giveaways) {
     const list = document.createElement('div');
     list.id = 'upcoming-giveaways-list';
     giveaways.slice(0, 5).forEach(gw => {
-        const prizeText = gw.prize_pool.map(p => `${formatLargeNumber(p.amount)}${p.type === 'sword' ? 'x' : ''} ${p.type === 'currency' ? appData.currencies[p.id]?.name : findSwordById(p.id)?.sword.name}`).join(' + ');
+        const prizeText = gw.prize_pool.map(p => `${formatLargeNumber(p.amount)}${p.type === 'sword' ? 'x' : ''} ${p.type === 'currency' ? (appData.currencies[p.id] ? appData.currencies[p.id].name : p.id) : (findSwordById(p.id) ? findSwordById(p.id).sword.name : p.id)}`).join(' + ');
         list.innerHTML += `
             <div class="upcoming-giveaway-item">
                 <span class="prize">${prizeText}</span>
@@ -355,7 +540,7 @@ function renderRecentWinners(winners) {
         return;
     }
     list.innerHTML = winners.map(w => {
-        const prizeText = w.prize_pool.map(p => `${formatLargeNumber(p.amount)}${p.type === 'sword' ? 'x' : ''} ${p.type === 'currency' ? appData.currencies[p.id]?.name : findSwordById(p.id)?.sword.name}`).join(' + ');
+        const prizeText = w.prize_pool.map(p => `${formatLargeNumber(p.amount)}${p.type === 'sword' ? 'x' : ''} ${p.type === 'currency' ? (appData.currencies[p.id] ? appData.currencies[p.id].name : p.id) : (findSwordById(p.id) ? findSwordById(p.id).sword.name : p.id)}`).join(' + ');
         return `
             <div class="winner-item">
                 <span class="winner-name">${w.winner}</span> won 
