@@ -488,7 +488,7 @@ bold; font-size: 1.1em; }
 .converter-input[type="number"]::-webkit-inner-spin-button {
 -webkit-appearance: none; margin: 0; }
 .converter-input[type=number] { -moz-appearance: textfield; }
-#search-module { position: relative; width: 450px; max-width: 100%; }
+#search-module { position: relative; width: 400px; max-width: 100%; }
 #search-bar { background-color: var(--dark-bg); border: 1px solid
 var(--border-color); color: var(--text-primary); padding: 12px 15px;
 font-size: 1.1em; border-radius: var(--border-radius-md); width: 100%;
