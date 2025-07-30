@@ -94,8 +94,6 @@ function getCurrencyHTML(currencyKey, price) {
 
 export function renderCaseSelection(navigateTo) {
     dom.containers.cases.innerHTML = '';
-    // Aplica el doble borde al contenedor de cases
-    dom.containers.cases.classList.add('double-border-glow');
     Object.keys(appData.cases).forEach(caseId => {
         const data = appData.cases[caseId];
         const link = document.createElement('a');
@@ -103,7 +101,7 @@ export function renderCaseSelection(navigateTo) {
         link.className = 'case-link';
         link.onclick = (e) => { e.preventDefault(); navigateTo('caseDetails', caseId); };
         const caseItem = document.createElement('div');
-        caseItem.className = 'case-item double-border-glow'; // Aplica el doble borde a cada caja
+        caseItem.className = 'case-item';
         caseItem.style.setProperty('--case-border-color', data.borderColor || 'var(--main-green)');
         caseItem.innerHTML = `
             <img class="case-content-image" src="${data.image}" alt="${data.name}">
@@ -172,8 +170,6 @@ function createRewardItemHTML(reward, source) {
 export function renderCaseDetails(caseId, navigateTo) {
     const data = appData.cases[caseId];
     if (!data) return;
-    // Aplica el doble borde al contenedor de detalles de la caja
-    document.querySelector('#case-details-view .info-column').classList.add('double-border-glow');
     document.getElementById('details-case-image').src = data.image;
     document.getElementById('details-case-name').textContent = data.name;
     document.getElementById('details-case-price').innerHTML = getCurrencyHTML(data.currency, data.price);
