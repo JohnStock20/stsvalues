@@ -32,57 +32,64 @@ exports.handler = async (event) => {
 async function handleGetGiveaways(event) {
   const client = await pool.connect();
   try {
-    // 1. Obtener sorteos activos y próximos
-    const giveawaysResult = await client.query(
-      `SELECT id, prize_pool, start_time, end_time, status, created_by, 
-       COALESCE(array_length(participants, 1), 0) as participant_count,
-       participants
-       FROM giveaways 
-       WHERE status != 'finished' 
-       ORDER BY start_time ASC`
-    );
-
-    // 2. Obtener los últimos 5 ganadores
-    const winnersResult = await client.query(
-      `SELECT winner, prize_pool 
-       FROM giveaways 
-       WHERE status = 'finished' AND winner IS NOT NULL 
-       ORDER BY end_time DESC 
-       LIMIT 5`
-    );
-
-    // 3. Actualizar estado y enriquecer datos de participantes
     const now = new Date();
-    const giveaways = await Promise.all(giveawaysResult.rows.map(async gw => {
-      let status = gw.status;
-      if (status !== 'finished' && new Date(gw.end_time) < now) {
-        status = 'finished';
-        // Aquí debería ir la lógica para seleccionar un ganador
-        if (gw.participants && gw.participants.length > 0) {
-            const winner = gw.participants[Math.floor(Math.random() * gw.participants.length)];
-            client.query('UPDATE giveaways SET status = $1, winner = $2 WHERE id = $3', [status, winner, gw.id]);
-        } else {
-            client.query('UPDATE giveaways SET status = $1 WHERE id = $2', [status, gw.id]);
-        }
-      }
+    
+    // 1. Obtener todos los sorteos que no estén ya finalizados de forma permanente.
+    const giveawaysResult = await client.query(
+      `SELECT id, prize_pool, start_time, end_time, status, created_by, participants
+       FROM giveaways 
+       WHERE status != 'archived'` // Podríamos archivar sorteos muy antiguos en el futuro.
+    );
 
-      // **FIX**: Obtener datos de participantes (username y avatar)
-      let participantsData = [];
-      if (gw.participants && gw.participants.length > 0) {
-          const usersResult = await client.query(
-              'SELECT username, roblox_avatar_url as avatar FROM users WHERE username = ANY($1::text[])',
-              [gw.participants]
-          );
-          participantsData = usersResult.rows;
+    // 2. Procesar y actualizar el estado de cada sorteo dinámicamente.
+    for (const gw of giveawaysResult.rows) {
+      const startTime = new Date(gw.start_time);
+      const endTime = new Date(gw.end_time);
+
+      // LÓGICA CORREGIDA Y MEJORADA
+      // Comprobación 1: ¿Debería pasar de 'upcoming' a 'active'?
+      if (gw.status === 'upcoming' && now >= startTime && now < endTime) {
+        gw.status = 'active';
+        // Actualizamos la base de datos para que el cambio sea permanente.
+        await client.query('UPDATE giveaways SET status = $1 WHERE id = $2', ['active', gw.id]);
       }
       
-      return { ...gw, status, participants: participantsData };
-    }));
+      // Comprobación 2: ¿Debería pasar de 'active' a 'finished'?
+      if (gw.status === 'active' && now >= endTime) {
+        gw.status = 'finished';
+        let winner = null;
+        // Seleccionar un ganador si hay participantes.
+        if (gw.participants && gw.participants.length > 0) {
+          winner = gw.participants[Math.floor(Math.random() * gw.participants.length)];
+        }
+        // Actualizamos la base de datos con el estado 'finished' y el ganador.
+        await client.query('UPDATE giveaways SET status = $1, winner = $2 WHERE id = $3', ['finished', winner, gw.id]);
+      }
+    }
 
+    // 3. Obtener los últimos 5 ganadores (sin cambios aquí).
+    const winnersResult = await client.query(
+      `SELECT winner, prize_pool, end_time FROM giveaways
+       WHERE status = 'finished' AND winner IS NOT NULL
+       ORDER BY end_time DESC LIMIT 5`
+    );
+
+    // 4. Enriquecer los datos de los participantes (sin cambios aquí).
+    const activeGiveaway = giveawaysResult.rows.find(gw => gw.status === 'active');
+    if (activeGiveaway && activeGiveaway.participants && activeGiveaway.participants.length > 0) {
+        const usersResult = await client.query(
+            'SELECT username, roblox_avatar_url as avatar FROM users WHERE username = ANY($1::text[])',
+            [activeGiveaway.participants]
+        );
+        activeGiveaway.participants = usersResult.rows;
+    }
+
+    // 5. Devolver los datos actualizados al cliente.
     return {
       statusCode: 200,
       body: JSON.stringify({
-        giveaways: giveaways.filter(gw => gw.status !== 'finished'),
+        // Filtramos para enviar solo los activos y próximos.
+        giveaways: giveawaysResult.rows.filter(gw => gw.status === 'active' || gw.status === 'upcoming'),
         recentWinners: winnersResult.rows
       })
     };
