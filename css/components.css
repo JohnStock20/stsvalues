@@ -524,17 +524,18 @@ z-index: 1001; box-shadow: var(--shadow-lg); }
   overflow-y: auto;
   padding-right: 10px;
 }
+/* MODIFICADO: Ahora usa variables CSS para los colores dinámicos */
 .title-list-item {
   border-radius: var(--border-radius-md);
   cursor: pointer;
-  transition: var(--transition-fast), box-shadow 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s; /* Transición más limpia */
   position: relative;
   padding: 20px;
   overflow: hidden;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 2px solid var(--border-color); /* Borde exterior oscuro AÑADIDO */
+  border: 2px solid var(--border-color);
 }
 
 .title-list-item:hover {
@@ -557,11 +558,10 @@ z-index: 1001; box-shadow: var(--shadow-lg); }
   inset: 2px;
   border-radius: var(--border-radius-sm);
   padding: 2px;
-  background: var(--title-border-style, var(--main-green)); /* Variable para el color/gradiente */
+  background: var(--title-border-style, var(--main-green)); /* <- USA LA VARIABLE DINÁMICA */
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
-  transition: background 0.2s;
 }
 .title-list-item::after { /* Fondo */
   content: '';
@@ -574,6 +574,8 @@ z-index: 1001; box-shadow: var(--shadow-lg); }
 .title-list-item > * { position: relative; z-index: 1; }
 .title-list-item:hover, .title-list-item.selected {
   transform: translateX(5px);
+  /* El resplandor ahora usa la variable de color dinámica */
+  box-shadow: 0 0 15px 4px var(--title-glow-color, var(--main-green)); /* <- USA LA VARIABLE DINÁMICA */
 }
 .title-list-item.selected::before {
   background: var(--main-green);
@@ -594,20 +596,20 @@ var(--text-secondary); }
   display: inline-block;
 }
 
-/* MODIFICADO: Panel de detalles de título con doble borde dinámico */
+/* MODIFICADO: Panel derecho ahora usa una variable para su borde */
 #title-details-view {
   padding: 25px;
   border-radius: var(--border-radius-lg);
   background-color: var(--panel-bg);
   border: 2px solid var(--border-color);
-  /* El box-shadow se controlará con JS para el color dinámico */
-  box-shadow: inset 0 0 0 2px var(--selected-title-border, var(--border-color));
+  /* La sombra interior (borde de color) se controla con la variable */
+  box-shadow: inset 0 0 0 2px var(--selected-title-border, var(--border-color)); /* <- USA LA VARIABLE DINÁMICA */
   position: sticky;
   top: 120px;
   height: 600px;
   display: flex;
   flex-direction: column;
-  transition: box-shadow 0.3s; /* Transición suave para el cambio de color */
+  transition: box-shadow 0.3s;
 }
 #title-details-view h3 {
   font-family: 'Anton', sans-serif;

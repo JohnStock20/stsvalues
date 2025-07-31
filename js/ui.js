@@ -468,15 +468,18 @@ export function renderTitlesPage(titlesData, selectedKey, onSelect, onEquip) {
     const item = document.createElement('div');
     item.className = `title-list-item ${title.unlocked ? 'unlocked' : 'locked'}`;
     if (title.key === selectedKey) item.classList.add('selected');
-    
-    // CORREGIDO: Se eliminan los guiones de los nombres de las variables.
-    const titleBorderStyle = styleInfo.style.includes('gradient') ? styleInfo.style : styleInfo.style;
+
+    // CORRECCIÓN: Calculamos el estilo de borde y brillo específico para CADA título.
+    const titleBorderStyle = styleInfo.style; // Puede ser un color o un gradiente
     const titleGlowColor = styleInfo.style.includes('gradient') ? 'rgba(255,255,255,0.4)' : styleInfo.style;
 
+    // Asignamos estos estilos a las variables CSS del elemento.
     item.style.setProperty('--title-border-style', titleBorderStyle);
     item.style.setProperty('--title-glow-color', titleGlowColor);
 
+    // El onClick ahora llama a la función `onSelect` que le pasamos (handleTitleSelection).
     item.onclick = () => { if (title.unlocked) onSelect(title.key); };
+    
     item.innerHTML = `
       <span class="title-name ${styleInfo.style.includes('gradient') ? 'gradient' : ''}"
             style="${styleInfo.style.includes('gradient') ? `background-image: ${styleInfo.style}` : `color: ${styleInfo.style}`}">
@@ -489,16 +492,16 @@ export function renderTitlesPage(titlesData, selectedKey, onSelect, onEquip) {
 }
 
 function renderTitleDetails(title, onEquip) {
-  const container = dom.containers.titleDetails;
+   const container = dom.containers.titleDetails;
   if (!title) {
     container.innerHTML = '<p>Select a title from the list to see its details.</p>';
     container.style.setProperty('--selected-title-border', 'var(--border-color)');
     return;
   }
   const styleInfo = titleStyles[title.key] || titleStyles['player'];
-  
-  // CORREGIDO: Se eliminan los guiones del nombre de la variable.
-  const titleBorderStyle = styleInfo.style.includes('gradient') ? styleInfo.style : styleInfo.style;
+
+  // CORRECCIÓN: Actualizamos dinámicamente el color del borde del panel derecho.
+  const titleBorderStyle = styleInfo.style;
   container.style.setProperty('--selected-title-border', titleBorderStyle);
 
   container.innerHTML = `

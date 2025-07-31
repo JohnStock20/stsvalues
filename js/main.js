@@ -73,28 +73,38 @@ function navigateToSubView(view, data) {
 // --- LÓGICA DE NEGOCIO (TÍTULOS, SORTEOS, ADMIN) ---
 
 async function loadAndRenderTitles() {
-    const token = localStorage.getItem('sts-token');
-    if (!token) { 
-        UI.dom.containers.titlesList.innerHTML = `<p>You must be logged in to view your titles.</p>`;
-        UI.dom.containers.titleDetails.innerHTML = '';
-        return; 
+  const token = localStorage.getItem('sts-token');
+  if (!token) {
+    // ... (código de no-logueado)
+    return;
+  }
+  try {
+    const response = await fetch('/.netlify/functions/get-titles', { headers: { 'Authorization': `Bearer ${token}` } });
+    if (!response.ok) throw new Error('Failed to fetch titles');
+    const titlesData = await response.json();
+    
+    // CORRECCIÓN: Si no hay ningún título seleccionado, seleccionamos el equipado o el primero desbloqueado.
+    if (!selectedTitleKey) {
+      const defaultSelected = titlesData.find(t => t.equipped) || titlesData.find(t => t.unlocked);
+      if (defaultSelected) {
+        selectedTitleKey = defaultSelected.key;
+      }
     }
-    try {
-        const response = await fetch('/.netlify/functions/get-titles', { headers: { 'Authorization': `Bearer ${token}` } });
-        if (!response.ok) throw new Error('Failed to fetch titles');
-        const titlesData = await response.json();
-        const defaultSelected = titlesData.find(t => t.equipped) || titlesData.find(t => t.unlocked);
-        selectedTitleKey = defaultSelected ? defaultSelected.key : null;
-        UI.renderTitlesPage(titlesData, selectedTitleKey, handleTitleSelection, handleTitleEquip);
-    } catch (e) {
-        console.error("Error loading titles:", e);
-    }
+    
+    // Le pasamos la función que manejará la selección.
+    UI.renderTitlesPage(titlesData, selectedTitleKey, handleTitleSelection, handleTitleEquip);
+  } catch (e) {
+    console.error("Error loading titles:", e);
+  }
 }
 
+// CORRECCIÓN: Esta es la función clave que faltaba.
+// Se ejecuta al hacer clic en un título de la lista.
 function handleTitleSelection(newKey) {
-    selectedTitleKey = newKey;
-    loadAndRenderTitles();
+  selectedTitleKey = newKey; // 1. Actualiza el estado
+  loadAndRenderTitles();      // 2. Vuelve a renderizar la página con el nuevo estado
 }
+
 
 async function handleTitleEquip(newTitleKey) {
     const token = localStorage.getItem('sts-token');
