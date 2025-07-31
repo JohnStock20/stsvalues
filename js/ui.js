@@ -28,7 +28,7 @@ export const dom = {
         upcomingGiveaways: document.getElementById('upcoming-giveaways-container'),
         participantsList: document.getElementById('giveaway-participants-list'),
         winnersList: document.getElementById('giveaway-winners-list'),
-        hostGiveawayBtn: document.getElementById('host-giveaway-btn-container'),
+        hostGiveawayBtn: document.getElementById('host-giveaway-container'),
         adminTools: document.getElementById('devtools-view'),
         searchResults: document.getElementById('search-results'),
         resultsTable: document.getElementById('results-table-container'),
