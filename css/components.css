@@ -596,20 +596,46 @@ var(--text-secondary); }
   display: inline-block;
 }
 
-/* MODIFICADO: Panel derecho ahora usa una variable para su borde */
+/* MODIFICADO: Panel derecho ahora usa la misma técnica que la lista para soportar gradientes */
 #title-details-view {
   padding: 25px;
   border-radius: var(--border-radius-lg);
-  background-color: var(--panel-bg);
+  background-color: transparent; /* El fondo lo maneja ::after */
   border: 2px solid var(--border-color);
-  /* La sombra interior (borde de color) se controla con la variable */
-  box-shadow: inset 0 0 0 2px var(--selected-title-border, var(--border-color)); /* <- USA LA VARIABLE DINÁMICA */
   position: sticky;
   top: 120px;
   height: 600px;
   display: flex;
   flex-direction: column;
   transition: box-shadow 0.3s;
+  overflow: hidden; /* Necesario para que los pseudo-elementos se recorten */
+}
+
+/* NUEVO: Se añaden los pseudo-elementos para el borde y fondo dinámico */
+#title-details-view::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: var(--border-radius-md);
+  padding: 2px;
+  background: var(--selected-title-border, var(--border-color)); /* Variable dinámica */
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  transition: background 0.3s;
+  z-index: -1; /* Detrás del contenido */
+}
+#title-details-view::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: var(--border-radius-sm);
+  background-color: var(--panel-bg);
+  z-index: -2; /* Detrás de todo */
+}
+
+#title-details-view > * {
+  position: relative; /* Asegura que el contenido esté por encima de los pseudo-elementos */
 }
 #title-details-view h3 {
   font-family: 'Anton', sans-serif;

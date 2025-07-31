@@ -435,17 +435,72 @@ function initializeTopUI() {
 }
 
 function initializeCalculator() {
-    UI.dom.buttons.calculate.addEventListener('click', () => { // FIX: Use UI.dom.buttons
-        const quantity = parseInt(UI.dom.inputs.caseQuantity.value, 10); // FIX: Use UI.dom.inputs
-        const caseId = appState.currentCaseIdForCalc;
-        if (caseId && appData.cases[caseId] && !isNaN(quantity) && quantity > 0) {
-            Calculator.runTheoreticalCalculation(quantity, caseId, appState);
-        } else {
-            UI.dom.containers.resultsTable.innerHTML = `<p class="error-message" style="display:block;">Please enter a valid number of cases.</p>`;
-        }
-    });
-}
+  const modeButtons = {
+    theoretical: UI.dom.buttons.modeTheoretical,
+    simulate: UI.dom.buttons.modeSimulate,
+    untilBest: UI.dom.buttons.modeUntilBest,
+    graph: UI.dom.buttons.modeGraph,
+  };
 
+  const updateCalculatorUI = () => {
+    // Actualiza los botones de modo
+    for (const mode in modeButtons) {
+      if (mode === appState.calculatorMode) {
+        modeButtons[mode].classList.add('active');
+      } else {
+        modeButtons[mode].classList.remove('active');
+      }
+    }
+    // Actualiza los controles (inputs)
+    UI.clearCalculator(appState);
+  };
+
+  // Listeners para los botones de modo
+  for (const mode in modeButtons) {
+    modeButtons[mode].addEventListener('click', () => {
+      appState.calculatorMode = mode;
+      updateCalculatorUI();
+    });
+  }
+
+  // Listener para el botón principal "Calculate" / "Generate Graph"
+  const handleCalculate = () => {
+    const quantity = parseInt(UI.dom.inputs.caseQuantity.value, 10);
+    const caseId = appState.currentCaseIdForCalc;
+    const step = parseInt(UI.dom.inputs.graphStep.value, 10);
+    const max = parseInt(UI.dom.inputs.graphMax.value, 10);
+
+    if (!caseId || !appData.cases[caseId]) {
+      UI.dom.containers.resultsTable.innerHTML = `<p class="error-message" style="display:block;">Please select a case first.</p>`;
+      return;
+    }
+
+    // Llama a la función correcta según el modo
+    switch (appState.calculatorMode) {
+      case 'theoretical':
+        if (isNaN(quantity) || quantity <= 0) return;
+        Calculator.runTheoreticalCalculation(quantity, caseId, appState);
+        break;
+      case 'simulate':
+        if (isNaN(quantity) || quantity <= 0) return;
+        Calculator.runRealisticSimulation(quantity, caseId, appState);
+        break;
+      case 'untilBest':
+        Calculator.runUntilBestSimulation(caseId, appState);
+        break;
+      case 'graph':
+        if (isNaN(step) || isNaN(max) || step <= 0 || max <= 0 || step > max) return;
+        Calculator.runGraphSimulation(step, max, caseId);
+        break;
+    }
+  };
+  
+  UI.dom.buttons.calculate.addEventListener('click', handleCalculate);
+  UI.dom.buttons.calculateGraph.addEventListener('click', handleCalculate);
+
+  // Inicializa la UI
+  updateCalculatorUI();
+}
 // --- INICIALIZACIÓN DE LA APP ---
 
 function onLoginSuccess(loggedInUser) {
