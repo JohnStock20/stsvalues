@@ -587,37 +587,59 @@ function renderUpcomingGiveaways(giveaways) {
     container.appendChild(list);
 }
 
+// NUEVO: Función auxiliar para crear la tarjeta de usuario estilizada
+function createUserProfileCardHTML(user) {
+  if (!user) return ''; // Guarda contra usuarios nulos
+  const styleInfo = titleStyles[user.equippedTitle] || titleStyles['player'];
+  const titleBorderStyle = styleInfo.style.includes('gradient') ? styleInfo.style : styleInfo.style;
+  
+  return `
+    <div class="giveaway-user-card" style="--user-title-border: ${titleBorderStyle};">
+      <img class="user-avatar" src="${user.avatar || 'images/placeholder.png'}" alt="${user.username}">
+      <div class="user-info">
+        <span class="user-name">@${user.username}</span>
+        <span class="user-title ${styleInfo.style.includes('gradient') ? 'gradient' : ''}" 
+              style="${styleInfo.style.includes('gradient') ? `background-image: ${styleInfo.style}` : `color: ${styleInfo.style}`}">
+          ${styleInfo.text}
+        </span>
+      </div>
+    </div>
+  `;
+}
 
+// MODIFICADO: renderParticipants ahora usa la nueva tarjeta
 function renderParticipants(participants) {
-    const list = dom.containers.participantsList;
-    if (!participants || participants.length === 0) {
-        list.innerHTML = '<p>No participants yet.</p>';
-        return;
-    }
-    list.innerHTML = participants.map(p_user => `
-        <div class="participant-item">
-            <img src="${p_user.avatar || 'images/placeholder.png'}" alt="${p_user.username}">
-            <span>${p_user.username}</span>
-        </div>
-    `).join('');
+  const list = dom.containers.participantsList;
+  if (!participants || participants.length === 0) {
+    list.innerHTML = '<p>No participants yet.</p>';
+    return;
+  }
+  // Mapeamos cada participante a la nueva tarjeta HTML
+  list.innerHTML = participants.map(pUser => createUserProfileCardHTML(pUser)).join('');
 }
 
-
+// MODIFICADO: renderRecentWinners ahora usa la nueva tarjeta
 function renderRecentWinners(winners) {
-    const list = dom.containers.winnersList;
-    if (!winners || winners.length === 0) {
-        list.innerHTML = '<p>No recent winners.</p>';
-        return;
-    }
-    list.innerHTML = winners.map(w => {
-        const prizeText = w.prize_pool.map(p => `${formatLargeNumber(p.amount)}${p.type === 'sword' ? 'x' : ''} ${p.type === 'currency' ? (appData.currencies[p.id] ? appData.currencies[p.id].name : p.id) : (findSwordById(p.id) ? findSwordById(p.id).sword.name : p.id)}`).join(' + ');
-        return `
-            <div class="winner-item">
-                <span class="winner-name">${w.winner}</span> won
-                <span class="winner-prize">${prizeText}</span>
-            </div>`;
-    }).join('');
+  const list = dom.containers.winnersList;
+  if (!winners || winners.length === 0) {
+    list.innerHTML = '<p>No recent winners.</p>';
+    return;
+  }
+  list.innerHTML = winners.map(w => {
+    const prizeText = w.prize_pool.map(p =>
+      `${formatLargeNumber(p.amount)}${p.type === 'sword' ? 'x' : ''} ${p.type === 'currency' ? (appData.currencies[p.id]?.name || p.id) : (findSwordById(p.id)?.sword.name || p.id)}`
+    ).join(' + ');
+    
+    // Creamos una tarjeta para el ganador y debajo mostramos el premio
+    return `
+      <div class="winner-item">
+        ${createUserProfileCardHTML(w.profile)}
+        <div class="winner-prize">Won: <strong>${prizeText}</strong></div>
+      </div>
+    `;
+  }).join('');
 }
+
 
 
 export function openGiveawayModal() {
