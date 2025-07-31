@@ -45,6 +45,11 @@ export const dom = {
         nextPage: document.getElementById('other-next-btn'),
         calculate: document.getElementById('calculate-btn'),
         calculateGraph: document.getElementById('calculate-graph-btn'),
+            // CORRECCIÓN: Se añaden los selectores que faltaban para los botones de modo.
+        modeTheoretical: document.getElementById('mode-theoretical-btn'),
+        modeSimulate: document.getElementById('mode-simulate-btn'),
+        modeUntilBest: document.getElementById('mode-until-best-btn'),
+        modeGraph: document.getElementById('mode-graph-btn'),
     },
     inputs: {
         converterFrom: document.getElementById('converter-from-input'),
