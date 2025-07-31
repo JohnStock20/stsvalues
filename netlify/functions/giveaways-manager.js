@@ -77,16 +77,19 @@ async function handleGetGiveaways(event) {
 
     // 4. Enriquecer los datos de los participantes (sin cambios aquí).
     const activeGiveaway = giveawaysResult.rows.find(gw => gw.status === 'active');
-     // Enriquecer participantes del sorteo activo
-    if (activeGiveaway && activeGiveaway.participants && activeGiveaway.participants.length > 0) {
+     if (activeGiveaway && activeGiveaway.participants && activeGiveaway.participants.length > 0) {
         const usersResult = await client.query(
             'SELECT username, roblox_avatar_url as avatar, equipped_title FROM users WHERE username = ANY($1::text[])',
             [activeGiveaway.participants]
         );
-        activeGiveaway.participants = usersResult.rows;
+        // CORREGIDO: Mapeamos de snake_case a camelCase
+        activeGiveaway.participants = usersResult.rows.map(p => ({
+            username: p.username,
+            avatar: p.avatar,
+            equippedTitle: p.equipped_title
+        }));
     }
 
-    // Enriquecer perfiles de los ganadores recientes
     let enrichedWinners = [];
     if (winnersResult.rows.length > 0) {
         const winnerUsernames = winnersResult.rows.map(w => w.winner);
@@ -94,19 +97,25 @@ async function handleGetGiveaways(event) {
             'SELECT username, roblox_avatar_url as avatar, equipped_title FROM users WHERE username = ANY($1::text[])',
             [winnerUsernames]
         );
-        const profilesMap = new Map(profilesResult.rows.map(p => [p.username, p]));
+        // CORREGIDO: Mapeamos de snake_case a camelCase al crear el mapa de perfiles
+        const profilesMap = new Map(profilesResult.rows.map(p => [p.username, {
+            username: p.username,
+            avatar: p.avatar,
+            equippedTitle: p.equipped_title
+        }]));
+        
         enrichedWinners = winnersResult.rows.map(w => ({
             ...w,
             profile: profilesMap.get(w.winner) || { username: w.winner, avatar: 'images/placeholder.png', equippedTitle: 'player' }
         }));
     }
 
-    // 5. Devolver todos los datos enriquecidos.
+    // 5. Devolver datos (sin cambios aquí)
     return {
       statusCode: 200,
       body: JSON.stringify({
         giveaways: giveawaysResult.rows.filter(gw => gw.status === 'active' || gw.status === 'upcoming'),
-        recentWinners: enrichedWinners // Enviamos los ganadores con perfiles completos
+        recentWinners: enrichedWinners
       })
     };
   } catch (error) {
