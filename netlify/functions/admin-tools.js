@@ -56,7 +56,7 @@ exports.handler = async (event) => {
                 const result = await client.query(
                     `UPDATE users 
                      SET unlocked_titles = array_append(unlocked_titles, $1) 
-                     WHERE username = $2 AND NOT ($1 = ANY(unlocked_titles))
+                     WHERE username ILIKE $2 AND NOT ($1 = ANY(unlocked_titles))
                      RETURNING username, unlocked_titles`,
                     [titleKey, targetUsername]
                 );

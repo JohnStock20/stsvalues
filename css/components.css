@@ -132,7 +132,9 @@ inputs...
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 40px;
-  align-items: flex-start;
+  /* ANTES: align-items: flex-start; */
+  /* CORREGIDO: */
+  align-items: stretch; /* <-- ¡ESTE ES EL CAMBIO! */
 }
 .rewards-column {
   display: flex;

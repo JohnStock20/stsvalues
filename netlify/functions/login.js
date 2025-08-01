@@ -28,7 +28,7 @@ exports.handler = async (event) => {
         try {
             // Paso 1: Buscamos al usuario y OBTENEMOS LOS NUEVOS DATOS (role, titles, etc.)
             const result = await client.query(
-                'SELECT id, username, password_hash, roblox_avatar_url, role, equipped_title, unlocked_titles FROM users WHERE username = $1',
+                'SELECT id, username, password_hash, roblox_avatar_url, role, equipped_title, unlocked_titles FROM users WHERE username ILIKE $1',
                 [username]
             );
 
