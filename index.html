@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/auth.css">
     <link rel="stylesheet" href="css/giveaways.css">
+    <!-- AÑADE EL CSS DE LA CALCULADORA SI NO ESTÁ -->
+    <link rel="stylesheet" href="css/calculator.css"> 
     
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-4YY08MDW4M"></script>
@@ -127,7 +129,10 @@
                             <div id="details-case-price"></div>
                         </div>
                     </div>
-                    <!-- REEMPLAZA DESDE AQUÍ -->
+                    
+                    <!-- ============================================= -->
+                    <!-- SECCIÓN DE LA CALCULADORA COMPLETAMENTE CORREGIDA -->
+                    <!-- ============================================= -->
                     <div id="calculator-section">
                         <h2 class="section-title">~PROFIT CALCULATOR~</h2>
                         <div class="calculator-mode-selector">
@@ -137,15 +142,14 @@
                             <button id="mode-graph-btn">Graph</button>
                         </div>
                         <div class="calculator-controls" id="standard-controls">
-                            <input type="number" id="case-quantity-input" placeholder="Enter amount...">
+                            <input type="number" id="case-quantity-input" placeholder="Enter amount of cases to open...">
                             <button id="calculate-btn" class="calculator-btn">Calculate</button>
                         </div>
                         <div class="calculator-controls" id="graph-controls" style="display: none;">
-                            <input type="number" id="graph-step-input" placeholder="Step (e.g., 100)">
-                            <input type="number" id="graph-max-input" placeholder="Max (e.g., 5000)">
+                            <input type="number" id="graph-step-input" placeholder="Range (e.g., 100)">
+                            <input type="number" id="graph-max-input" placeholder="Maximum (e.g., 5000)">
                             <button id="calculate-graph-btn" class="calculator-btn">Generate Graph</button>
                         </div>
-                        <!-- ESTA ES LA ESTRUCTURA CLAVE QUE SE PERDIÓ -->
                         <div id="calculator-results-container">
                             <div id="simulation-loot-summary" style="display: none;"></div>
                             <div id="results-table-container"></div>
@@ -156,6 +160,7 @@
                         </div>
                     </div>
                 </div>
+
                 <!-- VISTA 3: DETALLES DE ESPADA -->
                 <div id="sword-details-view" class="main-view-panel">
                      <button class="back-btn" id="details-to-sword-list-btn">← Back</button>
@@ -186,11 +191,9 @@
 
                 <!-- VISTA 5: SORTEOS -->
                 <div id="giveaways-view" class="main-view-panel">
-                            <!-- NUEVO: Contenedor para el botón "Host a Giveaway" -->
-        <!-- MODIFICADO: Se añade un ID al nuevo contenedor -->
-        <div id="host-giveaway-container" class="host-giveaway-container">
-            <!-- El JS insertará el botón aquí -->
-        </div>
+                    <div id="host-giveaway-container" class="host-giveaway-container">
+                        <!-- El JS insertará el botón aquí -->
+                    </div>
                     <div class="giveaways-layout">
                         <div class="giveaway-main-panel">
                             <div id="active-giveaway-container"></div>

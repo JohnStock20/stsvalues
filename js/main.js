@@ -434,6 +434,7 @@ function initializeTopUI() {
     });
 }
 
+// REEMPLAZA tu función initializeCalculator con esta versión
 function initializeCalculator() {
   const modeButtons = {
     theoretical: UI.dom.buttons.modeTheoretical,
@@ -443,7 +444,6 @@ function initializeCalculator() {
   };
 
   const updateCalculatorUI = () => {
-    // Actualiza los botones de modo
     for (const mode in modeButtons) {
       if (mode === appState.calculatorMode) {
         modeButtons[mode].classList.add('active');
@@ -451,11 +451,9 @@ function initializeCalculator() {
         modeButtons[mode].classList.remove('active');
       }
     }
-    // Actualiza los controles (inputs)
     UI.clearCalculator(appState);
   };
 
-  // Listeners para los botones de modo
   for (const mode in modeButtons) {
     modeButtons[mode].addEventListener('click', () => {
       appState.calculatorMode = mode;
@@ -463,7 +461,6 @@ function initializeCalculator() {
     });
   }
 
-  // Listener para el botón principal "Calculate" / "Generate Graph"
   const handleCalculate = () => {
     const quantity = parseInt(UI.dom.inputs.caseQuantity.value, 10);
     const caseId = appState.currentCaseIdForCalc;
@@ -475,7 +472,6 @@ function initializeCalculator() {
       return;
     }
 
-    // Llama a la función correcta según el modo
     switch (appState.calculatorMode) {
       case 'theoretical':
         if (isNaN(quantity) || quantity <= 0) return;
@@ -498,7 +494,6 @@ function initializeCalculator() {
   UI.dom.buttons.calculate.addEventListener('click', handleCalculate);
   UI.dom.buttons.calculateGraph.addEventListener('click', handleCalculate);
 
-  // Inicializa la UI
   updateCalculatorUI();
 }
 // --- INICIALIZACIÓN DE LA APP ---
