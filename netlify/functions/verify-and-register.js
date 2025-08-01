@@ -2,6 +2,7 @@
 
 const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
+const jwt = require('jsonwebtoken');
 const axios = require('axios');
 
 // Configuración de la conexión a la base de datos de Neon
@@ -62,6 +63,7 @@ async function getRobloxUserProfile(userId) {
     return null;
   }
 }
+
 
 exports.handler = async (event) => {
     if (event.httpMethod !== 'POST') {
