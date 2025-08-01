@@ -52,26 +52,23 @@ function navigateToView(viewName) {
     }
 }
 
-// REEMPLAZA TU FUNCIÓN navigateToSubView CON ESTA VERSIÓN
+// REEMPLAZA tu función navigateToSubView con esta versión corregida
 async function navigateToSubView(view, data) {
     if (window.swordUpdateInterval) clearInterval(window.swordUpdateInterval);
     
-    // Guardamos el contexto de navegación anterior
     navigationContext = { ...appState.currentNavigationView };
-    // Actualizamos el estado de la vista actual
     appState.currentNavigationView = { view, id: data };
 
     switch (view) {
         case 'caseDetails':
             appState.currentCaseIdForCalc = data;
-            isEditMode = false; // Siempre reseteamos el modo edición
-            activeValueSource = 'official'; // Y la vista a la oficial
+            isEditMode = false;
+            activeValueSource = 'official';
 
-            // 1. Obtiene los datos oficiales de la caja desde appData
             const caseData = appData.cases[data];
             
-            // 2. Intenta obtener los valores personalizados del usuario desde el backend
-            customCaseValues = {};
+            // CORRECCIÓN CLAVE: Nos aseguramos de que customCaseValues sea siempre un objeto
+            let fetchedValues = null; 
             if (currentUser) {
                 const token = localStorage.getItem('sts-token');
                 try {
@@ -79,16 +76,17 @@ async function navigateToSubView(view, data) {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     if (response.ok) {
-                        customCaseValues = await response.json();
+                        fetchedValues = await response.json();
                     }
                 } catch (error) {
                     console.error("Could not fetch custom values:", error);
                 }
             }
+            // Si fetchedValues es null o undefined, lo convertimos en un objeto vacío.
+            customCaseValues = fetchedValues || {};
             
-            // 3. Renderiza la sección de recompensas y la vista principal
-            renderRewardSection(caseData); // Esta función nueva controlará la lista de espadas
-            UI.renderCaseDetailsHeader(caseData); // Esta función nueva se encargará de la cabecera (imagen, nombre, precio)
+            renderRewardSection(caseData);
+            UI.renderCaseDetailsHeader(caseData);
             UI.showView('caseDetails');
             break;
 
