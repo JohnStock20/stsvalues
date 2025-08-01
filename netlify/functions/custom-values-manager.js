@@ -1,6 +1,7 @@
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 const axios = require('axios'); // Para enviar el webhook a Discord
+const { parseValue } = require('../../js/data.js'); 
 
 const pool = new Pool({
   connectionString: process.env.NEON_DATABASE_URL,
