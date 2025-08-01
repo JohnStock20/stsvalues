@@ -30,7 +30,7 @@ exports.handler = async (event) => {
   }
 };
 
-export function parseValue(value) {
+function parseValue(value) {
     if (typeof value === 'number') return value;
     if (typeof value !== 'string' || !value) return 0;
 
