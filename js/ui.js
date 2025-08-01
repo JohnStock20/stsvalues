@@ -143,34 +143,32 @@ export function updatePaginationControls(appState) {
 
 // --- Renderizado de Detalles (Caja y Espada) ---
 
-// 1. Modifica createRewardItemHTML para que acepte el nuevo parámetro
-function createRewardItemHTML(reward, source, isSimpleView = false) {
-  const isCaseReward = source.type === 'case';
-  const valueDisplayHTML = (typeof reward.value === 'string' && reward.value.toUpperCase().startsWith('O/C'))
-    ? `<span class="value-oc" title="Owner's Choice">O/C</span>`
-    : formatLargeNumber(parseValue(reward.value));
-  
-  // Si se solicita la vista simple, devolvemos solo imagen y nombre.
-  if (isSimpleView) {
+// 1. REEMPLAZA tu función createRewardItemHTML con esta
+function createRewardItemHTML(reward, source) {
+    const isCaseReward = source.type === 'case';
+    const numericValue = parseValue(reward.value); // Usamos parseValue para obtener el número
+    
+    const valueDisplayHTML = (typeof reward.value === 'string' && reward.value.toUpperCase().startsWith('O/C'))
+      ? `<span class="value-oc" title="Owner's Choice">O/C</span>`
+      : formatLargeNumber(numericValue);
+
     return `
       <div class="reward-info">
         <div class="reward-image-placeholder"><img src="${reward.image}" alt="${reward.name}"></div>
         <span class="reward-name">${reward.name}</span>
       </div>
-    `;
-  }
-
-  // De lo contrario, devolvemos la vista completa con estadísticas.
-  return `
-    <div class="reward-info">
-      <div class="reward-image-placeholder"><img src="${reward.image}" alt="${reward.name}"></div>
-      <span class="reward-name">${reward.name}</span>
-    </div>
-    <div class="reward-stats">
-      ${isCaseReward ? `<span>${reward.chance}%</span>` : '<span class="no-chance">--</span>'}
-      <span class="reward-value">${valueDisplayHTML}</span>
-      <span>${reward.stats}</span>
-    </div>`;
+      <div class="reward-stats">
+        ${isCaseReward ? `<span>${reward.chance}%</span>` : '<span class="no-chance">--</span>'}
+        
+        <div class="reward-value">
+          <span class="value-display">${valueDisplayHTML}</span>
+          <div class="value-input-wrapper">
+              <input type="text" class="value-input" data-sword-id="${reward.id}" value="${numericValue}">
+          </div>
+        </div>
+        
+        <span>${reward.stats}</span>
+      </div>`;
 }
 
 // 2. Modifica createRewardItem para que pase el nuevo parámetro
@@ -187,20 +185,22 @@ export function createRewardItem(reward, source, navigateTo, isSimpleView = fals
 }
 
 
+// Esta función se encarga SOLO de la cabecera (imagen, nombre, precio)
+export function renderCaseDetailsHeader(caseData) {
+    if (!caseData) return;
+    document.getElementById('details-case-image').src = caseData.image;
+    document.getElementById('details-case-name').textContent = caseData.name;
+    document.getElementById('details-case-price').innerHTML = getCurrencyHTML(caseData.currency, caseData.price);
+    document.querySelector('#case-details-view .info-column').style.setProperty('--case-border-color', caseData.borderColor || 'var(--main-green)');
+}
+
+// Esta función (que antes era todo renderCaseDetails) ahora se llama desde main.js
+// y solo se encarga de mostrar la vista. Los datos ya han sido procesados.
 export function renderCaseDetails(caseId, navigateTo) {
-    const data = appData.cases[caseId];
-    if (!data) return;
-    document.getElementById('details-case-image').src = data.image;
-    document.getElementById('details-case-name').textContent = data.name;
-    document.getElementById('details-case-price').innerHTML = getCurrencyHTML(data.currency, data.price);
-    document.querySelector('#case-details-view .info-column').style.setProperty('--case-border-color', data.borderColor || 'var(--main-green)');
-    dom.containers.rewards.innerHTML = '';
-    data.rewards.forEach(reward => {
-        const source = { type: 'case', id: caseId };
-        const item = createRewardItem(reward, source, navigateTo);
-        dom.containers.rewards.appendChild(item);
-    });
-    clearCalculator({ calculatorMode: 'theoretical' });
+    // La lógica de renderizado ahora está en `renderRewardSection` en main.js
+    // Esta función mantiene la estructura por si se necesita en el futuro,
+    // pero la acción principal es solo mostrar la vista.
+    clearCalculator({ calculatorMode: 'theoretical' }); // Resetea la calculadora
     showView('caseDetails');
 }
 

@@ -20,6 +20,11 @@ let giveawayUpdateInterval = null;
 let timerInterval = null;
 let selectedTitleKey = null;
 
+// --- AÑADE ESTAS VARIABLES AL ESTADO GLOBAL ---
+let customCaseValues = {};
+let isEditMode = false;
+let activeValueSource = 'official'; // 'official' o 'custom'
+
 const appState = {
     currentPage: 1,
     itemsPerPage: 10,
@@ -47,21 +52,52 @@ function navigateToView(viewName) {
     }
 }
 
-function navigateToSubView(view, data) {
+// REEMPLAZA TU FUNCIÓN navigateToSubView CON ESTA VERSIÓN
+async function navigateToSubView(view, data) {
     if (window.swordUpdateInterval) clearInterval(window.swordUpdateInterval);
+    
+    // Guardamos el contexto de navegación anterior
     navigationContext = { ...appState.currentNavigationView };
+    // Actualizamos el estado de la vista actual
     appState.currentNavigationView = { view, id: data };
 
     switch (view) {
         case 'caseDetails':
             appState.currentCaseIdForCalc = data;
-            UI.renderCaseDetails(data, navigateToSubView);
+            isEditMode = false; // Siempre reseteamos el modo edición
+            activeValueSource = 'official'; // Y la vista a la oficial
+
+            // 1. Obtiene los datos oficiales de la caja desde appData
+            const caseData = appData.cases[data];
+            
+            // 2. Intenta obtener los valores personalizados del usuario desde el backend
+            customCaseValues = {};
+            if (currentUser) {
+                const token = localStorage.getItem('sts-token');
+                try {
+                    const response = await fetch(`/.netlify/functions/custom-values-manager?caseId=${data}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (response.ok) {
+                        customCaseValues = await response.json();
+                    }
+                } catch (error) {
+                    console.error("Could not fetch custom values:", error);
+                }
+            }
+            
+            // 3. Renderiza la sección de recompensas y la vista principal
+            renderRewardSection(caseData); // Esta función nueva controlará la lista de espadas
+            UI.renderCaseDetailsHeader(caseData); // Esta función nueva se encargará de la cabecera (imagen, nombre, precio)
+            UI.showView('caseDetails');
             break;
+
         case 'swordDetails':
             UI.renderSwordDetails(data.sword, data.source, navigateToSubView, (intervalId) => {
                 window.swordUpdateInterval = intervalId;
             });
             break;
+            
         case 'cases':
         default:
             UI.showView('cases');
@@ -69,6 +105,100 @@ function navigateToSubView(view, data) {
     }
 }
 
+// NUEVA FUNCIÓN: Se encarga de renderizar y re-renderizar la sección de recompensas
+function renderRewardSection(caseData) {
+    const rewards = caseData.rewards;
+    const hasCustomValues = Object.keys(customCaseValues).length > 0;
+
+    // Decide qué fuente de datos usar
+    const displayRewards = activeValueSource === 'custom' && hasCustomValues
+        ? rewards.map(r => ({ ...r, value: customCaseValues[r.id] || r.value }))
+        : rewards;
+    
+    // Renderiza la lista de espadas
+    UI.dom.containers.rewards.innerHTML = '';
+    displayRewards.forEach(reward => {
+        const source = { type: 'case', id: caseData.id };
+        const item = UI.createRewardItem(reward, source, navigateToSubView);
+        if (isEditMode) item.classList.add('edit-mode');
+        UI.dom.containers.rewards.appendChild(item);
+    });
+
+    // Renderiza los controles (botón de editar, toggle, etc.)
+    const controlsContainer = document.getElementById('value-controls-container');
+    let controlsHTML = '';
+
+    if (isEditMode) {
+        controlsHTML = `<button id="save-values-btn" class="value-action-btn">Save</button>`;
+    } else {
+        controlsHTML = `<button id="edit-values-btn" class="value-action-btn" ${!currentUser ? 'disabled' : ''}>Edit Values</button>`;
+    }
+    
+    if (hasCustomValues && !isEditMode) {
+        controlsHTML += `
+            <div class="value-toggle">
+                <button class="${activeValueSource === 'official' ? 'active' : ''}" data-source="official">Official</button>
+                <button class="${activeValueSource === 'custom' ? 'active' : ''}" data-source="custom">Custom</button>
+            </div>
+        `;
+    }
+    controlsContainer.innerHTML = controlsHTML;
+    
+    // Añade los event listeners a los nuevos botones
+    addControlListeners(caseData);
+}
+
+// NUEVA FUNCIÓN: Centraliza los event listeners para los nuevos botones
+function addControlListeners(caseData) {
+    const editBtn = document.getElementById('edit-values-btn');
+    const saveBtn = document.getElementById('save-values-btn');
+    const toggleBtns = document.querySelectorAll('.value-toggle button');
+
+    if (editBtn) {
+        editBtn.onclick = () => {
+            if (!currentUser) {
+                alert('You must be logged in to edit values.');
+                return;
+            }
+            isEditMode = true;
+            renderRewardSection(caseData);
+        };
+    }
+
+    if (saveBtn) {
+        saveBtn.onclick = async () => {
+            const inputs = document.querySelectorAll('.value-input');
+            const newValues = {};
+            inputs.forEach(input => {
+                newValues[input.dataset.swordId] = parseValue(input.value); // Usa tu función parseValue
+            });
+
+            // Llama al backend para guardar
+            const token = localStorage.getItem('sts-token');
+            await fetch('/.netlify/functions/custom-values-manager', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    caseId: caseData.id,
+                    caseName: caseData.name,
+                    customValues: newValues
+                })
+            });
+
+            customCaseValues = newValues; // Actualiza el estado local
+            isEditMode = false;
+            activeValueSource = 'custom'; // Cambia a la vista custom por defecto después de guardar
+            renderRewardSection(caseData);
+        };
+    }
+
+    toggleBtns.forEach(btn => {
+        btn.onclick = () => {
+            activeValueSource = btn.dataset.source;
+            renderRewardSection(caseData);
+        };
+    });
+}
 
 // --- LÓGICA DE NEGOCIO (TÍTULOS, SORTEOS, ADMIN) ---
 
@@ -461,35 +591,52 @@ function initializeCalculator() {
     });
   }
 
-  const handleCalculate = () => {
+ // REEMPLAZA TU FUNCIÓN handleCalculate (dentro de initializeCalculator) CON ESTA VERSIÓN
+const handleCalculate = () => {
     const quantity = parseInt(UI.dom.inputs.caseQuantity.value, 10);
     const caseId = appState.currentCaseIdForCalc;
     const step = parseInt(UI.dom.inputs.graphStep.value, 10);
     const max = parseInt(UI.dom.inputs.graphMax.value, 10);
-
+    
     if (!caseId || !appData.cases[caseId]) {
       UI.dom.containers.resultsTable.innerHTML = `<p class="error-message" style="display:block;">Please select a case first.</p>`;
       return;
     }
 
+    // =====================================================================
+    // LÓGICA CLAVE: PREPARA LOS DATOS PARA EL CÁLCULO
+    // =====================================================================
+    const originalCaseData = appData.cases[caseId];
+    const hasCustomValues = Object.keys(customCaseValues).length > 0;
+    
+    // 1. Decide qué fuente de valores usar (oficial o personalizada)
+    const rewardsForCalc = (activeValueSource === 'custom' && hasCustomValues)
+        ? originalCaseData.rewards.map(r => ({ ...r, value: customCaseValues[r.id] !== undefined ? customCaseValues[r.id] : r.value }))
+        : originalCaseData.rewards;
+    
+    // 2. Crea un objeto de datos de la caja temporal con los valores correctos
+    const caseDataForCalc = { ...originalCaseData, rewards: rewardsForCalc };
+    // =====================================================================
+
+    // 3. Llama a las funciones de cálculo pasándoles el objeto de datos completo
     switch (appState.calculatorMode) {
       case 'theoretical':
         if (isNaN(quantity) || quantity <= 0) return;
-        Calculator.runTheoreticalCalculation(quantity, caseId, appState);
+        Calculator.runTheoreticalCalculation(quantity, caseDataForCalc, appState);
         break;
       case 'simulate':
         if (isNaN(quantity) || quantity <= 0) return;
-        Calculator.runRealisticSimulation(quantity, caseId, appState);
+        Calculator.runRealisticSimulation(quantity, caseDataForCalc, appState);
         break;
       case 'untilBest':
-        Calculator.runUntilBestSimulation(caseId, appState);
+        Calculator.runUntilBestSimulation(caseDataForCalc, appState);
         break;
       case 'graph':
         if (isNaN(step) || isNaN(max) || step <= 0 || max <= 0 || step > max) return;
-        Calculator.runGraphSimulation(step, max, caseId);
+        Calculator.runGraphSimulation(step, max, caseDataForCalc);
         break;
     }
-  };
+};
   
   UI.dom.buttons.calculate.addEventListener('click', handleCalculate);
   UI.dom.buttons.calculateGraph.addEventListener('click', handleCalculate);

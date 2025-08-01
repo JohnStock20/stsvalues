@@ -31,7 +31,7 @@ function prepareSimulationData(caseData) {
     return { rewardsWithCumulativeChance, totalChanceSum: cumulative };
 }
 
-export function runTheoreticalCalculation(quantity, caseId, appState) {
+export function runTheoreticalCalculation(quantity, caseData, appState) {
     const caseData = appData.cases[caseId];
     if (!caseData) return;
 
@@ -55,7 +55,7 @@ export function runTheoreticalCalculation(quantity, caseId, appState) {
     }, appState);
 }
 
-export function runRealisticSimulation(quantity, caseId, appState) {
+export function runRealisticSimulation(quantity, caseData, appState) {
     const caseData = appData.cases[caseId];
     const { rewardsWithCumulativeChance, totalChanceSum } = prepareSimulationData(caseData);
     let totalValueGained = 0;
@@ -79,7 +79,7 @@ export function runRealisticSimulation(quantity, caseId, appState) {
     }, appState);
 }
 
-export function runUntilBestSimulation(caseId, appState) {
+export function runUntilBestSimulation(caseData, appState) {
     const caseData = appData.cases[caseId];
     const bestReward = caseData.rewards.reduce((prev, current) => (prev.chance < current.chance) ? prev : current);
     const { rewardsWithCumulativeChance, totalChanceSum } = prepareSimulationData(caseData);
@@ -118,7 +118,7 @@ export function runUntilBestSimulation(caseId, appState) {
     }, appState);
 }
 
-export function runGraphSimulation(step, max, caseId) {
+export function runGraphSimulation(step, max, caseData) {
     const caseData = appData.cases[caseId];
     const { rewardsWithCumulativeChance, totalChanceSum } = prepareSimulationData(caseData);
     const results = [];

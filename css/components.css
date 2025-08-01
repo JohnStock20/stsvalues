@@ -661,6 +661,86 @@ var(--dark-bg); cursor: default; border-color: var(--main-green); }
 #equip-title-btn:disabled:not(.equipped) { background-color:
 var(--border-color); cursor: not-allowed; }
 
+/* En components.css */
+
+/* NUEVO: Contenedor para el título y los nuevos botones */
+.rewards-header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+/* NUEVO: Contenedor para los controles de valores */
+#value-controls-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* NUEVO: Estilo para el botón de editar/guardar */
+.value-action-btn {
+    background-color: var(--panel-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+.value-action-btn:hover:not(:disabled) {
+    background-color: var(--main-green);
+    color: var(--dark-bg);
+    border-color: var(--main-green);
+}
+.value-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* NUEVO: Estilos para el interruptor de tablas */
+.value-toggle {
+    display: flex;
+    font-size: 0.8em;
+    font-weight: bold;
+    background: var(--dark-bg);
+    border-radius: var(--border-radius-md);
+    padding: 4px;
+    border: 1px solid var(--border-color);
+}
+.value-toggle button {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 4px 10px;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+.value-toggle button.active {
+    background-color: var(--panel-bg);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+}
+
+/* NUEVO: Estilos para el modo edición en las espadas */
+.reward-item .value-display { transition: opacity 0.2s; }
+.reward-item .value-input-wrapper { display: none; }
+.reward-item.edit-mode .value-display { display: none; }
+.reward-item.edit-mode .value-input-wrapper { display: block; }
+
+.value-input-wrapper input {
+    width: 100px;
+    background: var(--dark-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 5px;
+    border-radius: var(--border-radius-sm);
+    text-align: center;
+}
+
 /* --- RESPONSIVE ADAPTATIONS FOR COMPONENTS --- */
 @media (max-width: 768px) {
   .details-content, .sword-details-content { grid-template-columns:

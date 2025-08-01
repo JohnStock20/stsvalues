@@ -112,16 +112,21 @@
                 <!-- VISTA 2: DETALLES DE CAJA Y CALCULADORA -->
                 <div id="case-details-view" class="main-view-panel">
                     <button class="back-btn" id="details-to-cases-btn">← Back to Selection</button>
-                    <div class="details-content">
-                        <div class="rewards-column">
-                            <h2 class="section-title">~Swords in this Case~</h2>
-                            <div class="rewards-list-header">
-                                <span>Chance</span>
-                                <span>Value</span>
-                                <span>Stats</span>
-                            </div>
-                            <div id="rewards-list-container"></div>
-                        </div>
+<div class="details-content">
+    <div class="rewards-column">
+        <div class="rewards-header-controls"> <!-- NUEVO CONTENEDOR -->
+            <h2 class="section-title">~Swords in this Case~</h2>
+            <div id="value-controls-container">
+                <!-- Los botones se insertarán aquí con JS -->
+            </div>
+        </div>
+        <div class="rewards-list-header">
+            <span>Chance</span>
+            <span>Value</span>
+            <span>Stats</span>
+        </div>
+        <div id="rewards-list-container"></div>
+    </div>
                         <div class="info-column">
                             <img id="details-case-image" src="" alt="Case Image">
                             <h3 id="details-case-name"></h3>
