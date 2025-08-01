@@ -146,9 +146,7 @@ function renderRewardSection(caseData) {
     addControlListeners(caseData);
 }
 
-// En main.js
-
-// REEMPLAZA tu función addControlListeners con esta versión
+// REEMPLAZA tu función addControlListeners con esta versión definitiva
 function addControlListeners(caseData) {
     const editBtn = document.getElementById('edit-values-btn');
     const saveBtn = document.getElementById('save-values-btn');
@@ -167,10 +165,11 @@ function addControlListeners(caseData) {
 
     if (saveBtn) {
         saveBtn.onclick = async () => {
-            const inputs = document.querySelectorAll('.value-input');
+            // CORRECCIÓN CLAVE: Buscamos los inputs solo dentro del contenedor visible.
+            const inputs = document.querySelectorAll('#rewards-list-container .value-input');
+            
             const newValues = {};
             inputs.forEach(input => {
-                // Usamos parseValue para asegurarnos de guardar un número limpio
                 newValues[input.dataset.swordId] = parseValue(input.value);
             });
 
@@ -180,7 +179,7 @@ function addControlListeners(caseData) {
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        // CORRECCIÓN: Usamos el caseId del estado global, que es el correcto.
+                        // Usamos el caseId del estado global, que es el correcto.
                         caseId: appState.currentCaseIdForCalc, 
                         caseName: caseData.name,
                         customValues: newValues
