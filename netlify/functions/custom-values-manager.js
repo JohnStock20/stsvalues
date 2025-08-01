@@ -1,7 +1,6 @@
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 const axios = require('axios'); // Para enviar el webhook a Discord
-const { parseValue } = require('../../js/data.js'); 
 
 const pool = new Pool({
   connectionString: process.env.NEON_DATABASE_URL,
@@ -30,6 +29,41 @@ exports.handler = async (event) => {
     return { statusCode: 401, body: JSON.stringify({ message: 'Invalid token' }) };
   }
 };
+
+export function parseValue(value) {
+    if (typeof value === 'number') return value;
+    if (typeof value !== 'string' || !value) return 0;
+
+    let processableValue = value.trim().toUpperCase();
+
+    // Maneja el formato O/C [Over-Clause, Owner's Choice]
+    if (processableValue.startsWith('O/C')) {
+        const match = processableValue.match(/\[(.*?)\]/);
+        if (match && match[1]) {
+            processableValue = match[1];
+        } else {
+            // Si es O/C sin rango, no podemos asignarle un valor numérico para cálculos.
+            return 0;
+        }
+    }
+
+    // Si es un rango (ej: "8T-10T"), toma el primer valor.
+    if (processableValue.includes('-')) {
+        processableValue = processableValue.split('-')[0].trim();
+    }
+
+    const multipliers = { 'K': 1e3, 'M': 1e6, 'B': 1e9, 'T': 1e12, 'QD': 1e15 };
+    const lastChar = processableValue.slice(-1);
+    const multiplier = multipliers[lastChar];
+
+    if (multiplier) {
+        const numberPart = parseFloat(processableValue.slice(0, -1));
+        return isNaN(numberPart) ? 0 : numberPart * multiplier;
+    }
+
+    const plainNumber = parseFloat(processableValue);
+    return isNaN(plainNumber) ? 0 : plainNumber;
+}
 
 // Obtiene la lista de un usuario
 async function handleGetValueList(userId, caseId) {
