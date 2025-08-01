@@ -146,7 +146,9 @@ function renderRewardSection(caseData) {
     addControlListeners(caseData);
 }
 
-// NUEVA FUNCIÓN: Centraliza los event listeners para los nuevos botones
+// En main.js
+
+// REEMPLAZA tu función addControlListeners con esta versión
 function addControlListeners(caseData) {
     const editBtn = document.getElementById('edit-values-btn');
     const saveBtn = document.getElementById('save-values-btn');
@@ -168,25 +170,37 @@ function addControlListeners(caseData) {
             const inputs = document.querySelectorAll('.value-input');
             const newValues = {};
             inputs.forEach(input => {
-                newValues[input.dataset.swordId] = parseValue(input.value); // Usa tu función parseValue
+                // Usamos parseValue para asegurarnos de guardar un número limpio
+                newValues[input.dataset.swordId] = parseValue(input.value);
             });
 
-            // Llama al backend para guardar
             const token = localStorage.getItem('sts-token');
-            await fetch('/.netlify/functions/custom-values-manager', {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    caseId: caseData.id,
-                    caseName: caseData.name,
-                    customValues: newValues
-                })
-            });
+            try {
+                const response = await fetch('/.netlify/functions/custom-values-manager', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        // CORRECCIÓN: Usamos el caseId del estado global, que es el correcto.
+                        caseId: appState.currentCaseIdForCalc, 
+                        caseName: caseData.name,
+                        customValues: newValues
+                    })
+                });
 
-            customCaseValues = newValues; // Actualiza el estado local
-            isEditMode = false;
-            activeValueSource = 'custom'; // Cambia a la vista custom por defecto después de guardar
-            renderRewardSection(caseData);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Failed to save values.');
+                }
+
+                customCaseValues = newValues;
+                isEditMode = false;
+                activeValueSource = 'custom';
+                renderRewardSection(caseData);
+
+            } catch (error) {
+                console.error("Save values error:", error);
+                alert(`Error: ${error.message}`);
+            }
         };
     }
 
