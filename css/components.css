@@ -309,8 +309,12 @@ cover; }
 .reward-stats { display: flex; align-items: center; }
 .reward-stats span { width: 100px; text-align: center; font-size:
 1.1em; flex-shrink: 0; }
-.reward-stats .reward-value { width: auto; min-width: 100px; flex-grow:
-1; }
+.reward-stats .reward-value {
+    width: auto;
+    min-width: 100px;
+    flex-grow: 1;
+    text-align: center; /* <-- ¡AÑADE ESTA LÍNEA! */
+}
 .reward-stats .no-chance { color: var(--text-secondary); }
 
 /* --- VISTA DE DETALLES DE ESPADA --- */

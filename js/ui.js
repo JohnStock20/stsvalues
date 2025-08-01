@@ -171,16 +171,22 @@ function createRewardItemHTML(reward, source) {
       </div>`;
 }
 
-// 2. Modifica createRewardItem para que pase el nuevo parámetro
-export function createRewardItem(reward, source, navigateTo, isSimpleView = false) {
+// REEMPLAZA tu función createRewardItem con esta versión
+export function createRewardItem(reward, source, navigateTo) {
   const item = document.createElement('div');
   item.className = `reward-item ${reward.rarity}`;
-  
-  // Le pasamos el parámetro a la función que genera el HTML
-  const itemHTML = createRewardItemHTML(reward, source, isSimpleView);
+  const itemHTML = createRewardItemHTML(reward, source);
   item.innerHTML = itemHTML;
   
-  item.addEventListener('click', () => navigateTo('swordDetails', { sword: reward, source }));
+  // CORRECCIÓN: Se añade una comprobación para el modo edición
+  item.addEventListener('click', (event) => {
+    // Si el ítem está en modo edición o si el clic fue en el input, no navegamos.
+    if (item.classList.contains('edit-mode') || event.target.tagName === 'INPUT') {
+      return;
+    }
+    navigateTo('swordDetails', { sword: reward, source });
+  });
+  
   return item;
 }
 
