@@ -127,9 +127,7 @@
                             <div id="details-case-price"></div>
                         </div>
                     </div>
-    <!-- ======================================================= -->
-    <!-- CALCULADORA COMPLETAMENTE RESTAURADA Y FUNCIONAL        -->
-    <!-- ======================================================= -->
+    <!-- CALCULADORA RESTAURADA CON TODOS LOS MODOS Y LA UI CORRECTA -->
     <div id="calculator-section">
         <h2 class="section-title">~PROFIT CALCULATOR~</h2>
 
@@ -141,20 +139,20 @@
             <button id="mode-graph-btn">Graph</button>
         </div>
 
-        <!-- Controles para los modos estándar -->
+        <!-- Controles para los modos Theoretical, Simulate, y Until Best -->
         <div id="standard-controls" class="calculator-controls">
             <input type="number" id="case-quantity-input" placeholder="Enter amount...">
             <button id="calculate-btn" class="calculator-btn">Calculate</button>
         </div>
 
-        <!-- Controles para el modo Graph -->
+        <!-- Controles exclusivos para el modo Graph -->
         <div id="graph-controls" class="calculator-controls" style="display: none;">
             <input type="number" id="graph-step-input" placeholder="Step (e.g., 100)">
             <input type="number" id="graph-max-input" placeholder="Max (e.g., 5000)">
             <button id="calculate-graph-btn" class="calculator-btn">Generate Graph</button>
         </div>
 
-        <!-- Contenedor para todos los resultados -->
+        <!-- Contenedor para mostrar todos los resultados -->
         <div id="calculator-results-container">
             <div id="simulation-loot-summary" style="display: none;"></div>
             <div id="results-table-container"></div>
@@ -164,6 +162,7 @@
             </div>
         </div>
     </div>
+</div>
                 <!-- VISTA 3: DETALLES DE ESPADA -->
                 <div id="sword-details-view" class="main-view-panel">
                      <button class="back-btn" id="details-to-sword-list-btn">← Back</button>
