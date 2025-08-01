@@ -64,8 +64,8 @@ export const dom = {
         closeGiveaway: document.querySelector('#create-giveaway-modal .close-modal-btn'),
     },
     controls: {
-        standard: document.getElementById('standard-controls'),
-        graph: document.getElementById('graph-controls'),
+    standard: document.getElementById('standard-controls'),
+    graph: document.getElementById('graph-controls'),
     },
     converterFromName: document.getElementById('converter-from-name'),
     converterToName: document.getElementById('converter-to-name'),
@@ -275,32 +275,32 @@ export function renderSwordDetails(sword, sourceInfo, navigateTo, onNewInterval)
 // --- Renderizado de la Calculadora ---
 
 
+// RECONSTRUIDA: Esta función ahora gestiona la visibilidad de los controles
 export function clearCalculator(appState) {
-    dom.containers.simulationLoot.style.display = 'none';
-    dom.containers.resultsTable.innerHTML = '';
-    dom.containers.graph.style.display = 'none';
-    if (dom.containers.graphSvg) dom.containers.graphSvg.innerHTML = '';
-    if (dom.containers.graphLabels) dom.containers.graphLabels.innerHTML = '';
+  // 1. Limpia los resultados de cálculos anteriores
+  dom.containers.simulationLoot.style.display = 'none';
+  dom.containers.resultsTable.innerHTML = '';
+  dom.containers.graph.style.display = 'none';
+  if (dom.containers.graphSvg) dom.containers.graphSvg.innerHTML = '';
+  if (dom.containers.graphLabels) dom.containers.graphLabels.innerHTML = '';
 
+  // 2. Muestra/oculta los paneles de control correctos
+  const isGraphMode = appState.calculatorMode === 'graph';
+  dom.controls.standard.style.display = isGraphMode ? 'none' : 'flex';
+  dom.controls.graph.style.display = isGraphMode ? 'flex' : 'none';
 
-    const isGraphMode = appState.calculatorMode === 'graph';
-    const isUntilBestMode = appState.calculatorMode === 'untilBest';
-
-
-    dom.controls.standard.style.display = isGraphMode ? 'none' : 'flex';
-    dom.controls.graph.style.display = isGraphMode ? 'flex' : 'none';
-
-
-    if (isUntilBestMode) {
-        dom.inputs.caseQuantity.value = '';
-        dom.inputs.caseQuantity.placeholder = "Not applicable";
-        dom.inputs.caseQuantity.disabled = true;
-        dom.buttons.calculate.textContent = 'Start Hunt';
-    } else {
-        dom.inputs.caseQuantity.placeholder = "Enter amount...";
-        dom.inputs.caseQuantity.disabled = false;
-        dom.buttons.calculate.textContent = 'Calculate';
-    }
+  // 3. Habilita/deshabilita el input según el modo
+  const isUntilBestMode = appState.calculatorMode === 'untilBest';
+  if (isUntilBestMode) {
+    dom.inputs.caseQuantity.value = '';
+    dom.inputs.caseQuantity.placeholder = "Not applicable";
+    dom.inputs.caseQuantity.disabled = true;
+    dom.buttons.calculate.textContent = 'Start Hunt';
+  } else {
+    dom.inputs.caseQuantity.placeholder = "Enter amount...";
+    dom.inputs.caseQuantity.disabled = false;
+    dom.buttons.calculate.textContent = 'Calculate';
+  }
 }
 
 
