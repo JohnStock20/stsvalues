@@ -46,10 +46,10 @@ export const dom = {
         calculate: document.getElementById('calculate-btn'),
         calculateGraph: document.getElementById('calculate-graph-btn'),
             // CORRECCIÓN: Se añaden los selectores que faltaban para los botones de modo.
-        modeTheoretical: document.getElementById('mode-theoretical-btn'),
-        modeSimulate: document.getElementById('mode-simulate-btn'),
-        modeUntilBest: document.getElementById('mode-until-best-btn'),
-        modeGraph: document.getElementById('mode-graph-btn'),
+    modeTheoretical: document.getElementById('mode-theoretical-btn'),
+    modeSimulate: document.getElementById('mode-simulate-btn'),
+    modeUntilBest: document.getElementById('mode-until-best-btn'),
+    modeGraph: document.getElementById('mode-graph-btn'),
     },
     inputs: {
         converterFrom: document.getElementById('converter-from-input'),
@@ -275,21 +275,21 @@ export function renderSwordDetails(sword, sourceInfo, navigateTo, onNewInterval)
 // --- Renderizado de la Calculadora ---
 
 
-// RECONSTRUIDA: Esta función ahora gestiona la visibilidad de los controles
+// REEMPLAZA TU FUNCIÓN ANTIGUA CON ESTA VERSIÓN COMPLETA
 export function clearCalculator(appState) {
-  // 1. Limpia los resultados de cálculos anteriores
+  // 1. Limpia cualquier resultado de un cálculo anterior
   dom.containers.simulationLoot.style.display = 'none';
   dom.containers.resultsTable.innerHTML = '';
   dom.containers.graph.style.display = 'none';
   if (dom.containers.graphSvg) dom.containers.graphSvg.innerHTML = '';
   if (dom.containers.graphLabels) dom.containers.graphLabels.innerHTML = '';
 
-  // 2. Muestra/oculta los paneles de control correctos
+  // 2. Muestra/oculta los paneles de control según el modo seleccionado
   const isGraphMode = appState.calculatorMode === 'graph';
   dom.controls.standard.style.display = isGraphMode ? 'none' : 'flex';
   dom.controls.graph.style.display = isGraphMode ? 'flex' : 'none';
 
-  // 3. Habilita/deshabilita el input según el modo
+  // 3. Ajusta los inputs y botones para el modo "Until Best"
   const isUntilBestMode = appState.calculatorMode === 'untilBest';
   if (isUntilBestMode) {
     dom.inputs.caseQuantity.value = '';
@@ -302,7 +302,6 @@ export function clearCalculator(appState) {
     dom.buttons.calculate.textContent = 'Calculate';
   }
 }
-
 
 export function renderResultsTable(data, appState) {
     dom.containers.resultsTable.innerHTML = '';
