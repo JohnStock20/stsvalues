@@ -488,7 +488,7 @@ export function renderTitlesPage(titlesData, selectedKey, onSelect, onEquip) {
     item.style.setProperty('--title-glow-color', titleGlowColor);
 
     // El onClick ahora llama a la función `onSelect` que le pasamos (handleTitleSelection).
-    item.onclick = () => { if (title.unlocked) onSelect(title.key); };
+     item.onclick = () => onSelect(title.key);
     
     item.innerHTML = `
       <span class="title-name ${styleInfo.style.includes('gradient') ? 'gradient' : ''}"

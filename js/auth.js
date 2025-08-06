@@ -7,7 +7,7 @@
 // Lo exportamos para que otros módulos como ui.js puedan usarlo.
 export const titleStyles = {
     'player': { text: 'Player', style: 'var(--title-player-color)', description: 'The standard title for all players.' },
-    'member': { text: 'Member', style: 'var(--title-member-gradient)', description: 'A special title for verified members of the community.' },
+    'member': { text: 'Member', style: 'var(--title-member-gradient)',description: 'Unlock this title by joining our official <a href="https://discord.gg/AsDBs2PKka" class="external-link">Discord Server</a>. You will be prompted before leaving the site.' },
     'gamedeveloper': { text: 'Game Developer', style: 'var(--title-gamedeveloper-gradient)', description: 'This title is reserved for the developers of STS.' },
     '100t': { text: '+100T Value', style: 'var(--title-100t-gradient)', description: 'Awarded to players with exceptional in-game value.' },
     '250t': { text: '+250T Time', style: 'var(--title-250t-gradient)', description: 'For the most dedicated players who have spent countless hours in-game.' },

@@ -774,12 +774,16 @@ var(--border-color); cursor: not-allowed; }
   ¡ESTA ES LA CORRECCIÓN CLAVE PARA EL BORDE DE TÍTULOS!
   Reseteamos la posición "pegajosa" en móvil. Ahora se comportará como un bloque normal.
   */
- .info-column, #sword-info-card, #title-details-view {
+.info-column, #sword-info-card, #title-details-view {
  position: static;
  margin-top: 30px;
- height: auto; /* Permitimos que la altura se ajuste al contenido */
- max-height: none; /* Quitamos cualquier restricción de altura */
-  }
+ height: auto;
+ max-height: none;
+ flex-grow: 1; /* ¡ESTA ES LA LÍNEA CLAVE! Hace que el panel se expanda. */
+ display: flex; /* Añadimos flex para alinear el contenido interno */
+ flex-direction: column; /* Dirección vertical */
+ justify-content: center; /* Centramos el contenido verticalmente */
+}
 
  /* Ocultamos la cabecera de la lista de recompensas que no es necesaria en móvil. */
  .rewards-list-header {

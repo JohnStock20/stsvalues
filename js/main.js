@@ -715,6 +715,20 @@ function initializeApp() {
     UI.renderOtherSwords(appState, navigateToSubView);
     navigateToView('cases');
 
+     // --- Event Listener para Enlaces Externos con Advertencia ---
+ document.addEventListener('click', (e) => {
+  // Buscamos si el clic fue en un elemento con la clase 'external-link'
+  const link = e.target.closest('.external-link');
+  if (link) {
+    e.preventDefault(); // Detenemos la navegación automática
+    const targetUrl = link.href;
+    const confirmed = confirm("SECURITY WARNING:\n\nYou are about to navigate to an external website:\n\n" + targetUrl + "\n\nDo you want to continue?");
+    if (confirmed) {
+      window.open(targetUrl, '_blank', 'noopener,noreferrer');
+    }
+  }
+ });
+
     console.log("STS Values App Initialized!");
 }
 
