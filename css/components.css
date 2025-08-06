@@ -55,11 +55,14 @@ inputs...
 }
 
 /* --- TARJETA DE CAJA (SELECCIÓN) --- */
+/* --- TARJETA DE CAJA (SELECCIÓN) --- */
 .cases-container {
-  display: flex;
-  overflow-x: auto;
-  padding: 20px;
-  margin: 0 -20px; /* Compensa el padding para alinear con los bordes */
+ display: flex;
+ flex-wrap: wrap; /* ¡CAMBIO CLAVE!: Permite que las tarjetas se apilen. */
+ justify-content: center; /* ¡NUEVO!: Centra las tarjetas para un look más limpio. */
+ gap: 30px; /* ¡NUEVO!: Añade espacio consistente entre las tarjetas. */
+ padding: 20px 0; /* AJUSTADO: Se elimina el padding horizontal que compensábamos antes. */
+ margin: 0; /* AJUSTADO: Se elimina el margen negativo. */
 }
 .case-link {
   text-decoration: none;
@@ -747,18 +750,69 @@ var(--border-color); cursor: not-allowed; }
 
 /* --- RESPONSIVE ADAPTATIONS FOR COMPONENTS --- */
 @media (max-width: 768px) {
- .details-content, .sword-details-content { grid-template-columns: 1fr; }
- .info-column, #sword-info-card, #title-details-view { position: static; margin-top: 30px; }
- .rewards-list-header { display: none; }
- #rewards-list-container { max-height: 400px; }
- .reward-item { flex-direction: column; align-items: flex-start; gap: 10px; }
- .reward-stats { width: 100%; display: flex; justify-content: space-around; background-color: rgba(0,0,0,0.2); padding: 8px 0; border-radius: var(--border-radius-sm); margin-top: 5px; }
- .case-item { width: 320px; height: 180px; }
- .titles-view-container { grid-template-columns: 1fr; }
- #titles-list-container, #title-details-view { height: auto; max-height: 50vh; }
+ /* ¡CAMBIO CLAVE!: Esto apila las columnas en la vista de detalles de caja y espada. */
+ .details-content, .sword-details-content {
+ grid-template-columns: 1fr;
+ gap: 20px; /* Reducimos el espacio en la vista de una columna */
+  }
+
+ /* Hacemos que la tarjeta de información no sea pegajosa en móvil y ocupe su lugar en el flujo. */
+ .info-column, #sword-info-card, #title-details-view {
+ position: static;
+ margin-top: 30px;
+  }
+
+ /* Ocultamos la cabecera de la lista de recompensas que no es necesaria en móvil. */
+ .rewards-list-header {
+ display: none;
+  }
+
+ #rewards-list-container {
+ max-height: 400px;
+  }
+
+ /* ¡CAMBIO CLAVE!: Reorganiza cada ítem de la lista para que sea más legible en vertical. */
+ .reward-item {
+ flex-direction: column;
+ align-items: flex-start;
+ gap: 10px;
+  }
+ .reward-stats {
+ width: 100%;
+ display: flex;
+ justify-content: space-around;
+ background-color: rgba(0, 0, 0, 0.2);
+ padding: 8px 0;
+ border-radius: var(--border-radius-sm);
+ margin-top: 5px;
+  }
+
+ /* Ajustamos el tamaño de las tarjetas de caja. */
+ .case-item {
+ width: 320px;
+ height: 180px;
+  }
+
+ /* Apilamos las columnas de la vista de Títulos. */
+ .titles-view-container {
+ grid-template-columns: 1fr;
+  }
+ #titles-list-container, #title-details-view {
+ height: auto;
+ max-height: 50vh;
+  }
 }
 
 @media (max-width: 480px) {
- .case-item { width: 280px; height: 160px; }
- .reward-stats span, .reward-stats .reward-value { font-size: 1em; width: 80px; }
+ /* Reducimos aún más el tamaño de las tarjetas para móviles pequeños. */
+ .case-item {
+ width: 100%; /* Hacemos que ocupe todo el ancho disponible */
+ height: 160px;
+  }
+
+ /* Ajustamos el texto de las estadísticas para que no se desborde. */
+ .reward-stats span, .reward-stats .reward-value {
+ font-size: 1em;
+ width: 80px;
+  }
 }
