@@ -747,24 +747,18 @@ var(--border-color); cursor: not-allowed; }
 
 /* --- RESPONSIVE ADAPTATIONS FOR COMPONENTS --- */
 @media (max-width: 768px) {
-  .details-content, .sword-details-content { grid-template-columns:
-1fr; }
-  .info-column, #sword-info-card, #title-details-view { position:
-static; margin-top: 30px; }
-  .rewards-list-header { display: none; }
-  #rewards-list-container { max-height: 400px; }
-  .reward-item { flex-direction: column; align-items: flex-start;
-gap: 10px; }
-  .reward-stats { width: 100%; display: flex; justify-content:
-space-around; background-color: rgba(0,0,0,0.2); padding: 8px 0;
-border-radius: var(--border-radius-sm); margin-top: 5px; }
-  .case-item { width: 320px; height: 180px; }
-  .titles-view-container { grid-template-columns: 1fr; }
-  #titles-list-container, #title-details-view { height: auto;
-max-height: 50vh; }
+ .details-content, .sword-details-content { grid-template-columns: 1fr; }
+ .info-column, #sword-info-card, #title-details-view { position: static; margin-top: 30px; }
+ .rewards-list-header { display: none; }
+ #rewards-list-container { max-height: 400px; }
+ .reward-item { flex-direction: column; align-items: flex-start; gap: 10px; }
+ .reward-stats { width: 100%; display: flex; justify-content: space-around; background-color: rgba(0,0,0,0.2); padding: 8px 0; border-radius: var(--border-radius-sm); margin-top: 5px; }
+ .case-item { width: 320px; height: 180px; }
+ .titles-view-container { grid-template-columns: 1fr; }
+ #titles-list-container, #title-details-view { height: auto; max-height: 50vh; }
 }
+
 @media (max-width: 480px) {
-  .case-item { width: 280px; height: 160px; }
-  .reward-stats span, .reward-stats .reward-value { font-size: 1em;
-width: 80px; }
+ .case-item { width: 280px; height: 160px; }
+ .reward-stats span, .reward-stats .reward-value { font-size: 1em; width: 80px; }
 }

@@ -34,48 +34,45 @@
 
 /* --- CABECERA REDISEÑADA --- */
 .main-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    padding: 20px 0;
-    margin-bottom: 40px;
+ display: flex;
+ align-items: center;
+ justify-content: space-between;
+ gap: 20px;
+ padding: 20px 0;
+ margin-bottom: 40px;
 }
-
 .logo-container {
-    flex-shrink: 0;
+ flex-shrink: 0;
 }
-
 .logo {
-    font-family: 'Anton', sans-serif;
-    font-size: 3em;
-    text-transform: uppercase;
-    background: linear-gradient(45deg, var(--light-green), var(--main-green));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent; /* Fallback para navegadores antiguos */
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 25px rgba(45, 212, 191, 0.4);
-    margin: 0;
-    padding: 0;
+ font-family: 'Anton', sans-serif;
+ font-size: 3em;
+ text-transform: uppercase;
+ background: linear-gradient(45deg, var(--light-green),
+var(--main-green));
+ -webkit-background-clip: text;
+ background-clip: text;
+ color: transparent; /* Fallback para navegadores antiguos */
+ -webkit-text-fill-color: transparent;
+ text-shadow: 0 0 25px rgba(45, 212, 191, 0.4);
+ margin: 0;
+ padding: 0;
 }
-
 .top-ui-container {
-    display: flex;
-    justify-content: center; /* Centra los módulos */
-    align-items: center;
-    gap: 15px;
-    flex-wrap: wrap;
-    flex-grow: 1; /* Permite que ocupe el espacio disponible */
-    padding: 0 30px;
+ display: flex;
+ justify-content: center; /* Centra los módulos */
+ align-items: center;
+ gap: 15px;
+ flex-wrap: wrap; /* ¡CLAVE! Permite que los elementos se apilen */
+ flex-grow: 1; /* Permite que ocupe el espacio disponible */
+ padding: 0 30px;
 }
-
 .auth-container {
-    position: relative; /* Para el menú desplegable */
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    flex-shrink: 0;
+ position: relative; /* Para el menú desplegable */
+ display: flex;
+ justify-content: flex-end;
+ align-items: center;
+ flex-shrink: 0;
 }
 
 
@@ -105,62 +102,61 @@
 
 /* --- TABLETS Y PORTÁTILES PEQUEÑOS (Ocultar barras laterales) --- */
 @media (max-width: 1280px) {
-    .site-wrapper {
-        grid-template-columns: 1fr; /* Cambiamos a un layout de una sola columna */
-    }
-    .main-content-wrapper {
-        grid-column: 1; /* El contenido ahora ocupa toda la columna */
-    }
-    .ad-sidebar {
-        display: none; /* Ocultamos las barras laterales */
-    }
+ .site-wrapper {
+ grid-template-columns: 1fr; /* Cambiamos a un layout de una sola columna */
+  }
+ .main-content-wrapper {
+ grid-column: 1; /* El contenido ahora ocupa toda la columna */
+  }
+ .ad-sidebar {
+ display: none; /* Ocultamos las barras laterales */
+  }
 }
 
 /* --- TABLETS EN VERTICAL Y MÓVILES GRANDES (Reestructurar cabecera) --- */
 @media (max-width: 900px) {
-    .main-content-wrapper {
-        padding: 0 20px 20px 20px;
-    }
-    .main-header {
-        display: grid;
-        grid-template-columns: 1fr auto; /* Logo a la izquierda, perfil/menú a la derecha. */
-        grid-template-rows: auto auto;   /* Dos filas */
-        gap: 20px;
-    }
-    .logo-container {
-        grid-row: 1;
-        grid-column: 1;
-        text-align: left;
-    }
-    .auth-container {
-        grid-row: 1;
-        grid-column: 2;
-    }
-    .top-ui-container {
-        grid-row: 2;
-        grid-column: 1 / -1; /* Ocupa todo el ancho en la segunda fila */
-        justify-content: center;
-        padding: 0;
-    }
+ .main-content-wrapper {
+ padding: 0 20px 20px 20px;
+  }
+ .main-header {
+ display: grid;
+ grid-template-columns: 1fr auto; /* Logo a la izquierda, perfil/menú a la derecha. */
+ grid-template-rows: auto auto; /* Dos filas */
+ gap: 20px;
+  }
+ .logo-container {
+ grid-row: 1;
+ grid-column: 1;
+ text-align: left;
+  }
+ .auth-container {
+ grid-row: 1;
+ grid-column: 2;
+  }
+ .top-ui-container {
+ grid-row: 2;
+ grid-column: 1 / -1; /* Ocupa todo el ancho en la segunda fila */
+ justify-content: center;
+ padding: 0;
+  }
 }
 
 /* --- MÓVILES PEQUEÑOS --- */
 @media (max-width: 480px) {
-    .main-content-wrapper {
-        padding: 0 15px 15px 15px;
-    }
-    .logo { font-size: 2.5em; }
-    .section-title { font-size: 2em; }
-
-    .top-ui-container {
-        flex-direction: column;
-        width: 100%;
-        gap: 15px;
-    }
-    #unit-converter, #search-module {
-        width: 100%;
-    }
-    #unit-converter {
-        flex-direction: column;
-    }
+ .main-content-wrapper {
+ padding: 0 15px 15px 15px;
+  }
+ .logo { font-size: 2.5em; }
+ .section-title { font-size: 2em; }
+ .top-ui-container {
+ flex-direction: column;
+ width: 100%;
+ gap: 15px;
+  }
+ #unit-converter, #search-module {
+ width: 100%;
+  }
+ #unit-converter {
+ flex-direction: column;
+  }
 }
