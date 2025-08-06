@@ -57,9 +57,23 @@ inputs...
 /* --- TARJETA DE CAJA (SELECCIÓN) --- */
 .cases-container {
  display: flex;
- overflow-x: auto; /* ¡CAMBIO CLAVE!: Permite el scroll horizontal SÓLO en este contenedor. */
- padding: 20px; /* Padding para que las tarjetas no se peguen a los bordes. */
- margin: 0 -20px; /* Compensa el padding para alinear con los bordes del contenido principal. */
+ overflow-x: auto; /* Permite el scroll horizontal SÓLO en este contenedor. */
+ padding: 20px;
+ margin: 0 -20px; /* Esto ahora funcionará como se espera, sin afectar al scroll principal. */
+ /* Añadimos propiedades para mejorar el scroll en navegadores táctiles y de escritorio */
+ scroll-snap-type: x mandatory; /* Opcional: hace que el scroll se "enganche" a cada tarjeta. */
+ -webkit-overflow-scrolling: touch; /* Scroll más suave en iOS. */
+}
+/* Añadimos un selector para el scrollbar para que se vea mejor */
+.cases-container::-webkit-scrollbar {
+ height: 8px;
+}
+.cases-container::-webkit-scrollbar-thumb {
+ background: var(--main-green);
+ border-radius: 4px;
+}
+.cases-container::-webkit-scrollbar-track {
+ background: var(--dark-bg);
 }
 
 .case-link {
@@ -747,38 +761,32 @@ var(--border-color); cursor: not-allowed; }
 }
 
 /* --- RESPONSIVE ADAPTATIONS FOR COMPONENTS --- */
-@media (max-width: 768px) {
-  /*
-  ¡ESTA ES LA CORRECCIÓN MÁS IMPORTANTE!
-  Cambiamos 'grid' por 'flex' con dirección de columna.
-  Esto fuerza a que la columna de información se ponga DEBAJO de la lista de recompensas,
-  eliminando la superposición.
-  */
+@media (max-width: 900px) { /* Usamos un breakpoint más consistente */
+
+ /* Apilamos las columnas en las vistas de Detalles (Caja, Espada y Títulos) */
  .details-content, .sword-details-content, .titles-view-container {
  display: flex;
  flex-direction: column;
- grid-template-columns: 1fr; /* Mantenemos por si algún elemento depende de ello, pero flex lo anula */
  gap: 30px;
   }
 
- /* Hacemos que la tarjeta de información no sea pegajosa en móvil. */
+ /*
+  ¡ESTA ES LA CORRECCIÓN CLAVE PARA EL BORDE DE TÍTULOS!
+  Reseteamos la posición "pegajosa" en móvil. Ahora se comportará como un bloque normal.
+  */
  .info-column, #sword-info-card, #title-details-view {
  position: static;
  margin-top: 30px;
-  }
- 
-  /* Aseguramos que el panel de detalles del título tenga una altura automática */
- #titles-list-container, #title-details-view {
- height: auto;
- max-height: none; /* Quitamos la altura máxima para que se expanda si es necesario */
+ height: auto; /* Permitimos que la altura se ajuste al contenido */
+ max-height: none; /* Quitamos cualquier restricción de altura */
   }
 
-  /* Ocultamos la cabecera de la lista de recompensas que no es necesaria en móvil. */
+ /* Ocultamos la cabecera de la lista de recompensas que no es necesaria en móvil. */
  .rewards-list-header {
  display: none;
   }
 
-  /* Reorganiza cada ítem de la lista de recompensas para que sea más legible en vertical. */
+ /* Reorganiza cada ítem de la lista de recompensas para que sea más legible en vertical. */
  .reward-item {
  flex-direction: column;
  align-items: flex-start;
@@ -794,24 +802,27 @@ var(--border-color); cursor: not-allowed; }
  margin-top: 5px;
   }
 
-  /* Ajustamos el tamaño de las tarjetas de caja. */
+ /* Ajustamos el tamaño de las tarjetas de caja. */
  .case-item {
  width: 320px;
  height: 180px;
   }
+
+ #titles-list-container {
+ height: auto; /* La lista de títulos también necesita altura automática */
+  }
 }
 
 @media (max-width: 480px) {
-  /* Hacemos que la tarjeta de caja ocupe todo el ancho para una mejor experiencia en móviles pequeños. */
  .case-item {
- width: 90%;
- margin-left: auto;
- margin-right: auto;
+ width: 280px;
  height: 160px;
   }
-
  .reward-stats span, .reward-stats .reward-value {
  font-size: 1em;
  width: 80px;
+  }
+ .section-title {
+ font-size: 2em;
   }
 }

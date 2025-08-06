@@ -13,11 +13,11 @@
 }
 
 .main-content-wrapper {
-    /* El contenido principal ocupa la segunda columna del grid */
-    grid-column: 2;
-    padding: 0 40px 40px 40px;
-    width: 100%;
-    position: relative; /* Necesario para el posicionamiento absoluto del menú desplegable */
+ /* El contenido principal ocupa la segunda columna del grid */
+ grid-column: 2;
+ padding: 0 40px 40px 40px;
+ width: 100%;
+ overflow-x: hidden; /* ¡CAMBIO CLAVE!: Evita que el scroll de los hijos afecte a toda la página. */
 }
 
 .ad-sidebar {
