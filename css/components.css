@@ -55,21 +55,19 @@ inputs...
 }
 
 /* --- TARJETA DE CAJA (SELECCIÓN) --- */
-/* --- TARJETA DE CAJA (SELECCIÓN) --- */
 .cases-container {
  display: flex;
- flex-wrap: wrap; /* ¡CAMBIO CLAVE!: Permite que las tarjetas se apilen. */
- justify-content: center; /* ¡NUEVO!: Centra las tarjetas para un look más limpio. */
- gap: 30px; /* ¡NUEVO!: Añade espacio consistente entre las tarjetas. */
- padding: 20px 0; /* AJUSTADO: Se elimina el padding horizontal que compensábamos antes. */
- margin: 0; /* AJUSTADO: Se elimina el margen negativo. */
+ overflow-x: auto; /* ¡CAMBIO CLAVE!: Permite el scroll horizontal SÓLO en este contenedor. */
+ padding: 20px; /* Padding para que las tarjetas no se peguen a los bordes. */
+ margin: 0 -20px; /* Compensa el padding para alinear con los bordes del contenido principal. */
 }
+
 .case-link {
-  text-decoration: none;
-  margin: 0 15px;
-  display: block;
-  transition: transform 0.2s ease-out;
-  flex-shrink: 0;
+ text-decoration: none;
+ margin: 0 15px;
+ display: block;
+ transition: transform 0.2s ease-out;
+ flex-shrink: 0; /* ¡MUY IMPORTANTE!: Evita que las tarjetas se encojan. */
 }
 .case-link:hover {
   transform: scale(1.03);
@@ -750,28 +748,37 @@ var(--border-color); cursor: not-allowed; }
 
 /* --- RESPONSIVE ADAPTATIONS FOR COMPONENTS --- */
 @media (max-width: 768px) {
- /* ¡CAMBIO CLAVE!: Esto apila las columnas en la vista de detalles de caja y espada. */
- .details-content, .sword-details-content {
- grid-template-columns: 1fr;
- gap: 20px; /* Reducimos el espacio en la vista de una columna */
+  /*
+  ¡ESTA ES LA CORRECCIÓN MÁS IMPORTANTE!
+  Cambiamos 'grid' por 'flex' con dirección de columna.
+  Esto fuerza a que la columna de información se ponga DEBAJO de la lista de recompensas,
+  eliminando la superposición.
+  */
+ .details-content, .sword-details-content, .titles-view-container {
+ display: flex;
+ flex-direction: column;
+ grid-template-columns: 1fr; /* Mantenemos por si algún elemento depende de ello, pero flex lo anula */
+ gap: 30px;
   }
 
- /* Hacemos que la tarjeta de información no sea pegajosa en móvil y ocupe su lugar en el flujo. */
+ /* Hacemos que la tarjeta de información no sea pegajosa en móvil. */
  .info-column, #sword-info-card, #title-details-view {
  position: static;
  margin-top: 30px;
   }
+ 
+  /* Aseguramos que el panel de detalles del título tenga una altura automática */
+ #titles-list-container, #title-details-view {
+ height: auto;
+ max-height: none; /* Quitamos la altura máxima para que se expanda si es necesario */
+  }
 
- /* Ocultamos la cabecera de la lista de recompensas que no es necesaria en móvil. */
+  /* Ocultamos la cabecera de la lista de recompensas que no es necesaria en móvil. */
  .rewards-list-header {
  display: none;
   }
 
- #rewards-list-container {
- max-height: 400px;
-  }
-
- /* ¡CAMBIO CLAVE!: Reorganiza cada ítem de la lista para que sea más legible en vertical. */
+  /* Reorganiza cada ítem de la lista de recompensas para que sea más legible en vertical. */
  .reward-item {
  flex-direction: column;
  align-items: flex-start;
@@ -787,30 +794,22 @@ var(--border-color); cursor: not-allowed; }
  margin-top: 5px;
   }
 
- /* Ajustamos el tamaño de las tarjetas de caja. */
+  /* Ajustamos el tamaño de las tarjetas de caja. */
  .case-item {
  width: 320px;
  height: 180px;
   }
-
- /* Apilamos las columnas de la vista de Títulos. */
- .titles-view-container {
- grid-template-columns: 1fr;
-  }
- #titles-list-container, #title-details-view {
- height: auto;
- max-height: 50vh;
-  }
 }
 
 @media (max-width: 480px) {
- /* Reducimos aún más el tamaño de las tarjetas para móviles pequeños. */
+  /* Hacemos que la tarjeta de caja ocupe todo el ancho para una mejor experiencia en móviles pequeños. */
  .case-item {
- width: 100%; /* Hacemos que ocupe todo el ancho disponible */
+ width: 90%;
+ margin-left: auto;
+ margin-right: auto;
  height: 160px;
   }
 
- /* Ajustamos el texto de las estadísticas para que no se desborde. */
  .reward-stats span, .reward-stats .reward-value {
  font-size: 1em;
  width: 80px;
