@@ -144,7 +144,11 @@ export function renderNotificationsPage(notifications, timeFormatter) {
         let contentHtml = '';
         switch (n.type) {
             case 'ban':
-                contentHtml = `You have been <strong>BANNED</strong>. Reason: <em>${n.content.reason || 'Not specified'}</em>.`;
+                contentHtml = `You have been <strong>BANNED</strong> by ${n.content.issued_by}. Reason: <em>${n.content.reason || 'Not specified'}</em>.`;
+                break;
+            // --- ¡NUEVO! Se añade el caso para 'unban' ---
+            case 'unban':
+                contentHtml = `Your account has been <strong>UNBANNED</strong> by ${n.content.unbanned_by}. Welcome back!`;
                 break;
             case 'warning':
                 contentHtml = `You received a <strong>WARNING</strong> from ${n.content.issued_by}. Reason: <em>${n.content.reason}</em>.`;
@@ -153,16 +157,17 @@ export function renderNotificationsPage(notifications, timeFormatter) {
                 const titleText = titleStyles[n.content.title_key]?.text || n.content.title_key;
                 contentHtml = `You have been granted the title "<strong>${titleText}</strong>" by ${n.content.granted_by}.`;
                 break;
+            // --- ¡NUEVO! Se añade el caso para 'giveaway_win' ---
             case 'giveaway_win':
                 contentHtml = `Congratulations! You won the giveaway for: <strong>${n.content.prize_summary}</strong>.`;
                 break;
             default:
-                contentHtml = `<p>New notification.</p>`;
+                contentHtml = `<p>New notification of type '${n.type}'.</p>`; // Mejoramos el default para depurar
         }
         return `
             <div class="notification-item ${n.type}">
                 <p>${contentHtml}</p>
-                <p class="timestamp">${timeFormatter(n.created_at)}</p>
+                <p class.timestamp">${timeFormatter(n.created_at)}</p>
             </div>
         `;
     }).join('');

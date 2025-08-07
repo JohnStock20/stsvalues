@@ -29,6 +29,8 @@ exports.handler = async (event) => {
   }
 };
 
+// Reemplaza tu función handleGetGiveaways por esta versión completa y final.
+
 async function handleGetGiveaways(event) {
   const client = await pool.connect();
   try {
@@ -47,11 +49,9 @@ async function handleGetGiveaways(event) {
       const startTime = new Date(gw.start_time);
       const endTime = new Date(gw.end_time);
 
-      // LÓGICA CORREGIDA Y MEJORADA
       // Comprobación 1: ¿Debería pasar de 'upcoming' a 'active'?
       if (gw.status === 'upcoming' && now >= startTime && now < endTime) {
         gw.status = 'active';
-        // Actualizamos la base de datos para que el cambio sea permanente.
         await client.query('UPDATE giveaways SET status = $1 WHERE id = $2', ['active', gw.id]);
       }
       
@@ -59,10 +59,38 @@ async function handleGetGiveaways(event) {
       if (gw.status === 'active' && now >= endTime) {
         gw.status = 'finished';
         let winner = null;
+        
         // Seleccionar un ganador si hay participantes.
         if (gw.participants && gw.participants.length > 0) {
           winner = gw.participants[Math.floor(Math.random() * gw.participants.length)];
+
+          // --- ¡NUEVA LÓGICA PARA CREAR NOTIFICACIÓN DE SORTEO GANADO! ---
+          try {
+            // 1. Buscamos el ID del usuario ganador para asociar la notificación.
+            const userRes = await client.query('SELECT id FROM users WHERE username = $1', [winner]);
+            if (userRes.rowCount > 0) {
+                const winnerId = userRes.rows[0].id;
+                
+                // 2. Creamos un resumen legible del premio.
+                const prizeSummary = gw.prize_pool.map(p => 
+                    `${p.amount} ${p.type === 'currency' ? p.id : `x ${p.id}`}`
+                ).join(', ');
+
+                const content = { prize_summary: prizeSummary };
+
+                // 3. Insertamos la nueva notificación en la base de datos.
+                await client.query(
+                    `INSERT INTO notifications (user_id, type, content) VALUES ($1, 'giveaway_win', $2)`,
+                    [winnerId, JSON.stringify(content)]
+                );
+            }
+          } catch (notificationError) {
+              // Si falla la creación de la notificación, lo registramos pero no detenemos el proceso.
+              console.error(`Failed to create giveaway win notification for user ${winner}:`, notificationError);
+          }
+          // --- FIN DE LA LÓGICA DE NOTIFICACIÓN ---
         }
+        
         // Actualizamos la base de datos con el estado 'finished' y el ganador.
         await client.query('UPDATE giveaways SET status = $1, winner = $2 WHERE id = $3', ['finished', winner, gw.id]);
       }
@@ -75,14 +103,13 @@ async function handleGetGiveaways(event) {
        ORDER BY end_time DESC LIMIT 5`
     );
 
-    // 4. Enriquecer los datos de los participantes (sin cambios aquí).
+    // 4. Enriquecer los datos de los participantes.
     const activeGiveaway = giveawaysResult.rows.find(gw => gw.status === 'active');
      if (activeGiveaway && activeGiveaway.participants && activeGiveaway.participants.length > 0) {
         const usersResult = await client.query(
             'SELECT username, roblox_avatar_url as avatar, equipped_title FROM users WHERE username = ANY($1::text[])',
             [activeGiveaway.participants]
         );
-        // CORREGIDO: Mapeamos de snake_case a camelCase
         activeGiveaway.participants = usersResult.rows.map(p => ({
             username: p.username,
             avatar: p.avatar,
@@ -97,7 +124,6 @@ async function handleGetGiveaways(event) {
             'SELECT username, roblox_avatar_url as avatar, equipped_title FROM users WHERE username = ANY($1::text[])',
             [winnerUsernames]
         );
-        // CORREGIDO: Mapeamos de snake_case a camelCase al crear el mapa de perfiles
         const profilesMap = new Map(profilesResult.rows.map(p => [p.username, {
             username: p.username,
             avatar: p.avatar,
@@ -110,7 +136,7 @@ async function handleGetGiveaways(event) {
         }));
     }
 
-    // 5. Devolver datos (sin cambios aquí)
+    // 5. Devolver datos.
     return {
       statusCode: 200,
       body: JSON.stringify({
