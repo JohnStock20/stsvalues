@@ -59,7 +59,10 @@ function navigateToView(viewName) {
 // --- NUEVA FUNCIÓN para marcar como leídas ---
 async function markNotificationsAsRead() {
     // Ocultamos el indicador inmediatamente para una respuesta visual rápida
-    document.getElementById('notification-indicator').style.display = 'none';
+    // --- ¡CORRECCIÓN CLAVE! ---
+    document.querySelectorAll('.notification-indicator').forEach(indicator => {
+        indicator.style.display = 'none';
+    });
     const token = localStorage.getItem('sts-token');
     try {
         await fetch('/.netlify/functions/notifications-manager', {
@@ -735,7 +738,6 @@ function onLoginSuccess(loggedInUser) {
     navigateToView(currentViewKey);
 }
 
-// --- NUEVA FUNCIÓN para manejar notificaciones ---
 async function fetchAndRenderNotifications() {
     if (!currentUser) return;
     const token = localStorage.getItem('sts-token');
@@ -748,9 +750,13 @@ async function fetchAndRenderNotifications() {
         
         userNotifications = await response.json();
         const hasUnread = userNotifications.some(n => !n.is_read);
-        document.getElementById('notification-indicator').style.display = hasUnread ? 'block' : 'none';
+        
+        // --- ¡CORRECCIÓN CLAVE! ---
+        // Usamos querySelectorAll para encontrar TODOS los indicadores
+        document.querySelectorAll('.notification-indicator').forEach(indicator => {
+            indicator.style.display = hasUnread ? 'block' : 'none';
+        });
 
-        // Pasamos la función formatTimeAgo desde utils.js
         UI.renderNotificationsPage(userNotifications, formatTimeAgo);
 
     } catch (error) {

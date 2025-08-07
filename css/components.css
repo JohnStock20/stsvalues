@@ -937,6 +937,41 @@ var(--border-color); cursor: not-allowed; }
 .notification-item.title_grant { --notification-border-color: #8b5cf6; } /* Morado */
 .notification-item.giveaway_win { --notification-border-color: #10b981; } /* Verde */
 
+/* --- Estilos para Notificaciones en la UI --- */
+
+/* Contenedor del enlace en el menú desplegable */
+.main-nav-dropdown .nav-link[data-view="notifications"] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Alinea el texto a la izquierda y el indicador a la derecha */
+}
+
+/* Estilo unificado para TODOS los indicadores de notificación */
+.notification-indicator {
+    display: none; /* Oculto por defecto */
+    background-color: #ef4444; /* Rojo */
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 20px;
+    flex-shrink: 0; /* Evita que se encoja */
+}
+
+/* Posicionamiento específico para el indicador del menú hamburguesa */
+#user-profile-nav .notification-indicator {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 12px;  /* Más pequeño para no ser intrusivo */
+    height: 12px;
+    font-size: 0; /* Ocultamos el '!' y solo mostramos el punto rojo */
+    border: 2px solid var(--panel-bg); /* Borde para que destaque */
+}
+
 /* --- RESPONSIVE ADAPTATIONS FOR COMPONENTS --- */
 @media (max-width: 900px) { /* Usamos un breakpoint más consistente */
 
