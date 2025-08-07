@@ -87,7 +87,7 @@ export function initializeAuth(onLoginSuccess) {
         }
     }
 
-// Reemplaza tu función handleLogin por esta versión corregida.
+// Reemplaza tu función handleLogin por esta versión corregida y final.
 async function handleLogin(event) {
     event.preventDefault();
     const form = event.target;
@@ -107,17 +107,16 @@ async function handleLogin(event) {
 
         const data = await response.json();
 
-        // ¡ESTA ES LA CORRECCIÓN CLAVE!
-        // Si la respuesta no es 'ok' (ej: status 401, 403, 404), lanzamos un error
-        // para que sea capturado por el bloque catch.
+        // --- ¡ESTA ES LA CORRECCIÓN MÁS IMPORTANTE! ---
+        // Si la respuesta del servidor NO es exitosa (ej. status 403 por baneo),
+        // creamos un error personalizado y lo lanzamos para que lo capture el bloque 'catch'.
         if (!response.ok) {
-            // Pasamos toda la información del error para poder usarla en el catch.
             const error = new Error(data.message || 'Login failed');
-            error.data = data; // Adjuntamos los datos del baneo.
+            error.data = data; // Adjuntamos los detalles (razón del baneo, etc.) al error.
             throw error;
         }
 
-        // Si todo va bien, procedemos como antes.
+        // Si el login fue exitoso, continuamos como siempre.
         localStorage.setItem('sts-token', data.token);
         localStorage.setItem('sts-user', JSON.stringify(data.user));
         updateProfileUI(data.user);
@@ -127,21 +126,23 @@ async function handleLogin(event) {
     } catch (error) {
         console.error('Login fetch error:', error);
         
-        // Ahora el catch recibe los errores de baneo correctamente.
-        if (error.data && error.data.ban_reason) {
+        // --- AHORA ESTE BLOQUE SÍ FUNCIONARÁ ---
+        // Gracias al 'throw' de arriba, ahora podemos detectar el error de baneo aquí.
+        if (error.data && (error.data.ban_reason || error.data.ban_expires_at)) {
             document.getElementById('banned-reason-text').textContent = error.data.ban_reason || 'No reason provided.';
             document.getElementById('banned-expires-text').textContent = error.data.ban_expires_at ? new Date(error.data.ban_expires_at).toLocaleString() : 'Permanent';
             
             const bannedModal = document.getElementById('banned-modal-overlay');
             if (bannedModal) {
+                // Ocultamos el modal de login y mostramos el de baneo.
+                hideModals();
                 bannedModal.style.display = 'flex';
-                document.getElementById('banned-logout-btn').addEventListener('click', () => {
+                document.getElementById('banned-logout-btn').onclick = () => {
                      bannedModal.style.display = 'none';
-                });
+                };
             }
-            hideModals(); // Ocultamos el modal de login normal.
-
         } else {
+            // Si es cualquier otro error, mostramos el mensaje genérico.
             errorElement.textContent = error.message || "Could not connect to the server.";
             errorElement.style.display = 'block';
         }
