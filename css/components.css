@@ -509,22 +509,60 @@ bold; font-size: 1.1em; }
 .converter-input[type="number"]::-webkit-inner-spin-button {
 -webkit-appearance: none; margin: 0; }
 .converter-input[type=number] { -moz-appearance: textfield; }
-#search-module { position: relative; width: 400px; max-width: 100%; }
-#search-bar { background-color: var(--dark-bg); border: 1px solid
-var(--border-color); color: var(--text-primary); padding: 12px 15px;
-font-size: 1.1em; border-radius: var(--border-radius-md); width: 100%;
-transition: var(--transition-fast); }
-#search-bar:focus { outline: none; border-color: var(--main-green);
-background-color: var(--panel-bg); }
-#search-results { position: absolute; top: calc(100% + 5px); left: 0;
-width: 100%; background-color: var(--panel-bg); border: 1px solid
-var(--border-color); border-radius: var(--border-radius-lg);
-max-height: 450px; overflow-y: auto; padding: 10px; display: none;
-z-index: 1001; box-shadow: var(--shadow-lg); }
+/* --- Módulo de Búsqueda (en auth.css o components.css) --- */
+#search-module {
+    position: relative; /* Necesario para que el panel de resultados se posicione correctamente */
+    width: 400px;
+    max-width: 100%;
+}
+
+#search-bar {
+    background-color: var(--dark-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 12px 15px;
+    font-size: 1.1em;
+    border-radius: var(--border-radius-md);
+    width: 100%;
+    transition: var(--transition-fast);
+}
+
+#search-bar:focus {
+    outline: none;
+    border-color: var(--main-green);
+    background-color: var(--panel-bg);
+}
+
+#search-results {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    width: auto; /* ¡CLAVE! Permite que el contenedor se expanda. */
+    min-width: 100%; /* Asegura que como mínimo sea tan ancho como la barra de búsqueda. */
+    background-color: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    max-height: 450px;
+    overflow-y: auto;
+    padding: 10px;
+    display: none;
+    z-index: 1001;
+    box-shadow: var(--shadow-lg);
+}
+/* --- ¡NUEVO! Estilos específicos para los ítems DENTRO de la búsqueda --- */
 #search-results .reward-item {
-  padding: 10px;
-  margin: 5px 0; /* Espaciado vertical AÑADIDO */
-  border-width: 1px;
+    padding: 10px;
+    margin-bottom: 5px; /* Espacio entre resultados */
+    border-width: 2px; /* Asegura que el borde tenga el mismo grosor */
+    background-color: var(--dark-bg); /* Un fondo ligeramente distinto para destacar */
+}
+
+#search-results .reward-item:last-child {
+    margin-bottom: 0;
+}
+
+#search-results .reward-item .reward-name {
+    white-space: nowrap; /* ¡CLAVE! Evita que los nombres largos se partan en dos líneas. */
 }
 #search-results .reward-item::before { inset: 1px; padding: 2px; }
 #search-results .reward-item::after { inset: 3px; }

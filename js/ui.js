@@ -190,6 +190,31 @@ export function createRewardItem(reward, source, navigateTo) {
   return item;
 }
 
+// AÑADE ESTA NUEVA FUNCIÓN en ui.js
+// Esta función crea una versión SIMPLIFICADA de un ítem solo para la búsqueda.
+export function createSearchResultItem(reward, source, navigateTo) {
+    const item = document.createElement('div');
+    // Aplicamos las mismas clases para que herede los estilos de borde y rareza
+    item.className = `reward-item ${reward.rarity}`;
+    
+    // HTML mucho más simple: solo imagen y nombre.
+    item.innerHTML = `
+        <div class="reward-info">
+            <div class="reward-image-placeholder">
+                <img src="${reward.image}" alt="${reward.name}">
+            </div>
+            <span class="reward-name">${reward.name}</span>
+        </div>
+    `;
+    
+    // El evento de clic sigue funcionando igual para llevar a los detalles.
+    item.addEventListener('click', () => {
+        navigateTo('swordDetails', { sword: reward, source });
+    });
+
+    return item;
+}
+
 
 // Esta función se encarga SOLO de la cabecera (imagen, nombre, precio)
 export function renderCaseDetailsHeader(caseData) {

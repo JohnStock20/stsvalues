@@ -545,28 +545,28 @@ function initializeTopUI() {
     const results = allSwords.filter(s => s.name.toLowerCase().includes(query)).slice(0, 10);
     UI.dom.containers.searchResults.innerHTML = '';
 
-    if (results.length > 0) {
-      results.forEach(sword => {
-        const source = findSwordById(sword.id)?.source || { type: 'other' };
-        
-        // MODIFICACIÓN CLAVE:
-        // Llamamos a la función de ui.js y le pasamos 'true' como
-        // último argumento para indicarle que queremos la vista simple.
-        const item = UI.createRewardItem(sword, source, navigateToSubView, true);
-        
-        // El resto de la lógica para el clic
-        item.addEventListener('click', () => {
-          navigateToSubView("swordDetails", { sword, source });
-          UI.dom.inputs.searchBar.value = '';
-          UI.dom.containers.searchResults.style.display = 'none';
-        });
-        UI.dom.containers.searchResults.appendChild(item);
-      });
-      UI.dom.containers.searchResults.style.display = 'block';
-    } else {
-      UI.dom.containers.searchResults.style.display = 'none';
-    }
-  });
+        if (results.length > 0) {
+            results.forEach(sword => {
+                const source = findSwordById(sword.id)?.source || { type: 'other' };
+                
+                // --- ¡ESTA ES LA CORRECCIÓN CLAVE! ---
+                // Llamamos a la nueva función simplificada en lugar de la compleja.
+                const item = UI.createSearchResultItem(sword, source, navigateToSubView);
+
+                // El resto de la lógica para el clic se maneja DENTRO de la nueva función.
+                // Pero dejamos el código para ocultar el modal al hacer clic.
+                item.addEventListener('click', () => {
+                    UI.dom.inputs.searchBar.value = '';
+                    UI.dom.containers.searchResults.style.display = 'none';
+                });
+
+                UI.dom.containers.searchResults.appendChild(item);
+            });
+            UI.dom.containers.searchResults.style.display = 'block';
+        } else {
+            UI.dom.containers.searchResults.style.display = 'none';
+        }
+    });
 
     document.addEventListener('click', (e) => {
         if (!document.getElementById('search-module').contains(e.target)) {
