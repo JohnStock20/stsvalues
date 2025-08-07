@@ -87,7 +87,7 @@ export function initializeAuth(onLoginSuccess) {
         }
     }
 
-// Reemplaza tu función handleLogin por esta versión final y corregida.
+// Reemplaza tu función handleLogin por esta versión final y definitiva.
 async function handleLogin(event) {
     event.preventDefault();
     const form = event.target;
@@ -108,13 +108,11 @@ async function handleLogin(event) {
         const data = await response.json();
 
         if (!response.ok) {
-            // Adjuntamos los datos del error al objeto Error para usarlo en el catch
             const error = new Error(data.message || `Request failed with status ${response.status}`);
             error.data = data;
             throw error;
         }
 
-        // Si el login es exitoso
         localStorage.setItem('sts-token', data.token);
         localStorage.setItem('sts-user', JSON.stringify(data.user));
         updateProfileUI(data.user);
@@ -122,31 +120,33 @@ async function handleLogin(event) {
         onLoginSuccess(data.user);
 
     } catch (error) {
-        // --- ¡ESTE BLOQUE AHORA FUNCIONARÁ CORRECTAMENTE! ---
         console.error('Login fetch error:', error);
 
-        // Comprobamos si el error tiene los datos de baneo que adjuntamos
+        // Comprobamos si el error tiene los datos de baneo
         if (error.data && error.data.ban_reason !== undefined) {
-            // Ocultamos el modal de login normal
-            hideModals();
-
-            // Mostramos el modal de baneo con la información
             const bannedModal = document.getElementById('banned-modal-overlay');
-            const reasonEl = document.getElementById('banned-reason-text');
-            const expiresEl = document.getElementById('banned-expires-text');
-            const logoutBtn = document.getElementById('banned-logout-btn');
+            if (bannedModal) {
+                // Primero, ocultamos el modal de login actual
+                hideModals();
 
-            if (bannedModal && reasonEl && expiresEl && logoutBtn) {
-                reasonEl.textContent = error.data.ban_reason || 'No reason provided.';
-                expiresEl.textContent = error.data.ban_expires_at ? new Date(error.data.ban_expires_at).toLocaleString() : 'Permanent';
+                // Rellenamos la información del baneo
+                document.getElementById('banned-reason-text').textContent = error.data.ban_reason || 'No reason provided.';
+                document.getElementById('banned-expires-text').textContent = error.data.ban_expires_at ? new Date(error.data.ban_expires_at).toLocaleString() : 'Permanent';
                 
+                // --- ¡ESTA ES LA CORRECCIÓN CLAVE! ---
+                // Hacemos visible el modal de baneo manejando las clases de CSS
                 bannedModal.style.display = 'flex';
-                
-                // Asignamos el evento de logout al botón
-                logoutBtn.onclick = handleLogout; // Usamos la función de logout real
+                setTimeout(() => bannedModal.classList.add('visible'), 10); // Añadimos la clase para la transición
+
+                // Asignamos el evento al botón de logout del modal de baneo
+                document.getElementById('banned-logout-btn').onclick = () => {
+                    bannedModal.classList.remove('visible');
+                    setTimeout(() => bannedModal.style.display = 'none', 300); // Ocultamos después de la transición
+                    handleLogout(); // Ejecutamos la función de logout real si es necesario
+                };
             }
         } else {
-            // Si es un error normal (ej. contraseña incorrecta), lo mostramos en el formulario
+            // Si es un error normal, lo mostramos en el formulario
             errorElement.textContent = error.message || "Could not connect to the server.";
             errorElement.style.display = 'block';
         }
