@@ -45,7 +45,7 @@ function navigateToView(viewName) {
         UI.renderGiveawayPage(appDataCache.giveaways, appDataCache.recentWinners, currentUser, handleJoinGiveaway, openCreateGiveawayModal);
     } else if (viewName === 'devtools') {
         if (currentUser && currentUser.role === 'owner') {
-            UI.renderAdminTools(handleGrantTitle);
+            UI.renderAdminTools(handleAdminAction);
         } else {
             document.getElementById('devtools-view').innerHTML = `<h2 class="section-title">ACCESS DENIED</h2><p>You do not have permission to view this page.</p>`;
         }
@@ -655,6 +655,44 @@ const handleCalculate = () => {
   updateCalculatorUI();
 }
 // --- INICIALIZACIÓN DE LA APP ---
+
+// AÑADE ESTA NUEVA FUNCIÓN en main.js
+
+async function handleAdminAction(action, targetUsername, payload, feedbackElId) {
+    const token = localStorage.getItem('sts-token');
+    const feedbackEl = document.getElementById(feedbackElId);
+    
+    // Busca el formulario padre para encontrar el botón y deshabilitarlo
+    const form = feedbackEl.closest('form');
+    const submitButtons = form.querySelectorAll('button[type="submit"]');
+
+    feedbackEl.style.display = 'none';
+    submitButtons.forEach(btn => btn.disabled = true);
+
+    try {
+        const response = await fetch('/.netlify/functions/admin-tools', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            // Unimos todos los datos en el cuerpo de la petición
+            body: JSON.stringify({ action, targetUsername, ...payload })
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message);
+
+        feedbackEl.className = 'feedback-message success';
+        feedbackEl.textContent = result.message;
+    } catch (e) {
+        feedbackEl.className = 'feedback-message error';
+        feedbackEl.textContent = `Error: ${e.message}`;
+    } finally {
+        feedbackEl.style.display = 'block';
+        submitButtons.forEach(btn => btn.disabled = false);
+    }
+}
 
 function onLoginSuccess(loggedInUser) {
     currentUser = loggedInUser;

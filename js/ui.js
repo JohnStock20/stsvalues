@@ -666,10 +666,7 @@ export function closeGiveawayModal() {
     setTimeout(() => dom.modals.createGiveaway.style.display = 'none', 300);
 }
 
-
-
-
-export function renderAdminTools(onGrantTitle, onAdminAction) {
+export function renderAdminTools(onAdminAction) { // <-- ¡Solo un argumento!
     const container = dom.containers.adminTools;
     container.innerHTML = `
     <div class="admin-tool-card">
@@ -701,6 +698,7 @@ export function renderAdminTools(onGrantTitle, onAdminAction) {
     </div>
     `;
 
+    // ¡CORRECCIÓN! Ambos formularios usan ahora onAdminAction
     document.getElementById('grant-title-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const form = e.target;
