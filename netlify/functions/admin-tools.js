@@ -1,5 +1,4 @@
-// Archivo: netlify/functions/admin-tools.js (NUEVO)
-// Propósito: Endpoint protegido para que el Owner realice acciones administrativas.
+// Archivo: netlify/functions/admin-tools.js
 
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
@@ -53,14 +52,14 @@ exports.handler = async (event) => {
 
         // --- Paso 2: Procesar la acción solicitada ---
         const { action, targetUsername, titleKey, reason, unbanDate } = JSON.parse(event.body);
+        const client = await pool.connect();
 
-        // --- Acción: Otorgar un Título ---
-        if (action === 'grantTitle') {
-            if (!targetUsername || !titleKey) {
-                return { statusCode: 400, body: JSON.stringify({ message: 'Target username and title key are required.' }) };
-            }
-            const client = await pool.connect();
-            try {
+        try {
+            // --- Acción: Otorgar un Título ---
+            if (action === 'grantTitle') {
+                if (!targetUsername || !titleKey) {
+                    return { statusCode: 400, body: JSON.stringify({ message: 'Target username and title key are required.' }) };
+                }
                 const result = await client.query(
                     `UPDATE users SET unlocked_titles = array_append(unlocked_titles, $1) WHERE username ILIKE $2 AND NOT ($1 = ANY(unlocked_titles)) RETURNING username`,
                     [titleKey, targetUsername]
@@ -69,17 +68,28 @@ exports.handler = async (event) => {
                     return { statusCode: 404, body: JSON.stringify({ message: `User '${targetUsername}' not found or already has the title.` }) };
                 }
                 return { statusCode: 200, body: JSON.stringify({ message: `Title '${titleKey}' successfully granted to user '${targetUsername}'.` }) };
-            } finally {
-                client.release();
             }
-        }
-        // --- Acción: Banear un Usuario ---
-        else if (action === 'banUser') {
-            if (!targetUsername) {
-                return { statusCode: 400, body: JSON.stringify({ message: 'Target username is required to ban a user.' }) };
+            // --- Acción: Advertir a un Usuario ---
+            else if (action === 'warnUser') {
+                if (!targetUsername || !reason) {
+                    return { statusCode: 400, body: JSON.stringify({ message: 'Target username and reason are required for a warning.' }) };
+                }
+                const userResult = await client.query(`SELECT id, username FROM users WHERE username ILIKE $1`, [targetUsername]);
+                if (userResult.rowCount === 0) {
+                    return { statusCode: 404, body: JSON.stringify({ message: `User '${targetUsername}' not found.` }) };
+                }
+                const targetUser = userResult.rows[0];
+                await client.query(
+                    `INSERT INTO warnings (user_id, reason, issued_by) VALUES ($1, $2, $3)`,
+                    [targetUser.id, reason, decoded.username]
+                );
+                return { statusCode: 200, body: JSON.stringify({ message: `Warning issued successfully to '${targetUser.username}'.` }) };
             }
-            const client = await pool.connect();
-            try {
+            // --- Acción: Banear un Usuario ---
+            else if (action === 'banUser') {
+                if (!targetUsername) {
+                    return { statusCode: 400, body: JSON.stringify({ message: 'Target username is required to ban a user.' }) };
+                }
                 const result = await client.query(
                     `UPDATE users SET is_banned = true, ban_reason = $1, ban_expires_at = $2 WHERE username ILIKE $3 RETURNING username`,
                     [reason, unbanDate || null, targetUsername]
@@ -88,17 +98,12 @@ exports.handler = async (event) => {
                     return { statusCode: 404, body: JSON.stringify({ message: `User '${targetUsername}' not found.` }) };
                 }
                 return { statusCode: 200, body: JSON.stringify({ message: `User '${result.rows[0].username}' has been banned.` }) };
-            } finally {
-                client.release();
             }
-        }
-        // --- Acción: Desbanear un Usuario ---
-        else if (action === 'unbanUser') {
-            if (!targetUsername) {
-                return { statusCode: 400, body: JSON.stringify({ message: 'Target username is required to unban a user.' }) };
-            }
-            const client = await pool.connect();
-            try {
+            // --- Acción: Desbanear un Usuario ---
+            else if (action === 'unbanUser') {
+                if (!targetUsername) {
+                    return { statusCode: 400, body: JSON.stringify({ message: 'Target username is required to unban a user.' }) };
+                }
                 const result = await client.query(
                     `UPDATE users SET is_banned = false, ban_reason = NULL, ban_expires_at = NULL WHERE username ILIKE $1 RETURNING username`,
                     [targetUsername]
@@ -107,18 +112,18 @@ exports.handler = async (event) => {
                     return { statusCode: 404, body: JSON.stringify({ message: `User '${targetUsername}' not found.` }) };
                 }
                 return { statusCode: 200, body: JSON.stringify({ message: `User '${result.rows[0].username}' has been unbanned.` }) };
-            } finally {
-                client.release();
             }
+            // --- Acción no válida ---
+            else {
+                return {
+                    statusCode: 400,
+                    body: JSON.stringify({ message: 'Invalid action specified.' })
+                };
+            }
+        } finally {
+            // Aseguramos que el cliente de la base de datos se libere siempre
+            client.release();
         }
-        // --- Acción no válida ---
-        else {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ message: 'Invalid action specified.' })
-            };
-        }
-
     } catch (error) {
         console.error("Error in admin tools:", error);
         return {

@@ -666,7 +666,8 @@ export function closeGiveawayModal() {
     setTimeout(() => dom.modals.createGiveaway.style.display = 'none', 300);
 }
 
-export function renderAdminTools(onAdminAction) { // <-- ¡Solo un argumento!
+// Reemplaza tu función renderAdminTools por esta versión completa y corregida
+export function renderAdminTools(onAdminAction) {
     const container = dom.containers.adminTools;
     container.innerHTML = `
     <div class="admin-tool-card">
@@ -678,8 +679,18 @@ export function renderAdminTools(onAdminAction) { // <-- ¡Solo un argumento!
                 ${Object.keys(titleStyles).map(key => `<option value="${key}">${titleStyles[key].text}</option>`).join('')}
             </select>
             <button type="submit" class="auth-button">Grant Title</button>
+            <div id="grant-title-feedback" class="feedback-message"></div>
         </form>
-        <div id="grant-title-feedback" class="feedback-message"></div>
+    </div>
+
+    <div class="admin-tool-card">
+        <h3>Warn User</h3>
+        <form id="warn-user-form" class="admin-form">
+            <input type="text" name="targetUsername" placeholder="Enter Roblox Username..." required>
+            <textarea name="reason" placeholder="Reason for the warning..." required></textarea>
+            <button type="submit" name="action" value="warnUser" class="auth-button warning-btn">Issue Warning</button>
+            <div id="warn-user-feedback" class="feedback-message"></div>
+        </form>
     </div>
 
     <div class="admin-tool-card">
@@ -693,16 +704,22 @@ export function renderAdminTools(onAdminAction) { // <-- ¡Solo un argumento!
                 <button type="submit" name="action" value="banUser" class="auth-button danger-btn">Ban User</button>
                 <button type="submit" name="action" value="unbanUser" class="auth-button">Unban User</button>
             </div>
+            <div id="ban-user-feedback" class="feedback-message"></div>
         </form>
-        <div id="ban-user-feedback" class="feedback-message"></div>
     </div>
     `;
 
-    // ¡CORRECCIÓN! Ambos formularios usan ahora onAdminAction
+    // --- Event Listeners para los formularios ---
     document.getElementById('grant-title-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const form = e.target;
         onAdminAction('grantTitle', form.targetUsername.value, { titleKey: form.titleKey.value }, 'grant-title-feedback');
+    });
+
+    document.getElementById('warn-user-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const form = e.target;
+        onAdminAction('warnUser', form.targetUsername.value, { reason: form.reason.value }, 'warn-user-feedback');
     });
 
     document.getElementById('ban-user-form').addEventListener('submit', (e) => {
@@ -716,7 +733,6 @@ export function renderAdminTools(onAdminAction) { // <-- ¡Solo un argumento!
         onAdminAction(action, form.targetUsername.value, payload, 'ban-user-feedback');
     });
 }
-
 
 export function updateProfileHeader(userData) {
     const userProfileNav = document.getElementById('user-profile-nav');

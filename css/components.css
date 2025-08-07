@@ -760,6 +760,73 @@ var(--border-color); cursor: not-allowed; }
     text-align: center;
 }
 
+/* --- Estilos para Formularios de Administrador --- */
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.admin-form input[type="text"],
+.admin-form input[type="datetime-local"],
+.admin-form select,
+.admin-form textarea {
+    background-color: var(--dark-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 12px 15px;
+    font-size: 1em;
+    border-radius: var(--border-radius-md);
+    width: 100%;
+    transition: var(--transition-fast);
+}
+
+.admin-form input:focus,
+.admin-form select:focus,
+.admin-form textarea:focus {
+    outline: none;
+    border-color: var(--main-green);
+    background-color: var(--panel-bg);
+}
+
+.admin-form textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.admin-form label {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    margin-bottom: -10px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.form-actions .auth-button {
+    flex-grow: 1;
+}
+
+.warning-btn {
+    background-color: #f59e0b; /* Amarillo/Naranja */
+    border-color: #f59e0b;
+}
+.warning-btn:hover {
+    background-color: #d97706;
+    border-color: #d97706;
+}
+
+.danger-btn {
+    background-color: var(--text-danger);
+    border-color: var(--text-danger);
+}
+.danger-btn:hover {
+    background-color: #b91c1c; /* Rojo más oscuro */
+    border-color: #b91c1c;
+}
+
 /* --- RESPONSIVE ADAPTATIONS FOR COMPONENTS --- */
 @media (max-width: 900px) { /* Usamos un breakpoint más consistente */
 
