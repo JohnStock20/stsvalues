@@ -38,6 +38,36 @@ exports.handler = async (event) => {
 
             const user = result.rows[0];
 
+            // --- ¡NUEVO! Comprobación de Baneo ---
+if (user.is_banned) {
+    const now = new Date();
+    const expires = user.ban_expires_at ? new Date(user.ban_expires_at) : null;
+
+    // Si el baneo ha expirado, lo levantamos automáticamente
+    if (expires && now > expires) {
+        const unbanClient = await pool.connect();
+        try {
+            await unbanClient.query(
+                `UPDATE users SET is_banned = false, ban_reason = NULL, ban_expires_at = NULL WHERE id = $1`,
+                [user.id]
+            );
+        } finally {
+            unbanClient.release();
+        }
+    } else {
+        // Si el baneo sigue activo, denegamos el login
+        return {
+            statusCode: 403, // Forbidden
+            body: JSON.stringify({
+                message: 'This account is banned.',
+                ban_reason: user.ban_reason,
+                ban_expires_at: user.ban_expires_at
+            })
+        };
+    }
+}
+// --- Fin de la comprobación de Baneo ---
+
             // Paso 2: Comparamos la contraseña (sin cambios)
             const passwordIsValid = await bcrypt.compare(password, user.password_hash);
 

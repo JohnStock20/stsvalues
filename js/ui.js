@@ -669,11 +669,12 @@ export function closeGiveawayModal() {
 
 
 
-export function renderAdminTools(onGrantTitle) {
+export function renderAdminTools(onGrantTitle, onAdminAction) {
     const container = dom.containers.adminTools;
-    container.innerHTML = `<div class="admin-tool-card">
+    container.innerHTML = `
+    <div class="admin-tool-card">
         <h3>Grant Title to User</h3>
-        <form id="grant-title-form">
+        <form id="grant-title-form" class="admin-form">
             <input type="text" name="targetUsername" placeholder="Enter Roblox Username..." required>
             <select name="titleKey" required>
                 <option value="" disabled selected>Select a Title to Grant</option>
@@ -681,12 +682,40 @@ export function renderAdminTools(onGrantTitle) {
             </select>
             <button type="submit" class="auth-button">Grant Title</button>
         </form>
-        <div id="admin-feedback" class="feedback-message"></div>
-    </div>`;
+        <div id="grant-title-feedback" class="feedback-message"></div>
+    </div>
+
+    <div class="admin-tool-card">
+        <h3>Ban / Unban User</h3>
+        <form id="ban-user-form" class="admin-form">
+            <input type="text" name="targetUsername" placeholder="Enter Roblox Username..." required>
+            <textarea name="reason" placeholder="Ban reason (optional for unban)"></textarea>
+            <label for="unbanDate">Ban expires at (leave empty for permanent)</label>
+            <input type="datetime-local" name="unbanDate">
+            <div class="form-actions">
+                <button type="submit" name="action" value="banUser" class="auth-button danger-btn">Ban User</button>
+                <button type="submit" name="action" value="unbanUser" class="auth-button">Unban User</button>
+            </div>
+        </form>
+        <div id="ban-user-feedback" class="feedback-message"></div>
+    </div>
+    `;
+
     document.getElementById('grant-title-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const form = e.target;
-        onGrantTitle(form.targetUsername.value, form.titleKey.value);
+        onAdminAction('grantTitle', form.targetUsername.value, { titleKey: form.titleKey.value }, 'grant-title-feedback');
+    });
+
+    document.getElementById('ban-user-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const action = e.submitter.value;
+        const payload = {
+            reason: form.reason.value,
+            unbanDate: form.unbanDate.value ? new Date(form.unbanDate.value).toISOString() : null
+        };
+        onAdminAction(action, form.targetUsername.value, payload, 'ban-user-feedback');
     });
 }
 

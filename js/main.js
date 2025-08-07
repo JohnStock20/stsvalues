@@ -658,6 +658,19 @@ const handleCalculate = () => {
 
 function onLoginSuccess(loggedInUser) {
     currentUser = loggedInUser;
+
+        // --- ¡NUEVO! Comprobación de Baneo al Cargar ---
+    if (currentUser && currentUser.is_banned) {
+        const now = new Date();
+        const expires = currentUser.ban_expires_at ? new Date(currentUser.ban_expires_at) : null;
+        if (!expires || now < expires) { // Si el baneo es permanente o no ha expirado
+            document.getElementById('banned-reason-text').textContent = currentUser.ban_reason || 'No reason provided.';
+            document.getElementById('banned-expires-text').textContent = expires ? expires.toLocaleString() : 'Permanent';
+            document.getElementById('banned-modal-overlay').style.display = 'flex';
+            document.getElementById('banned-logout-btn').onclick = handleLogout; // Reutilizamos la función de logout
+            return; // Detenemos la ejecución normal
+        }
+    }
     const currentViewKey = Object.keys(UI.dom.views).find(key => UI.dom.views[key] && UI.dom.views[key].style.display === 'block') || 'cases';
     navigateToView(currentViewKey);
 }

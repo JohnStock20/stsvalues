@@ -112,10 +112,20 @@ export function initializeAuth(onLoginSuccess) {
             updateProfileUI(data.user);
             hideModals();
             onLoginSuccess(data.user); // Notificamos a main.js del éxito
-        } catch (error) {
-            console.error('Login fetch error:', error);
-            errorElement.textContent = error.message || "Could not connect to the server.";
-            errorElement.style.display = 'block';
+} catch (error) {
+    console.error('Login fetch error:', error);
+    const data = JSON.parse(error.request.response); // Intenta parsear la respuesta del error
+    
+    // ¡NUEVO! Manejo específico para usuarios baneados
+    if (error.response.status === 403 && data.ban_reason) {
+        document.getElementById('banned-reason-text').textContent = data.ban_reason || 'No reason provided.';
+        document.getElementById('banned-expires-text').textContent = data.ban_expires_at ? new Date(data.ban_expires_at).toLocaleString() : 'Permanent';
+        document.getElementById('banned-modal-overlay').style.display = 'flex';
+        // El botón de logout del modal de baneo necesitará un event listener
+    } else {
+        errorElement.textContent = error.message || "Could not connect to the server.";
+        errorElement.style.display = 'block';
+    }
         } finally {
             loginButton.disabled = false;
             loginButton.textContent = 'Login';
