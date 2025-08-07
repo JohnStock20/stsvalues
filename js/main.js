@@ -25,6 +25,8 @@ let customCaseValues = {};
 let isEditMode = false;
 let activeValueSource = 'official'; // 'official' o 'custom'
 
+let userNotifications = [];
+
 const appState = {
     currentPage: 1,
     itemsPerPage: 10,
@@ -43,12 +45,31 @@ function navigateToView(viewName) {
         loadAndRenderTitles();
     } else if (viewName === 'giveaways') {
         UI.renderGiveawayPage(appDataCache.giveaways, appDataCache.recentWinners, currentUser, handleJoinGiveaway, openCreateGiveawayModal);
+    } else if (viewName === 'notifications') {
+        markNotificationsAsRead();
     } else if (viewName === 'devtools') {
         if (currentUser && currentUser.role === 'owner') {
             UI.renderAdminTools(handleAdminAction);
         } else {
             document.getElementById('devtools-view').innerHTML = `<h2 class="section-title">ACCESS DENIED</h2><p>You do not have permission to view this page.</p>`;
         }
+    }
+}
+
+// --- NUEVA FUNCIÓN para marcar como leídas ---
+async function markNotificationsAsRead() {
+    // Ocultamos el indicador inmediatamente para una respuesta visual rápida
+    document.getElementById('notification-indicator').style.display = 'none';
+    const token = localStorage.getItem('sts-token');
+    try {
+        await fetch('/.netlify/functions/notifications-manager', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        // Actualizamos el estado local
+        userNotifications.forEach(n => n.is_read = true);
+    } catch (error) {
+        console.error("Could not mark notifications as read:", error);
     }
 }
 
@@ -710,13 +731,38 @@ function onLoginSuccess(loggedInUser) {
         }
     }
     const currentViewKey = Object.keys(UI.dom.views).find(key => UI.dom.views[key] && UI.dom.views[key].style.display === 'block') || 'cases';
+    fetchAndRenderNotifications(); // ¡NUEVO!
     navigateToView(currentViewKey);
+}
+
+// --- NUEVA FUNCIÓN para manejar notificaciones ---
+async function fetchAndRenderNotifications() {
+    if (!currentUser) return;
+    const token = localStorage.getItem('sts-token');
+    
+    try {
+        const response = await fetch('/.netlify/functions/notifications-manager', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Could not fetch notifications');
+        
+        userNotifications = await response.json();
+        const hasUnread = userNotifications.some(n => !n.is_read);
+        document.getElementById('notification-indicator').style.display = hasUnread ? 'block' : 'none';
+
+        // Pasamos la función formatTimeAgo desde utils.js
+        UI.renderNotificationsPage(userNotifications, formatTimeAgo);
+
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 function initializeApp() {
     initializeAuth(onLoginSuccess);
     initializeTopUI();
     initializeCalculator();
+    fetchAndRenderNotifications(); // ¡NUEVO!
     
     fetchGiveaways();
     giveawayUpdateInterval = setInterval(fetchGiveaways, 30000);

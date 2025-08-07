@@ -84,6 +84,12 @@
                         <a href="#" class="nav-link" data-view="titles">Titles</a>
                         <a href="#" class="nav-link" data-view="giveaways">Giveaways</a>
                         <a href="#" class="nav-link disabled" data-view="donations">Donations</a>
+                        <!-- Dentro de .main-nav-dropdown -->
+<a href="#" class="nav-link" data-view="notifications">
+    Notifications
+    <span id="notification-indicator">!</span> <!-- ¡NUEVO! -->
+</a>
+
                         <a href="#" id="dev-tools-link" class="nav-link" data-view="devtools" style="display: none;">Developer Tools</a>
                         <a href="#" id="logout-btn" class="nav-link logout">Logout</a>
                     </nav>
@@ -219,7 +225,13 @@
                 
                 <!-- VISTA 6: HERRAMIENTAS DE DESARROLLADOR -->
                 <div id="devtools-view" class="main-view-panel"></div>
-
+<!-- VISTA 7: NOTIFICACIONES -->
+<div id="notifications-view" class="main-view-panel">
+    <h2 class="section-title">~NOTIFICATIONS~</h2>
+    <div id="notifications-list-container">
+        <!-- Las notificaciones se insertarán aquí con JS -->
+    </div>
+</div>
             </main>
         </div>
 

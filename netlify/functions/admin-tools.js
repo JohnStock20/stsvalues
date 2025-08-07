@@ -55,63 +55,78 @@ exports.handler = async (event) => {
         const client = await pool.connect();
 
         try {
+            // Obtenemos el ID del usuario objetivo para todas las acciones, así no repetimos código
+            const userResult = await client.query(`SELECT id, username FROM users WHERE username ILIKE $1`, [targetUsername]);
+            if (userResult.rowCount === 0) {
+                return { statusCode: 404, body: JSON.stringify({ message: `User '${targetUsername}' not found.` }) };
+            }
+            const targetUser = userResult.rows[0];
+
             // --- Acción: Otorgar un Título ---
             if (action === 'grantTitle') {
-                if (!targetUsername || !titleKey) {
-                    return { statusCode: 400, body: JSON.stringify({ message: 'Target username and title key are required.' }) };
+                if (!titleKey) {
+                    return { statusCode: 400, body: JSON.stringify({ message: 'Title key is required.' }) };
                 }
-                const result = await client.query(
-                    `UPDATE users SET unlocked_titles = array_append(unlocked_titles, $1) WHERE username ILIKE $2 AND NOT ($1 = ANY(unlocked_titles)) RETURNING username`,
-                    [titleKey, targetUsername]
+                await client.query(
+                    `UPDATE users SET unlocked_titles = array_append(unlocked_titles, $1) WHERE id = $2 AND NOT ($1 = ANY(unlocked_titles))`,
+                    [titleKey, targetUser.id]
                 );
-                if (result.rowCount === 0) {
-                    return { statusCode: 404, body: JSON.stringify({ message: `User '${targetUsername}' not found or already has the title.` }) };
-                }
-                return { statusCode: 200, body: JSON.stringify({ message: `Title '${titleKey}' successfully granted to user '${targetUsername}'.` }) };
+                
+                // Insertar notificación
+                const content = { title_key: titleKey, granted_by: decoded.username };
+                await client.query(
+                    `INSERT INTO notifications (user_id, type, content) VALUES ($1, 'title_grant', $2)`,
+                    [targetUser.id, JSON.stringify(content)]
+                );
+                
+                return { statusCode: 200, body: JSON.stringify({ message: `Title '${titleKey}' successfully granted to user '${targetUser.username}'.` }) };
             }
             // --- Acción: Advertir a un Usuario ---
             else if (action === 'warnUser') {
-                if (!targetUsername || !reason) {
-                    return { statusCode: 400, body: JSON.stringify({ message: 'Target username and reason are required for a warning.' }) };
+                if (!reason) {
+                    return { statusCode: 400, body: JSON.stringify({ message: 'Reason is required for a warning.' }) };
                 }
-                const userResult = await client.query(`SELECT id, username FROM users WHERE username ILIKE $1`, [targetUsername]);
-                if (userResult.rowCount === 0) {
-                    return { statusCode: 404, body: JSON.stringify({ message: `User '${targetUsername}' not found.` }) };
-                }
-                const targetUser = userResult.rows[0];
+                
+                // Insertar notificación (esto reemplaza la antigua tabla 'warnings')
+                const content = { reason: reason, issued_by: decoded.username };
                 await client.query(
-                    `INSERT INTO warnings (user_id, reason, issued_by) VALUES ($1, $2, $3)`,
-                    [targetUser.id, reason, decoded.username]
+                    `INSERT INTO notifications (user_id, type, content) VALUES ($1, 'warning', $2)`,
+                    [targetUser.id, JSON.stringify(content)]
                 );
+                
                 return { statusCode: 200, body: JSON.stringify({ message: `Warning issued successfully to '${targetUser.username}'.` }) };
             }
             // --- Acción: Banear un Usuario ---
             else if (action === 'banUser') {
-                if (!targetUsername) {
-                    return { statusCode: 400, body: JSON.stringify({ message: 'Target username is required to ban a user.' }) };
-                }
-                const result = await client.query(
-                    `UPDATE users SET is_banned = true, ban_reason = $1, ban_expires_at = $2 WHERE username ILIKE $3 RETURNING username`,
-                    [reason, unbanDate || null, targetUsername]
+                await client.query(
+                    `UPDATE users SET is_banned = true, ban_reason = $1, ban_expires_at = $2 WHERE id = $3`,
+                    [reason, unbanDate || null, targetUser.id]
                 );
-                if (result.rowCount === 0) {
-                    return { statusCode: 404, body: JSON.stringify({ message: `User '${targetUsername}' not found.` }) };
-                }
-                return { statusCode: 200, body: JSON.stringify({ message: `User '${result.rows[0].username}' has been banned.` }) };
+                
+                // Insertar notificación
+                const content = { reason: reason, expires_at: unbanDate || null, issued_by: decoded.username };
+                await client.query(
+                    `INSERT INTO notifications (user_id, type, content) VALUES ($1, 'ban', $2)`,
+                    [targetUser.id, JSON.stringify(content)]
+                );
+
+                return { statusCode: 200, body: JSON.stringify({ message: `User '${targetUser.username}' has been banned.` }) };
             }
             // --- Acción: Desbanear un Usuario ---
             else if (action === 'unbanUser') {
-                if (!targetUsername) {
-                    return { statusCode: 400, body: JSON.stringify({ message: 'Target username is required to unban a user.' }) };
-                }
-                const result = await client.query(
-                    `UPDATE users SET is_banned = false, ban_reason = NULL, ban_expires_at = NULL WHERE username ILIKE $1 RETURNING username`,
-                    [targetUsername]
+                await client.query(
+                    `UPDATE users SET is_banned = false, ban_reason = NULL, ban_expires_at = NULL WHERE id = $1`,
+                    [targetUser.id]
                 );
-                if (result.rowCount === 0) {
-                    return { statusCode: 404, body: JSON.stringify({ message: `User '${targetUsername}' not found.` }) };
-                }
-                return { statusCode: 200, body: JSON.stringify({ message: `User '${result.rows[0].username}' has been unbanned.` }) };
+
+                // Insertar notificación
+                const content = { unbanned_by: decoded.username };
+                await client.query(
+                    `INSERT INTO notifications (user_id, type, content) VALUES ($1, 'unban', $2)`,
+                    [targetUser.id, JSON.stringify(content)]
+                );
+
+                return { statusCode: 200, body: JSON.stringify({ message: `User '${targetUser.username}' has been unbanned.` }) };
             }
             // --- Acción no válida ---
             else {

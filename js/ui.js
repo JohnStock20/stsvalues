@@ -16,6 +16,7 @@ export const dom = {
         swordDetails: document.getElementById('sword-details-view'),
         titles: document.getElementById('titles-view'),
         giveaways: document.getElementById('giveaways-view'),
+        notifications: document.getElementById('notifications-view'),
         devtools: document.getElementById('devtools-view'),
     },
     containers: {
@@ -131,6 +132,41 @@ export function renderOtherSwords(appState, navigateTo) {
     updatePaginationControls(appState);
 }
 
+// En ui.js, añade esta nueva función
+export function renderNotificationsPage(notifications, timeFormatter) {
+    const container = document.getElementById('notifications-list-container');
+    if (!notifications || notifications.length === 0) {
+        container.innerHTML = `<p>You have no notifications.</p>`;
+        return;
+    }
+
+    container.innerHTML = notifications.map(n => {
+        let contentHtml = '';
+        switch (n.type) {
+            case 'ban':
+                contentHtml = `You have been <strong>BANNED</strong>. Reason: <em>${n.content.reason || 'Not specified'}</em>.`;
+                break;
+            case 'warning':
+                contentHtml = `You received a <strong>WARNING</strong> from ${n.content.issued_by}. Reason: <em>${n.content.reason}</em>.`;
+                break;
+            case 'title_grant':
+                const titleText = titleStyles[n.content.title_key]?.text || n.content.title_key;
+                contentHtml = `You have been granted the title "<strong>${titleText}</strong>" by ${n.content.granted_by}.`;
+                break;
+            case 'giveaway_win':
+                contentHtml = `Congratulations! You won the giveaway for: <strong>${n.content.prize_summary}</strong>.`;
+                break;
+            default:
+                contentHtml = `<p>New notification.</p>`;
+        }
+        return `
+            <div class="notification-item ${n.type}">
+                <p>${contentHtml}</p>
+                <p class="timestamp">${timeFormatter(n.created_at)}</p>
+            </div>
+        `;
+    }).join('');
+}
 
 export function updatePaginationControls(appState) {
     const totalPages = Math.ceil(appData.otherSwords.length / appState.itemsPerPage);
