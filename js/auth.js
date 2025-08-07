@@ -87,50 +87,69 @@ export function initializeAuth(onLoginSuccess) {
         }
     }
 
-    // --- Lógica de negocio y Event Handlers ---
-    async function handleLogin(event) {
-        event.preventDefault();
-        const form = event.target;
-        const errorElement = document.getElementById('login-error');
-        const loginButton = form.querySelector('button');
-        
-        errorElement.style.display = 'none';
-        loginButton.disabled = true;
-        loginButton.textContent = 'Logging in...';
+// Reemplaza tu función handleLogin por esta versión corregida.
+async function handleLogin(event) {
+    event.preventDefault();
+    const form = event.target;
+    const errorElement = document.getElementById('login-error');
+    const loginButton = form.querySelector('button');
 
-        try {
-            const response = await fetch('/.netlify/functions/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: form.username.value, password: form.password.value })
-            });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.message);
+    errorElement.style.display = 'none';
+    loginButton.disabled = true;
+    loginButton.textContent = 'Logging in...';
 
-            localStorage.setItem('sts-token', data.token);
-            localStorage.setItem('sts-user', JSON.stringify(data.user)); // Guardamos el perfil del usuario
-            updateProfileUI(data.user);
-            hideModals();
-            onLoginSuccess(data.user); // Notificamos a main.js del éxito
-} catch (error) {
-    console.error('Login fetch error:', error);
-    const data = JSON.parse(error.request.response); // Intenta parsear la respuesta del error
-    
-    // ¡NUEVO! Manejo específico para usuarios baneados
-    if (error.response.status === 403 && data.ban_reason) {
-        document.getElementById('banned-reason-text').textContent = data.ban_reason || 'No reason provided.';
-        document.getElementById('banned-expires-text').textContent = data.ban_expires_at ? new Date(data.ban_expires_at).toLocaleString() : 'Permanent';
-        document.getElementById('banned-modal-overlay').style.display = 'flex';
-        // El botón de logout del modal de baneo necesitará un event listener
-    } else {
-        errorElement.textContent = error.message || "Could not connect to the server.";
-        errorElement.style.display = 'block';
-    }
-        } finally {
-            loginButton.disabled = false;
-            loginButton.textContent = 'Login';
+    try {
+        const response = await fetch('/.netlify/functions/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: form.username.value, password: form.password.value })
+        });
+
+        const data = await response.json();
+
+        // ¡ESTA ES LA CORRECCIÓN CLAVE!
+        // Si la respuesta no es 'ok' (ej: status 401, 403, 404), lanzamos un error
+        // para que sea capturado por el bloque catch.
+        if (!response.ok) {
+            // Pasamos toda la información del error para poder usarla en el catch.
+            const error = new Error(data.message || 'Login failed');
+            error.data = data; // Adjuntamos los datos del baneo.
+            throw error;
         }
+
+        // Si todo va bien, procedemos como antes.
+        localStorage.setItem('sts-token', data.token);
+        localStorage.setItem('sts-user', JSON.stringify(data.user));
+        updateProfileUI(data.user);
+        hideModals();
+        onLoginSuccess(data.user);
+
+    } catch (error) {
+        console.error('Login fetch error:', error);
+        
+        // Ahora el catch recibe los errores de baneo correctamente.
+        if (error.data && error.data.ban_reason) {
+            document.getElementById('banned-reason-text').textContent = error.data.ban_reason || 'No reason provided.';
+            document.getElementById('banned-expires-text').textContent = error.data.ban_expires_at ? new Date(error.data.ban_expires_at).toLocaleString() : 'Permanent';
+            
+            const bannedModal = document.getElementById('banned-modal-overlay');
+            if (bannedModal) {
+                bannedModal.style.display = 'flex';
+                document.getElementById('banned-logout-btn').addEventListener('click', () => {
+                     bannedModal.style.display = 'none';
+                });
+            }
+            hideModals(); // Ocultamos el modal de login normal.
+
+        } else {
+            errorElement.textContent = error.message || "Could not connect to the server.";
+            errorElement.style.display = 'block';
+        }
+    } finally {
+        loginButton.disabled = false;
+        loginButton.textContent = 'Login';
     }
+}
 
     async function handleRegisterStep1(event) {
         event.preventDefault();
