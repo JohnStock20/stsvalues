@@ -865,22 +865,7 @@ var(--border-color); cursor: not-allowed; }
     border-color: #b91c1c;
 }
 
-/* --- Indicador de Notificación --- */
-#notification-indicator {
-    display: none; /* Oculto por defecto */
-    background-color: #ef4444; /* Rojo */
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    font-size: 14px;
-    font-weight: bold;
-    text-align: center;
-    line-height: 20px;
-    margin-left: 8px;
-}
-
-/* --- Lista de Notificaciones --- */
+/* --- Lista de Notificaciones (Versión con Doble Borde) --- */
 #notifications-list-container {
     display: flex;
     flex-direction: column;
@@ -890,17 +875,53 @@ var(--border-color); cursor: not-allowed; }
 }
 
 .notification-item {
+    position: relative;
+    overflow: hidden;
+    background-color: transparent; /* El ::after se encargará del fondo */
+    border: 2px solid var(--border-color); /* Borde exterior oscuro */
     border-radius: var(--border-radius-md);
     padding: 20px;
-    background-color: var(--panel-bg);
-    border: 2px solid var(--notification-border-color);
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .notification-item:hover {
     transform: translateY(-3px);
+    /* El resplandor usa el mismo color dinámico que el borde interior */
     box-shadow: 0 0 15px 4px var(--notification-border-color);
 }
+
+/* El ::before crea el borde interior de color/gradiente */
+.notification-item::before {
+    content: '';
+    position: absolute;
+    inset: 2px; /* Se ajusta dentro del borde exterior */
+    border-radius: 5px; /* Un radio ligeramente menor */
+    padding: 3px; /* Grosor del borde interior */
+    background: var(--notification-border-color); /* Usa el color dinámico */
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    z-index: 0;
+}
+
+/* El ::after crea el fondo interior sobre el que se sienta el texto */
+.notification-item::after {
+    content: '';
+    position: absolute;
+    inset: 5px; /* Se ajusta dentro del ::before (borde exterior 2px + padding 3px) */
+    background: var(--panel-bg);
+    border-radius: 3px; /* Un radio aún menor */
+    z-index: -1;
+}
+
+/* Asegura que el contenido (el texto) esté por encima de todo */
+.notification-item > * {
+    position: relative;
+    z-index: 1;
+}
+
 
 .notification-item p { margin: 0; }
 .notification-item .timestamp {
@@ -911,6 +932,7 @@ var(--border-color); cursor: not-allowed; }
 
 /* Colores de Borde por Tipo de Notificación */
 .notification-item.ban { --notification-border-color: #ef4444; } /* Rojo */
+.notification-item.unban { --notification-border-color: #a1a1aa; } /* Gris */
 .notification-item.warning { --notification-border-color: #f59e0b; } /* Naranja */
 .notification-item.title_grant { --notification-border-color: #8b5cf6; } /* Morado */
 .notification-item.giveaway_win { --notification-border-color: #10b981; } /* Verde */
