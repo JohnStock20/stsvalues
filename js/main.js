@@ -65,15 +65,41 @@ async function markNotificationsAsRead() {
     });
     const token = localStorage.getItem('sts-token');
     try {
-        await fetch('/.netlify/functions/notifications-manager', {
+        await fetchWithAuth('/.netlify/functions/notifications-manager', {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` }
         });
         // Actualizamos el estado local
         userNotifications.forEach(n => n.is_read = true);
     } catch (error) {
         console.error("Could not mark notifications as read:", error);
     }
+}
+
+// AÑADE ESTA NUEVA FUNCIÓN en main.js
+
+// Esta función se encargará de TODAS las peticiones que necesiten autenticación.
+async function fetchWithAuth(url, options = {}) {
+    const token = localStorage.getItem('sts-token');
+
+    // Preparamos las cabeceras (headers)
+    const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+        'Authorization': `Bearer ${token}`
+    };
+
+    const response = await fetch(url, { ...options, headers });
+
+    // ¡LA MAGIA OCURRE AQUÍ!
+    // Si la respuesta es 401 (No autorizado), significa que el token es inválido o ha caducado.
+    if (response.status === 401) {
+        alert("Your session has expired. Please log in again.");
+        handleLogout(); // Usamos tu función de logout existente.
+        // Lanzamos un error para detener cualquier otra ejecución.
+        throw new Error('Session expired');
+    }
+
+    return response;
 }
 
 // REEMPLAZA tu función navigateToSubView con esta versión corregida
@@ -96,9 +122,7 @@ async function navigateToSubView(view, data) {
             if (currentUser) {
                 const token = localStorage.getItem('sts-token');
                 try {
-                    const response = await fetch(`/.netlify/functions/custom-values-manager?caseId=${data}`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
+                    const response = await fetchWithAuth(`/.netlify/functions/custom-values-manager?caseId=${data}` );
                     if (response.ok) {
                         fetchedValues = await response.json();
                     }
@@ -199,9 +223,8 @@ function addControlListeners(caseData) {
 
             const token = localStorage.getItem('sts-token');
             try {
-                const response = await fetch('/.netlify/functions/custom-values-manager', {
+                const response = await fetchWithAuth('/.netlify/functions/custom-values-manager', {
                     method: 'POST',
-                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         // Usamos el caseId del estado global, que es el correcto.
                         caseId: appState.currentCaseIdForCalc, 
@@ -244,7 +267,7 @@ async function loadAndRenderTitles() {
     return;
   }
   try {
-    const response = await fetch('/.netlify/functions/get-titles', { headers: { 'Authorization': `Bearer ${token}` } });
+    const response = await fetchWithAuth('/.netlify/functions/get-titles' );
     if (!response.ok) throw new Error('Failed to fetch titles');
     const titlesData = await response.json();
     
@@ -274,9 +297,8 @@ function handleTitleSelection(newKey) {
 async function handleTitleEquip(newTitleKey) {
     const token = localStorage.getItem('sts-token');
     try {
-        const response = await fetch('/.netlify/functions/update-user-profile', {
+        const response = await fetchWithAuth('/.netlify/functions/update-user-profile', {
             method: 'PUT',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ newTitle: newTitleKey })
         });
         const result = await response.json();
@@ -302,9 +324,8 @@ async function handleGrantTitle(targetUsername, titleKey) {
     btn.textContent = 'Granting...';
 
     try {
-        const response = await fetch('/.netlify/functions/admin-tools', {
+        const response = await fetchWithAuth('/.netlify/functions/admin-tools', {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'grantTitle', targetUsername, titleKey })
         });
         const result = await response.json();
@@ -372,9 +393,8 @@ async function handleJoinGiveaway(giveawayId) {
     btn.textContent = 'Joining...';
 
     try {
-        const response = await fetch('/.netlify/functions/giveaways-manager', {
+        const response = await fetchWithAuth('/.netlify/functions/giveaways-manager', {
             method: 'PUT',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ giveawayId })
         });
         const result = await response.json();
@@ -423,9 +443,8 @@ async function handleCreateGiveaway(event) {
             start_time: new Date(form.start_time.value).toISOString(),
             end_time: new Date(form.end_time.value).toISOString(),
         };
-        const response = await fetch('/.netlify/functions/giveaways-manager', {
+        const response = await fetchWithAuth('/.netlify/functions/giveaways-manager', {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         });
         const result = await response.json();
@@ -694,12 +713,8 @@ async function handleAdminAction(action, targetUsername, payload, feedbackElId) 
     submitButtons.forEach(btn => btn.disabled = true);
 
     try {
-        const response = await fetch('/.netlify/functions/admin-tools', {
+        const response = await fetchWithAuth('/.netlify/functions/admin-tools', {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            },
             // Unimos todos los datos en el cuerpo de la petición
             body: JSON.stringify({ action, targetUsername, ...payload })
         });
@@ -743,9 +758,7 @@ async function fetchAndRenderNotifications() {
     const token = localStorage.getItem('sts-token');
     
     try {
-        const response = await fetch('/.netlify/functions/notifications-manager', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const response = await fetchWithAuth('/.netlify/functions/notifications-manager' );
         if (!response.ok) throw new Error('Could not fetch notifications');
         
         userNotifications = await response.json();
