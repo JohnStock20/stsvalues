@@ -3,8 +3,7 @@
 // =================================================================================
 
 // --- MÓDULOS ---
-import { appData, parseValue } from './data.js';
-import { findSwordById, getPrizeItemHtml, getUnitValue, convertTimeValueToCurrency, formatLargeNumber, formatTimeAgo} from './utils.js';
+import { findSwordById, getPrizeItemHtml, getUnitValue, convertTimeValueToCurrency, formatLargeNumber, formatTimeAgo, parseValue} from './utils.js';
 import * as UI from './ui.js';
 import { initializeAuth, titleStyles } from './auth.js';
 import * as Calculator from './calculator.js';
@@ -12,6 +11,7 @@ import * as Calculator from './calculator.js';
 // --- ESTADO GLOBAL DE LA APLICACIÓN ---
 let currentUser = null;
 let navigationContext = { view: 'cases', id: null, type: null };
+let appData = { cases: {}, otherSwords: [] }; // ¡NUEVO! Empieza como un objeto vacío
 let appDataCache = {
     giveaways: [],
     recentWinners: []
@@ -53,6 +53,22 @@ function navigateToView(viewName) {
         } else {
             document.getElementById('devtools-view').innerHTML = `<h2 class="section-title">ACCESS DENIED</h2><p>You do not have permission to view this page.</p>`;
         }
+    }
+}
+
+// AÑADE ESTA FUNCIÓN en main.js
+async function loadInitialData() {
+    try {
+        const response = await fetch('/.netlify/functions/get-game-data');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        appData = await response.json();
+        console.log('Game data loaded from database!');
+    } catch (error) {
+        console.error('Failed to load game data:', error);
+        // Opcional: Mostrar un mensaje de error al usuario en la página
+        document.querySelector('main').innerHTML = '<h2>Error loading game data. Please try again later.</h2>';
     }
 }
 
@@ -777,16 +793,35 @@ async function fetchAndRenderNotifications() {
     }
 }
 
-function initializeApp() {
+// Reemplaza tu función initializeApp por esta versión final y optimizada
+
+async function initializeApp() {
+    // --- 1. Inicialización de componentes síncronos ---
+    // Estos no dependen de datos externos, así que se ejecutan primero.
     initializeAuth(onLoginSuccess);
     initializeTopUI();
     initializeCalculator();
-    fetchAndRenderNotifications(); // ¡NUEVO!
-    
-    fetchGiveaways();
-    giveawayUpdateInterval = setInterval(fetchGiveaways, 30000);
-    startTimer();
 
+    // --- 2. Carga de todos los datos asíncronos en paralelo ---
+    // Lanzamos todas las peticiones a la vez y esperamos a que todas terminen.
+    // Esto es más rápido que hacer await uno por uno.
+    await Promise.all([
+        loadInitialData(), // Carga espadas y cajas
+        fetchGiveaways()   // Carga los sorteos
+    ]);
+
+    // --- 3. Renderizado de la página ---
+    // Ahora que TENEMOS TODOS los datos, renderizamos la interfaz UNA SOLA VEZ.
+    UI.renderCaseSelection(appData, navigateToSubView);
+    UI.renderOtherSwords(appData, appState, navigateToSubView);
+    navigateToView('cases'); // Establecemos la vista inicial
+
+    // --- 4. Inicialización de listeners y timers ---
+    // Estos se configuran después de que la interfaz inicial esté renderizada.
+    startTimer();
+    giveawayUpdateInterval = setInterval(fetchGiveaways, 30000);
+
+    // --- Vinculación de Event Listeners (tu código estaba perfecto aquí) ---
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', (e) => {
             if (e.target.classList.contains('disabled')) return;
@@ -809,14 +844,15 @@ function initializeApp() {
     UI.dom.buttons.prevPage.addEventListener('click', () => {
         if (appState.currentPage > 1) {
             appState.currentPage--;
-            UI.renderOtherSwords(appState, navigateToSubView);
+            UI.renderOtherSwords(appData, appState, navigateToSubView);
         }
     });
+
     UI.dom.buttons.nextPage.addEventListener('click', () => {
         const totalPages = Math.ceil(appData.otherSwords.length / appState.itemsPerPage);
         if (appState.currentPage < totalPages) {
             appState.currentPage++;
-            UI.renderOtherSwords(appState, navigateToSubView);
+            UI.renderOtherSwords(appData, appState, navigateToSubView);
         }
     });
 
@@ -827,23 +863,17 @@ function initializeApp() {
     });
     document.getElementById('giveaway-creation-form').addEventListener('submit', handleCreateGiveaway);
     
-    UI.renderCaseSelection(navigateToSubView);
-    UI.renderOtherSwords(appState, navigateToSubView);
-    navigateToView('cases');
-
-     // --- Event Listener para Enlaces Externos con Advertencia ---
- document.addEventListener('click', (e) => {
-  // Buscamos si el clic fue en un elemento con la clase 'external-link'
-  const link = e.target.closest('.external-link');
-  if (link) {
-    e.preventDefault(); // Detenemos la navegación automática
-    const targetUrl = link.href;
-    const confirmed = confirm("SECURITY WARNING:\n\nYou are about to navigate to an external website:\n\n" + targetUrl + "\n\nDo you want to continue?");
-    if (confirmed) {
-      window.open(targetUrl, '_blank', 'noopener,noreferrer');
-    }
-  }
- });
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('.external-link');
+        if (link) {
+            e.preventDefault();
+            const targetUrl = link.href;
+            const confirmed = confirm("SECURITY WARNING:\n\nYou are about to navigate to an external website:\n\n" + targetUrl + "\n\nDo you want to continue?");
+            if (confirmed) {
+                window.open(targetUrl, '_blank', 'noopener,noreferrer');
+            }
+        }
+    });
 
     console.log("STS Values App Initialized!");
 }

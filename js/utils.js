@@ -3,8 +3,6 @@
 // Contiene funciones de utilidad reutilizables en toda la aplicación.
 // =================================================================================
 
-import { appData, currencyTiers, parseValue } from './data.js';
-
 // --- Funciones de Búsqueda ---
 export function findSwordById(swordId) {
     // Buscar en las recompensas de las cajas
@@ -120,3 +118,64 @@ export function getPrizeItemHtml(prize) {
             <span>${amount > 1 ? `${amount}x ` : ''}${sword.name}</span>`;
     }
 }
+
+// Función de parsing que vive junto a los datos que la necesitan.
+export function parseValue(value) {
+    if (typeof value === 'number') return value;
+    if (typeof value !== 'string' || !value) return 0;
+
+    let processableValue = value.trim().toUpperCase();
+
+    // Maneja el formato O/C [Over-Clause, Owner's Choice]
+    if (processableValue.startsWith('O/C')) {
+        const match = processableValue.match(/\[(.*?)\]/);
+        if (match && match[1]) {
+            processableValue = match[1];
+        } else {
+            // Si es O/C sin rango, no podemos asignarle un valor numérico para cálculos.
+            return 0;
+        }
+    }
+
+    // Si es un rango (ej: "8T-10T"), toma el primer valor.
+    if (processableValue.includes('-')) {
+        processableValue = processableValue.split('-')[0].trim();
+    }
+
+    const multipliers = { 'K': 1e3, 'M': 1e6, 'B': 1e9, 'T': 1e12, 'QD': 1e15 };
+    const lastChar = processableValue.slice(-1);
+    const multiplier = multipliers[lastChar];
+
+    if (multiplier) {
+        const numberPart = parseFloat(processableValue.slice(0, -1));
+        return isNaN(numberPart) ? 0 : numberPart * multiplier;
+    }
+
+    const plainNumber = parseFloat(processableValue);
+    return isNaN(plainNumber) ? 0 : plainNumber;
+}
+
+export const currencyTiers = {
+    'diamonds': [
+        { threshold: 50000, value: parseValue("3B") },
+        { threshold: 35000, value: parseValue("2.7B") },
+        { threshold: 25000, value: parseValue("2.4B") },
+        { threshold: 15000, value: 2.2e9 },
+        { threshold: 10000, value: 2e9 },
+        { threshold: 5000, value: 1.8e9 },
+        { threshold: 3000, value: 1.7e9 },
+        { threshold: 1000, value: 1.6e9 },
+        { threshold: 0, value: 1.5e9 }
+    ],
+    'heartstones': [
+        { threshold: 50000, value: parseValue("775M") },
+        { threshold: 35000, value: parseValue("725M") },
+        { threshold: 25000, value: parseValue("650M") },
+        { threshold: 15000, value: 625e6 },
+        { threshold: 10000, value: 600e6 },
+        { threshold: 5000, value: 575e6 },
+        { threshold: 3000, value: 550e6 },
+        { threshold: 1000, value: 525e6 },
+        { threshold: 0, value: 500e6 }
+    ]
+};

@@ -3,8 +3,7 @@
 // Toda la lógica de negocio y cálculos para la calculadora de profit.
 // =================================================================================
 
-import { appData, parseValue } from './data.js';
-import { getUnitValue } from './utils.js';
+import { getUnitValue, parseValue } from './utils.js';
 // FIX: Se restauran todas las importaciones necesarias desde ui.js
 import { renderResultsTable, renderSimulationLoot, renderHuntResult, renderProfitGraph } from './ui.js';
 

@@ -2,9 +2,7 @@
 // ARCHIVO: ui.js (Controlador de la Interfaz de Usuario) - VERSIÓN 100% COMPLETA
 // =================================================================================
 
-
-import { appData, parseValue } from './data.js';
-import { findSwordById, formatLargeNumber, formatTimeAgo, getPrizeItemHtml, formatHours } from './utils.js';
+import { findSwordById, formatLargeNumber, formatTimeAgo, getPrizeItemHtml, formatHours, parseValue } from './utils.js';
 import { titleStyles } from './auth.js';
 
 
