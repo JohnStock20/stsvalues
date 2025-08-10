@@ -795,33 +795,32 @@ async function fetchAndRenderNotifications() {
 
 // Reemplaza tu función initializeApp por esta versión final y optimizada
 
+// Reemplaza tu función initializeApp por esta versión corregida
+
 async function initializeApp() {
-    // --- 1. Inicialización de componentes síncronos ---
-    // Estos no dependen de datos externos, así que se ejecutan primero.
+    // --- 1. Inicialización de componentes que NO dependen de datos ---
     initializeAuth(onLoginSuccess);
-    initializeTopUI();
-    initializeCalculator();
+    initializeCalculator(); // La calculadora se inicializa, pero no se usa hasta que hay datos.
 
-    // --- 2. Carga de todos los datos asíncronos en paralelo ---
-    // Lanzamos todas las peticiones a la vez y esperamos a que todas terminen.
-    // Esto es más rápido que hacer await uno por uno.
-    await Promise.all([
-        loadInitialData(), // Carga espadas y cajas
-        fetchGiveaways()   // Carga los sorteos
-    ]);
+    // --- 2. Carga de TODOS los datos iniciales ---
+    await loadInitialData();
+    
+    // --- 3. Ahora que SÍ tenemos appData, inicializamos los componentes que lo usan ---
+    initializeTopUI(); // ESTA LÍNEA SE HA MOVIDO AQUÍ
 
-    // --- 3. Renderizado de la página ---
-    // Ahora que TENEMOS TODOS los datos, renderizamos la interfaz UNA SOLA VEZ.
+    // --- 4. Renderizado inicial de la página ---
     UI.renderCaseSelection(appData, navigateToSubView);
     UI.renderOtherSwords(appData, appState, navigateToSubView);
-    navigateToView('cases'); // Establecemos la vista inicial
+    navigateToView('cases');
 
-    // --- 4. Inicialización de listeners y timers ---
-    // Estos se configuran después de que la interfaz inicial esté renderizada.
-    startTimer();
+    // --- 5. Inicialización de timers y lógica asíncrona secundaria ---
+    fetchGiveaways();
     giveawayUpdateInterval = setInterval(fetchGiveaways, 30000);
+    startTimer();
 
-    // --- Vinculación de Event Listeners (tu código estaba perfecto aquí) ---
+    // --- Vinculación de Event Listeners (esto ya estaba bien) ---
+    // ... (el resto de tus event listeners van aquí, no necesitan cambios)
+    
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', (e) => {
             if (e.target.classList.contains('disabled')) return;
@@ -862,7 +861,7 @@ async function initializeApp() {
         if (e.target === UI.dom.modals.createGiveaway) UI.closeGiveawayModal();
     });
     document.getElementById('giveaway-creation-form').addEventListener('submit', handleCreateGiveaway);
-    
+
     document.addEventListener('click', (e) => {
         const link = e.target.closest('.external-link');
         if (link) {
