@@ -7,12 +7,11 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }
 });
 
-// --- ¡NUEVO! Definimos los datos estáticos de las divisas aquí ---
 const currenciesData = {
     "time": { name: "Time", icon: null },
     "diamonds": { name: "Diamonds", icon: "images/diamonds.png" },
     "heartstones": { name: "Heartstones", icon: "images/heartstones.png" },
-    "cooldown": { name: "Cooldown", icon: null } // Lo mantenemos por consistencia
+    "cooldown": { name: "Cooldown", icon: null }
 };
 
 exports.handler = async (event) => {
@@ -35,7 +34,7 @@ exports.handler = async (event) => {
         const swordsMap = new Map(swordsResult.rows.map(s => [s.id, s]));
 
         const appData = {
-            currencies: currenciesData, // <-- ¡CORRECCIÓN CLAVE! Añadimos las divisas aquí.
+            currencies: currenciesData,
             cases: {},
             otherSwords: []
         };
@@ -59,7 +58,7 @@ exports.handler = async (event) => {
                     id: swordData.id,
                     name: swordData.name,
                     image: swordData.image_path,
-                    rararidad: swordData.rarity,
+                    rarity: swordData.rarity, // ¡CORRECCIÓN! Era 'rararidad', ahora es 'rarity'
                     value: swordData.value_text,
                     stats: swordData.stats_text,
                     exist: swordData.exist_text,
@@ -75,13 +74,13 @@ exports.handler = async (event) => {
                 appData.otherSwords.push({
                     id: swordRow.id,
                     name: swordRow.name,
-                    image: swordData.image_path,
-                    rarity: swordData.rarity,
-                    value: swordData.value_text,
-                    stats: swordData.stats_text,
-                    exist: swordData.exist_text,
-                    demand: swordData.demand,
-                    description: swordData.description,
+                    image: swordRow.image_path, // Corregido: debía ser swordRow
+                    rarity: swordRow.rarity,
+                    value: swordRow.value_text,
+                    stats: swordRow.stats_text,
+                    exist: swordRow.exist_text,
+                    demand: swordRow.demand,
+                    description: swordRow.description,
                     lastUpdated: swordRow.updated_at
                 });
             }
@@ -95,7 +94,7 @@ exports.handler = async (event) => {
 
     } catch (error) {
         console.error("Error fetching game data:", error);
-        return { statusCode: 500, body: JSON.stringify({ message: "An internal error occurred." }) };
+        return { statusCode: 500, body: JSON.stringify({ message: "An internal server error occurred." }) };
     } finally {
         client.release();
     }
