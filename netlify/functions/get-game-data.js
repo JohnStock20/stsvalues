@@ -1,4 +1,4 @@
-// Archivo: netlify/functions/get-game-data.js
+// Archivo: netlify/functions/get-game-data.js (Versión Corregida y Final)
 
 const { Pool } = require('pg');
 
@@ -7,15 +7,21 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }
 });
 
+// --- ¡NUEVO! Definimos los datos estáticos de las divisas aquí ---
+const currenciesData = {
+    "time": { name: "Time", icon: null },
+    "diamonds": { name: "Diamonds", icon: "images/diamonds.png" },
+    "heartstones": { name: "Heartstones", icon: "images/heartstones.png" },
+    "cooldown": { name: "Cooldown", icon: null } // Lo mantenemos por consistencia
+};
+
 exports.handler = async (event) => {
-    // Esta función es pública, no necesita token de autenticación.
     if (event.httpMethod !== 'GET') {
         return { statusCode: 405, body: 'Method Not Allowed' };
     }
 
     const client = await pool.connect();
     try {
-        // 1. Obtenemos todas las cajas, espadas y recompensas en paralelo
         const casesPromise = client.query('SELECT * FROM cases');
         const swordsPromise = client.query('SELECT * FROM swords');
         const rewardsPromise = client.query('SELECT * FROM case_rewards');
@@ -26,17 +32,14 @@ exports.handler = async (event) => {
             rewardsPromise,
         ]);
 
-        // 2. Procesamos los datos para reconstruir la estructura de appData
-
-        // Creamos un mapa de espadas para un acceso rápido (id -> datos de la espada)
         const swordsMap = new Map(swordsResult.rows.map(s => [s.id, s]));
 
         const appData = {
+            currencies: currenciesData, // <-- ¡CORRECCIÓN CLAVE! Añadimos las divisas aquí.
             cases: {},
             otherSwords: []
         };
 
-        // Llenamos el objeto de cajas
         for (const caseRow of casesResult.rows) {
             appData.cases[caseRow.id] = {
                 id: caseRow.id,
@@ -45,11 +48,10 @@ exports.handler = async (event) => {
                 price: caseRow.price,
                 currency: caseRow.currency,
                 borderColor: caseRow.border_color,
-                rewards: [] // Preparamos el array para las recompensas
+                rewards: []
             };
         }
 
-        // Llenamos el array de recompensas para cada caja
         for (const rewardRow of rewardsResult.rows) {
             const swordData = swordsMap.get(rewardRow.sword_id);
             if (swordData && appData.cases[rewardRow.case_id]) {
@@ -57,36 +59,34 @@ exports.handler = async (event) => {
                     id: swordData.id,
                     name: swordData.name,
                     image: swordData.image_path,
+                    rararidad: swordData.rarity,
+                    value: swordData.value_text,
+                    stats: swordData.stats_text,
+                    exist: swordData.exist_text,
+                    demand: swordData.demand,
+                    description: swordData.description,
+                    chance: parseFloat(rewardRow.chance)
+                });
+            }
+        }
+
+        for (const swordRow of swordsResult.rows) {
+            if (swordRow.is_custom) {
+                appData.otherSwords.push({
+                    id: swordRow.id,
+                    name: swordRow.name,
+                    image: swordData.image_path,
                     rarity: swordData.rarity,
                     value: swordData.value_text,
                     stats: swordData.stats_text,
                     exist: swordData.exist_text,
                     demand: swordData.demand,
                     description: swordData.description,
-                    chance: parseFloat(rewardRow.chance) // Aseguramos que sea un número
+                    lastUpdated: swordRow.updated_at
                 });
             }
         }
 
-        // Llenamos el array de otherSwords
-        for (const swordRow of swordsResult.rows) {
-            if (swordRow.is_custom) {
-                appData.otherSwords.push({
-                    id: swordRow.id,
-                    name: swordRow.name,
-                    image: swordRow.image_path,
-                    rarity: swordRow.rarity,
-                    value: swordRow.value_text,
-                    stats: swordRow.stats_text,
-                    exist: swordRow.exist_text,
-                    demand: swordRow.demand,
-                    description: swordRow.description,
-                    lastUpdated: swordRow.updated_at // ¡Ahora tenemos la fecha de actualización real!
-                });
-            }
-        }
-
-        // 3. Devolvemos el objeto completo
         return {
             statusCode: 200,
             headers: { 'Content-Type': 'application/json' },
