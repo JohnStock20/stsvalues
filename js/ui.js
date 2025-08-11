@@ -267,71 +267,81 @@ export function renderNotificationsPage(notifications, timeFormatter) {
 
 // AÑADE ESTA NUEVA FUNCIÓN en ui.js
 
+// Reemplaza tu función renderSwordEditor completa con esta versión
+
 export function renderSwordEditor(swordData, onSave, onCancel) {
     const container = dom.views.swordEditorView;
-    const isCreating = !swordData; // Si no hay datos, estamos creando
-    const sword = swordData || {}; // Usamos un objeto vacío si es nuevo
+    const isCreating = !swordData;
+    // Usamos un objeto por defecto para no tener errores con 'undefined'
+    const sword = swordData || { name: '', image_path: '', rarity: 'common', value_text: '0', stats_text: 'x1', exist_text: 'N/A', demand: 'N/A', description: '', is_custom: true };
 
     const rarities = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic', 'godly', 'insane', 'subzero', 'staff', 'limited', 'exclusive', 'event', 'easter', 'unobtainable', 'hell', 'evil'];
     const demands = ['insane', 'high', 'medium', 'low', 'N/A'];
 
     container.innerHTML = `
-        <button id="cancel-sword-edit-btn" class="back-btn">← Cancel</button>
-        <h2 class="section-title">~ ${isCreating ? 'Create New Sword' : 'Edit Sword'} ~</h2>
-        
-        <form id="sword-editor-form" class="admin-form">
-            <input type="hidden" name="id" value="${sword.id || ''}">
-            
-            <label for="name">Name</label>
-            <input type="text" name="name" placeholder="e.g., Excalibur" value="${sword.name || ''}" required>
-            
-            <label for="image_path">Image Filename</label>
-            <input type="text" name="image_path" placeholder="e.g., excalibur.png" value="${sword.image_path || ''}">
-            
-            <label for="rarity">Rarity</label>
-            <select name="rarity" required>
-                ${rarities.map(r => `<option value="${r}" ${sword.rarity === r ? 'selected' : ''}>${r.charAt(0).toUpperCase() + r.slice(1)}</option>`).join('')}
-            </select>
-            
-            <label for="value_text">Value</label>
-            <input type="text" name="value_text" placeholder="e.g., 75K or 80T-100T" value="${sword.value_text || ''}">
-            
-            <label for="stats_text">Stats</label>
-            <input type="text" name="stats_text" placeholder="e.g., x6.5" value="${sword.stats_text || ''}">
-            
-            <label for="exist_text">Exist</label>
-            <input type="text" name="exist_text" placeholder="e.g., 500 or N/A" value="${sword.exist_text || ''}">
+        <div class="form-actions" style="justify-content: space-between; margin-bottom: 20px;">
+            <button id="cancel-sword-edit-btn" class="back-btn">← Cancel</button>
+            <button id="save-sword-changes-btn" class="auth-button">💾 ${isCreating ? 'Create Sword' : 'Save Changes'}</button>
+        </div>
 
-            <label for="demand">Demand</label>
-            <select name="demand">
-                 ${demands.map(d => `<option value="${d}" ${sword.demand === d ? 'selected' : ''}>${d}</option>`).join('')}
-            </select>
-            
-            <label for="description">Description</label>
-            <textarea name="description" placeholder="Use [case:case_id] or [sword:sword_id] for links.">${sword.description || ''}</textarea>
-            
-            <div class="form-checkbox">
-                <input type="checkbox" id="is_custom" name="is_custom" ${sword.is_custom ? 'checked' : ''}>
-                <label for="is_custom">Is this a custom sword? (Belongs to "Other Swords")</label>
+        <div class="sword-details-content">
+            <!-- Columna Izquierda: Tarjeta de Información Editable -->
+            <div id="sword-info-card" class="sword-info-card ${sword.rarity}">
+                <div id="sword-demand-indicator" class="sword-demand-indicator ${sword.demand}"></div>
+                <div id="sword-details-image-container">
+                    <img src="${sword.image_path || 'images/placeholder.png'}" alt="${sword.name}">
+                </div>
+                <input type="text" id="edit-sword-name" class="editable-title" value="${sword.name}">
+                <textarea id="edit-sword-description" class="editable-description">${sword.description}</textarea>
             </div>
 
-            <button type="submit" class="auth-button">${isCreating ? 'Create Sword' : 'Save Changes'}</button>
-        </form>
+            <!-- Columna Derecha: Cajas de Estadísticas Editables -->
+            <div class="sword-stats-container">
+                <div class="stat-box">
+                    <h4>VALUE</h4>
+                    <input type="text" id="edit-sword-value" class="editable-stat-p" value="${sword.value_text}">
+                    <input type="text" id="edit-sword-image" class="editable-sub-text" placeholder="Image path..." value="${sword.image_path || ''}">
+                </div>
+                <div class="stat-box">
+                    <h4>STATS</h4>
+                    <input type="text" id="edit-sword-stats" class="editable-stat-p" value="${sword.stats_text}">
+                </div>
+                <div class="stat-box">
+                    <h4>MORE</h4>
+                    <div class="editable-more">
+                        <span>Chance - <input type="text" id="edit-sword-chance" value="N/A (Set in Case)" disabled></span>
+                        <span>Exist - <input type="text" id="edit-sword-exist" value="${sword.exist_text}"></span>
+                        <span>Rarity - 
+                            <select id="edit-sword-rarity">
+                                ${rarities.map(r => `<option value="${r}" ${sword.rarity === r ? 'selected' : ''}>${r}</option>`).join('')}
+                            </select>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
     `;
 
-    // Añadimos los event listeners para los botones y el formulario
-    document.getElementById('cancel-sword-edit-btn').addEventListener('click', onCancel);
-
-    document.getElementById('sword-editor-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const swordData = Object.fromEntries(formData.entries());
-        
-        // Convertimos el checkbox a booleano
-        swordData.is_custom = e.target.elements.is_custom.checked;
-
-        onSave(swordData);
+    // --- Lógica para recolectar los datos y guardar ---
+    const saveButton = document.getElementById('save-sword-changes-btn');
+    saveButton.addEventListener('click', () => {
+        const updatedSwordData = {
+            id: sword.id, // Mantenemos el ID si estamos editando
+            name: document.getElementById('edit-sword-name').value,
+            image_path: document.getElementById('edit-sword-image').value,
+            rarity: document.getElementById('edit-sword-rarity').value,
+            value_text: document.getElementById('edit-sword-value').value,
+            stats_text: document.getElementById('edit-sword-stats').value,
+            exist_text: document.getElementById('edit-sword-exist').value,
+            demand: sword.demand, // Por ahora lo mantenemos simple, luego lo haremos interactivo
+            description: document.getElementById('edit-sword-description').value,
+            // El checkbox para 'is_custom' lo añadiremos en el siguiente paso para no complicar
+            is_custom: true // Asumimos que todas las espadas nuevas son 'custom' por ahora
+        };
+        onSave(updatedSwordData);
     });
+
+    document.getElementById('cancel-sword-edit-btn').addEventListener('click', onCancel);
 }
 
 export function updatePaginationControls(appData, appState) {

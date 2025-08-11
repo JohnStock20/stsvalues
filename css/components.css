@@ -996,6 +996,60 @@ var(--border-color); cursor: not-allowed; }
     border-radius: var(--border-radius-md);
 }
 
+/* --- Estilos para el Editor de Espadas "En Vivo" --- */
+.editable-title, .editable-stat-p, .editable-sub-text, .editable-description, .editable-more input, .editable-more select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px dashed var(--border-color);
+    color: var(--text-primary);
+    padding: 8px;
+    border-radius: var(--border-radius-sm);
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+}
+
+.editable-title {
+    font-family: 'Anton', sans-serif;
+    font-size: 2.8em;
+    line-height: 1.1;
+    margin: 10px 0;
+}
+
+.editable-stat-p {
+    font-size: 2.2em;
+    font-weight: bold;
+}
+
+.editable-sub-text {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    margin-top: 5px;
+}
+
+.editable-description {
+    min-height: 80px;
+    font-size: 1em;
+    text-align: left;
+    resize: vertical;
+}
+
+.editable-more {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    font-size: 1em;
+}
+.editable-more span {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.editable-more input, .editable-more select {
+    width: 60%;
+    text-align: right;
+    padding: 4px 8px;
+}
+
 /* --- RESPONSIVE ADAPTATIONS FOR COMPONENTS --- */
 @media (max-width: 900px) { /* Usamos un breakpoint más consistente */
 
