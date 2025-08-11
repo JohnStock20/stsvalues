@@ -196,7 +196,10 @@ swordsListHTML = swords.map(sword => `
         <h2 class="section-title">~Manage Game Data~</h2>
         <div class="admin-section">
             <h3>Swords</h3>
-            <button id="add-new-sword-btn" class="auth-button">Add New Sword</button>
+            <div class="admin-controls">
+                <input type="text" id="admin-sword-search" placeholder="Search swords...">
+                <button id="add-new-sword-btn" class="auth-button">Add New Sword</button>
+            </div>
             <div id="swords-management-list" class="admin-item-list">
                 ${swordsListHTML}
             </div>
@@ -207,6 +210,10 @@ swordsListHTML = swords.map(sword => `
     // Sabemos que los botones existen porque los acabamos de crear.
     document.getElementById('back-to-devtools-btn').addEventListener('click', onBack);
     document.getElementById('add-new-sword-btn').addEventListener('click', onAdd);
+        // ¡NUEVO! Event listener para la nueva barra de búsqueda
+    document.getElementById('admin-sword-search').addEventListener('input', (e) => {
+        onSearch(e.target.value);
+    });
     
     container.querySelectorAll('.edit-btn').forEach(button => {
         button.addEventListener('click', () => onEdit(button.dataset.swordId));
@@ -347,7 +354,7 @@ const valueDisplayHTML = (typeof reward.value === 'string' && reward.value.toUpp
   // Ahora el 'title' del span contiene el valor real de la espada
   ? `<span class="value-oc" title="Estimated Value: ${reward.value}">O/C</span>`
   : formatLargeNumber(numericValue);
-  
+
     return `
       <div class="reward-info">
         <div class="reward-image-placeholder"><img src="${reward.image}" alt="${reward.name}"></div>

@@ -982,6 +982,20 @@ var(--border-color); cursor: not-allowed; }
     width: auto;
 }
 
+.admin-controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+.admin-controls input {
+    flex-grow: 1;
+    background-color: var(--dark-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 10px 15px;
+    border-radius: var(--border-radius-md);
+}
+
 /* --- RESPONSIVE ADAPTATIONS FOR COMPONENTS --- */
 @media (max-width: 900px) { /* Usamos un breakpoint más consistente */
 

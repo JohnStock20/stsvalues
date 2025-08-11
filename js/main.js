@@ -123,6 +123,16 @@ const onDelete = async (swordId) => {
             navigateToView('devtools');
         };
 
+                // ¡NUEVA! Función de búsqueda
+        const onSearch = (query) => {
+            const lowerCaseQuery = query.toLowerCase();
+            const filteredSwords = allAdminSwords.filter(sword => 
+                sword.name.toLowerCase().includes(lowerCaseQuery)
+            );
+            // Volvemos a renderizar la vista, pero solo con las espadas filtradas
+            UI.renderAdminDataView(filteredSwords, onAdd, onEdit, onDelete, onBack, onSearch);
+        };
+
         // Llamamos a la nueva función de renderizado con todos los datos y acciones
         UI.renderAdminDataView(data.swords, onAdd, onEdit, onDelete, onBack);
         
@@ -655,6 +665,48 @@ function setupGiveawayModal() {
 
 // --- INICIALIZACIÓN DE COMPONENTES DE UI ---
 
+// AÑADE ESTA NUEVA FUNCIÓN en main.js
+
+function initializeSearchBar(allSwords) {
+    const searchBar = UI.dom.inputs.searchBar;
+    const searchResultsContainer = UI.dom.containers.searchResults;
+
+    searchBar.addEventListener("input", () => {
+        const query = searchBar.value.toLowerCase().trim();
+        if (!query) {
+            searchResultsContainer.style.display = 'none';
+            return;
+        }
+
+        const results = allSwords.filter(s => s.name.toLowerCase().includes(query)).slice(0, 10);
+        searchResultsContainer.innerHTML = '';
+
+        if (results.length > 0) {
+            results.forEach(sword => {
+                // findSwordById ahora necesita appData
+                const source = findSwordById(appData, sword.id)?.source || { type: 'other' };
+                const item = UI.createSearchResultItem(sword, source, navigateToSubView);
+                
+                item.addEventListener('click', () => {
+                    searchBar.value = '';
+                    searchResultsContainer.style.display = 'none';
+                });
+                searchResultsContainer.appendChild(item);
+            });
+            searchResultsContainer.style.display = 'block';
+        } else {
+            searchResultsContainer.style.display = 'none';
+        }
+    });
+
+    // Ocultar resultados al hacer clic fuera
+    document.addEventListener('click', (e) => {
+        if (!document.getElementById('search-module').contains(e.target)) {
+            searchResultsContainer.style.display = 'none';
+        }
+    });
+}
+
 function initializeTopUI() {
     const currencySelectors = [
         document.getElementById('converter-from-wrapper'),
@@ -698,45 +750,6 @@ function initializeTopUI() {
 
     setCurrency('converter-from', 'time');
     setCurrency('converter-to', 'diamonds');
-
-    const allSwords = [...Object.values(appData.cases).flatMap(c=>c.rewards), ...appData.otherSwords];
-  UI.dom.inputs.searchBar.addEventListener("input", () => {
-    const query = UI.dom.inputs.searchBar.value.toLowerCase().trim();
-    if (!query) {
-      UI.dom.containers.searchResults.style.display = 'none';
-      return;
-    }
-    const results = allSwords.filter(s => s.name.toLowerCase().includes(query)).slice(0, 10);
-    UI.dom.containers.searchResults.innerHTML = '';
-
-        if (results.length > 0) {
-            results.forEach(sword => {
-                const source = findSwordById(sword.id)?.source || { type: 'other' };
-                
-                // --- ¡ESTA ES LA CORRECCIÓN CLAVE! ---
-                // Llamamos a la nueva función simplificada en lugar de la compleja.
-                const item = UI.createSearchResultItem(sword, source, navigateToSubView);
-
-                // El resto de la lógica para el clic se maneja DENTRO de la nueva función.
-                // Pero dejamos el código para ocultar el modal al hacer clic.
-                item.addEventListener('click', () => {
-                    UI.dom.inputs.searchBar.value = '';
-                    UI.dom.containers.searchResults.style.display = 'none';
-                });
-
-                UI.dom.containers.searchResults.appendChild(item);
-            });
-            UI.dom.containers.searchResults.style.display = 'block';
-        } else {
-            UI.dom.containers.searchResults.style.display = 'none';
-        }
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!document.getElementById('search-module').contains(e.target)) {
-            UI.dom.containers.searchResults.style.display = 'none';
-        }
-    });
 }
 
 // REEMPLAZA tu función initializeCalculator con esta versión
@@ -917,6 +930,14 @@ async function initializeApp() {
     UI.renderCaseSelection(appData, navigateToSubView);
     UI.renderOtherSwords(appData, appState, navigateToSubView);
     navigateToView('cases');
+
+    // ¡AÑADE ESTA LÍNEA!
+    // Creamos una lista plana de todas las espadas para la búsqueda
+    const allSwordsList = [
+        ...Object.values(appData.cases).flatMap(c => c.rewards),
+        ...appData.otherSwords
+    ];
+    initializeSearchBar(allSwordsList);
 
     // --- 5. Inicialización de timers y lógica asíncrona secundaria ---
     fetchGiveaways();
