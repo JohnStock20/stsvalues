@@ -167,9 +167,10 @@ export function renderOtherSwords(appData, appState, navigateTo) {
     updatePaginationControls(appData, appState);
 }
 
-// AÑADE ESTA NUEVA FUNCIÓN en ui.js
 export function renderAdminSwordsList(swords, onEdit, onDelete) {
     const container = document.getElementById('swords-management-list');
+    if (!container) return; // Comprobación de seguridad
+
     if (!swords || swords.length === 0) {
         container.innerHTML = '<p>No swords found in the database.</p>';
         return;
@@ -177,24 +178,21 @@ export function renderAdminSwordsList(swords, onEdit, onDelete) {
 
     container.innerHTML = swords.map(sword => `
         <div class="admin-list-item">
-            <span>${sword.name} <em class="rarity-text ${sword.rarity}">(${sword.rarity})</em></span>
+            <span>${sword.name} <em class="rarity-text ${sword.rarity || ''}">(${sword.rarity || 'N/A'})</em></span>
             <div class="item-actions">
-                <button class="value-action-btn" data-sword-id="${sword.id}">Edit</button>
-                <button class="value-action-btn danger-btn" data-sword-id="${sword.id}">Delete</button>
+                <button class="value-action-btn edit-btn" data-sword-id="${sword.id}">Edit</button>
+                <button class="value-action-btn danger-btn delete-btn" data-sword-id="${sword.id}">Delete</button>
             </div>
         </div>
     `).join('');
 
     // Añadimos los event listeners a los botones creados
-    container.querySelectorAll('.value-action-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            const swordId = button.dataset.swordId;
-            if (button.textContent === 'Edit') {
-                onEdit(swordId);
-            } else {
-                onDelete(swordId);
-            }
-        });
+    container.querySelectorAll('.edit-btn').forEach(button => {
+        button.addEventListener('click', () => onEdit(button.dataset.swordId));
+    });
+
+    container.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', () => onDelete(button.dataset.swordId));
     });
 }
 
@@ -909,12 +907,8 @@ export function renderAdminTools(onAdminAction) {
     </div>
     `;
 
-        // --- ¡CORRECCIÓN CLAVE! ---
-    // Añadimos el event listener AQUÍ, justo después de crear el botón en el HTML.
-    // Ahora estamos 100% seguros de que el botón existe antes de intentar usarlo.
-    document.getElementById('manage-data-btn').addEventListener('click', () => {
-        navigateTo('adminDataView');
-    });
+    // Asignamos la función recibida al evento click
+    document.getElementById('manage-data-btn').addEventListener('click', onManageDataClick);
 
     // --- Event Listeners para los formularios ---
     document.getElementById('grant-title-form').addEventListener('submit', (e) => {

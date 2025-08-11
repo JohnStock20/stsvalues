@@ -37,6 +37,8 @@ const appState = {
 
 // --- GESTIÓN DE VISTAS Y NAVEGÁCIÓn ---
 
+// Reemplaza tu función navigateToView por esta versión más limpia
+
 function navigateToView(viewName) {
     UI.showView(viewName);
     appState.currentNavigationView = { view: viewName, id: null, type: viewName };
@@ -44,17 +46,25 @@ function navigateToView(viewName) {
     if (viewName === 'titles') {
         loadAndRenderTitles();
     } else if (viewName === 'giveaways') {
-        UI.renderGiveawayPage(appDataCache.giveaways, appDataCache.recentWinners, currentUser, handleJoinGiveaway, openCreateGiveawayModal);
+        UI.renderGiveawayPage(appData, appDataCache.giveaways, appDataCache.recentWinners, currentUser, handleJoinGiveaway, openCreateGiveawayModal);
     } else if (viewName === 'notifications') {
         markNotificationsAsRead();
-    } else if (viewName === 'adminDataView') { // <-- ¡AÑADE ESTE ELSE IF!
-        loadAndRenderAdminSwords();
-    } else if (viewName === 'devtools') {
+    } 
+    // --- ¡NUEVA LÓGICA CENTRALIZADA PARA ADMIN ---
+    else if (viewName === 'devtools') {
         if (currentUser && currentUser.role === 'owner') {
-            UI.renderAdminTools(handleAdminAction, navigateToView);
+            // Pasamos las funciones controladoras necesarias a la interfaz
+            UI.renderAdminTools(
+                handleAdminAction, 
+                () => navigateToView('adminDataView') // Función para ir a la gestión de datos
+            );
         } else {
-            document.getElementById('devtools-view').innerHTML = `<h2 class="section-title">ACCESS DENIED</h2><p>You do not have permission to view this page.</p>`;
+            document.getElementById('devtools-view').innerHTML = `<h2>ACCESS DENIED</h2>`;
         }
+    } 
+    else if (viewName === 'adminDataView') {
+        // Esta vista se encarga de cargar y mostrar la lista de espadas
+        loadAndRenderAdminSwords();
     }
 }
 
