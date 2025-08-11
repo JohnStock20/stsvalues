@@ -909,6 +909,13 @@ export function renderAdminTools(onAdminAction) {
     </div>
     `;
 
+        // --- ¡CORRECCIÓN CLAVE! ---
+    // Añadimos el event listener AQUÍ, justo después de crear el botón en el HTML.
+    // Ahora estamos 100% seguros de que el botón existe antes de intentar usarlo.
+    document.getElementById('manage-data-btn').addEventListener('click', () => {
+        navigateTo('adminDataView');
+    });
+
     // --- Event Listeners para los formularios ---
     document.getElementById('grant-title-form').addEventListener('submit', (e) => {
         e.preventDefault();
@@ -931,11 +938,6 @@ export function renderAdminTools(onAdminAction) {
             unbanDate: form.unbanDate.value ? new Date(form.unbanDate.value).toISOString() : null
         };
         onAdminAction(action, form.targetUsername.value, payload, 'ban-user-feedback');
-    });
-
-        // ¡NUEVO! Event listener para el nuevo botón
-    document.getElementById('manage-data-btn').addEventListener('click', () => {
-        navigateTo('adminDataView'); // Navegamos a una nueva vista que crearemos
     });
 }
 
