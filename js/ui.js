@@ -167,30 +167,46 @@ export function renderOtherSwords(appData, appState, navigateTo) {
     updatePaginationControls(appData, appState);
 }
 
-// Reemplaza renderAdminSwordsList por esta nueva función en ui.js
+// Reemplaza esta función completa en ui.js
 
-export function renderAdminDataView(swords, onAdd, onEdit, onDelete, onBack) {
-    const container = dom.views.adminDataView; // Usamos el contenedor de la vista principal
+export function renderAdminDataView(allSwords, onAdd, onEdit, onDelete, onBack) {
+    const container = dom.views.adminDataView;
 
-    let swordsListHTML = '<p>No swords found in the database.</p>';
-    if (swords && swords.length > 0) {
-swordsListHTML = swords.map(sword => `
-    <div class="reward-item ${sword.rarity || 'common'}">
-        <div class="reward-info">
-            <div class="reward-image-placeholder">
-                <img src="${sword.image_path || 'images/placeholder.png'}" alt="${sword.name}">
+    // Función interna para renderizar solo la lista de espadas
+    const renderList = (swordsToRender) => {
+        const listContainer = document.getElementById('swords-management-list');
+        if (!listContainer) return;
+
+        if (!swordsToRender || swordsToRender.length === 0) {
+            listContainer.innerHTML = '<p>No swords match your search or none exist.</p>';
+            return;
+        }
+
+        listContainer.innerHTML = swordsToRender.map(sword => `
+            <div class="reward-item ${sword.rarity || 'common'}">
+                <div class="reward-info">
+                    <div class="reward-image-placeholder">
+                        <img src="${sword.image_path || 'images/placeholder.png'}" alt="${sword.name}">
+                    </div>
+                    <span class="reward-name">${sword.name}</span>
+                </div>
+                <div class="item-actions">
+                    <button class="value-action-btn edit-btn" data-sword-id="${sword.id}">Edit</button>
+                    <button class="value-action-btn danger-btn delete-btn" data-sword-id="${sword.id}">Delete</button>
+                </div>
             </div>
-            <span class="reward-name">${sword.name}</span>
-        </div>
-        <div class="item-actions">
-            <button class="value-action-btn edit-btn" data-sword-id="${sword.id}">Edit</button>
-            <button class="value-action-btn danger-btn delete-btn" data-sword-id="${sword.id}">Delete</button>
-        </div>
-    </div>
-`).join('');
-    }
+        `).join('');
 
-    // Construimos el HTML completo de la vista
+        // Añadimos los listeners a los botones que acabamos de crear en la lista
+        listContainer.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', () => onEdit(button.dataset.swordId));
+        });
+        listContainer.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', () => onDelete(button.dataset.swordId));
+        });
+    };
+
+    // Construimos el HTML estático de la vista (el "marco")
     container.innerHTML = `
         <button id="back-to-devtools-btn" class="back-btn">← Back to Admin Tools</button>
         <h2 class="section-title">~Manage Game Data~</h2>
@@ -201,27 +217,26 @@ swordsListHTML = swords.map(sword => `
                 <button id="add-new-sword-btn" class="auth-button">Add New Sword</button>
             </div>
             <div id="swords-management-list" class="admin-item-list">
-                ${swordsListHTML}
+                <!-- La lista se renderizará aquí -->
             </div>
         </div>
     `;
 
-    // --- AHORA AÑADIMOS TODOS LOS LISTENERS ---
-    // Sabemos que los botones existen porque los acabamos de crear.
+    // --- Vinculamos los listeners a los elementos del "marco" ---
     document.getElementById('back-to-devtools-btn').addEventListener('click', onBack);
     document.getElementById('add-new-sword-btn').addEventListener('click', onAdd);
-        // ¡NUEVO! Event listener para la nueva barra de búsqueda
-    document.getElementById('admin-sword-search').addEventListener('input', (e) => {
-        onSearch(e.target.value);
-    });
     
-    container.querySelectorAll('.edit-btn').forEach(button => {
-        button.addEventListener('click', () => onEdit(button.dataset.swordId));
+    const searchInput = document.getElementById('admin-sword-search');
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const filteredSwords = allSwords.filter(sword => 
+            sword.name.toLowerCase().includes(query)
+        );
+        renderList(filteredSwords); // Volvemos a renderizar SOLO la lista con los resultados
     });
 
-    container.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', () => onDelete(button.dataset.swordId));
-    });
+    // Renderizamos la lista inicial con todas las espadas
+    renderList(allSwords);
 }
 
 // En ui.js, añade esta nueva función

@@ -68,7 +68,7 @@ function navigateToView(viewName) {
     }
 }
 
-// Reemplaza tu función loadAndRenderAdminSwords en main.js
+// Reemplaza esta función completa en main.js
 
 async function loadAndRenderAdminSwords() {
     try {
@@ -79,69 +79,52 @@ async function loadAndRenderAdminSwords() {
         if (!response.ok) throw new Error('Could not fetch swords list.');
         
         const data = await response.json();
-        
-        // Definimos todas las acciones que la interfaz necesita
+        const allAdminSwords = data.swords;
+
+        // Definimos las acciones que los botones ejecutarán
         const onAdd = () => {
             UI.renderSwordEditor(null, handleSaveSword, () => navigateToView('adminDataView'));
             navigateToView('swordEditorView');
         };
         const onEdit = (swordId) => {
-            const swordData = data.swords.find(s => s.id === swordId);
+            const swordData = allAdminSwords.find(s => s.id === swordId);
             UI.renderSwordEditor(swordData, handleSaveSword, () => navigateToView('adminDataView'));
             navigateToView('swordEditorView');
         };
-// En main.js, dentro de loadAndRenderAdminSwords
-const onDelete = async (swordId) => {
-    const swordData = data.swords.find(s => s.id === swordId);
-    if (!swordData) return;
+        const onDelete = async (swordId) => {
+            const swordData = allAdminSwords.find(s => s.id === swordId);
+            if (!swordData) return;
 
-    // Pedimos confirmación
-    if (!confirm(`Are you sure you want to delete the sword "${swordData.name}"? This cannot be undone.`)) {
-        return;
-    }
+            if (!confirm(`Are you sure you want to delete "${swordData.name}"? This cannot be undone.`)) {
+                return;
+            }
 
-    try {
-        const response = await fetchWithAuth('/.netlify/functions/manage-data', {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'deleteSword',
-                payload: { swordId }
-            })
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.message);
-        
-        alert(result.message);
-        loadAndRenderAdminSwords(); // Recargamos la lista
-
-    } catch (error) {
-        console.error('Failed to delete sword:', error);
-        alert(`Error: ${error.message}`);
-    }
-};
-        const onBack = () => {
-            navigateToView('devtools');
+            try {
+                const response = await fetchWithAuth('/.netlify/functions/manage-data', {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'deleteSword', payload: { swordId } })
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message);
+                
+                alert(result.message);
+                loadAndRenderAdminSwords(); // Recargamos toda la vista para reflejar el borrado
+            } catch (error) {
+                console.error('Failed to delete sword:', error);
+                alert(`Error: ${error.message}`);
+            }
         };
+        const onBack = () => navigateToView('devtools');
 
-                // ¡NUEVA! Función de búsqueda
-        const onSearch = (query) => {
-            const lowerCaseQuery = query.toLowerCase();
-            const filteredSwords = allAdminSwords.filter(sword => 
-                sword.name.toLowerCase().includes(lowerCaseQuery)
-            );
-            // Volvemos a renderizar la vista, pero solo con las espadas filtradas
-            UI.renderAdminDataView(filteredSwords, onAdd, onEdit, onDelete, onBack, onSearch);
-        };
-
-        // Llamamos a la nueva función de renderizado con todos los datos y acciones
-        UI.renderAdminDataView(data.swords, onAdd, onEdit, onDelete, onBack);
+        // Llamamos a la función de la UI para que construya la vista
+        // Le pasamos la lista completa de espadas y las funciones de control
+        UI.renderAdminDataView(allAdminSwords, onAdd, onEdit, onDelete, onBack);
         
     } catch (error) {
-        console.error(error);
+        console.error('Error loading admin swords:', error);
         alert('Error loading swords list.');
     }
 }
-
 // AÑADE ESTA FUNCIÓN en main.js
 async function loadInitialData() {
     try {
