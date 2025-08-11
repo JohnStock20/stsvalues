@@ -847,18 +847,18 @@ const handleCalculate = () => {
     switch (appState.calculatorMode) {
       case 'theoretical':
         if (isNaN(quantity) || quantity <= 0) return;
-        Calculator.runTheoreticalCalculation(quantity, caseDataForCalc, appState);
+        Calculator.runTheoreticalCalculation(appData, quantity, caseDataForCalc, appState);
         break;
       case 'simulate':
         if (isNaN(quantity) || quantity <= 0) return;
-        Calculator.runRealisticSimulation(quantity, caseDataForCalc, appState);
+        Calculator.runRealisticSimulation(appData, quantity, caseDataForCalc, appState);
         break;
       case 'untilBest':
-        Calculator.runUntilBestSimulation(caseDataForCalc, appState);
+        Calculator.runUntilBestSimulation(appData, caseDataForCalc, appState);
         break;
       case 'graph':
         if (isNaN(step) || isNaN(max) || step <= 0 || max <= 0 || step > max) return;
-        Calculator.runGraphSimulation(step, max, caseDataForCalc);
+        Calculator.runGraphSimulation(appData, step, max, caseDataForCalc);
         break;
     }
 };

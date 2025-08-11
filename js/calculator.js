@@ -30,7 +30,7 @@ function prepareSimulationData(caseData) {
     return { rewardsWithCumulativeChance, totalChanceSum: cumulative };
 }
 
-export function runTheoreticalCalculation(quantity, caseData, appState) {
+export function runTheoreticalCalculation(appData, quantity, caseData, appState) {
     if (!caseData) return;
 
     let expectedValuePerCase = 0;
@@ -46,14 +46,15 @@ export function runTheoreticalCalculation(quantity, caseData, appState) {
     const totalValueGained = expectedValuePerCase * quantity;
     const totalCost = calculateTotalCost(caseData.currency, caseData.price, quantity);
 
-    renderResultsTable({
+    // ¡CAMBIO! Pasamos appData a la función de UI
+    renderResultsTable(appData, {
         totalCost,
         totalValueGained,
         result: totalValueGained - totalCost
     }, appState);
 }
 
-export function runRealisticSimulation(quantity, caseData, appState) {
+export function runRealisticSimulation(appData, quantity, caseData, appState) {
     const { rewardsWithCumulativeChance, totalChanceSum } = prepareSimulationData(caseData);
     let totalValueGained = 0;
     const wonItems = {};
@@ -68,15 +69,16 @@ export function runRealisticSimulation(quantity, caseData, appState) {
     }
 
     const totalCost = calculateTotalCost(caseData.currency, caseData.price, quantity);
-    renderSimulationLoot(wonItems);
-    renderResultsTable({
+    // ¡CAMBIO! Pasamos appData a AMBAS funciones de UI
+    renderSimulationLoot(appData, wonItems);
+    renderResultsTable(appData, {
         totalCost,
         totalValueGained,
         result: totalValueGained - totalCost
     }, appState);
 }
 
-export function runUntilBestSimulation(caseData, appState) {
+export function runUntilBestSimulation(appData, caseData, appState) {
     const bestReward = caseData.rewards.reduce((prev, current) => (prev.chance < current.chance) ? prev : current);
     const { rewardsWithCumulativeChance, totalChanceSum } = prepareSimulationData(caseData);
 
@@ -100,13 +102,13 @@ export function runUntilBestSimulation(caseData, appState) {
 
     const totalCost = calculateTotalCost(caseData.currency, caseData.price, casesOpened);
 
-    renderHuntResult({
+    renderHuntResult(appData, {
         found: hasFoundBest,
         casesOpened,
         bestReward,
         maxAttempts: MAX_ATTEMPTS
     });
-    renderResultsTable({
+    renderResultsTable(appData, {
         totalCost,
         totalValueGained,
         result: totalValueGained - totalCost,
@@ -114,7 +116,7 @@ export function runUntilBestSimulation(caseData, appState) {
     }, appState);
 }
 
-export function runGraphSimulation(step, max, caseData) {
+export function runGraphSimulation(appData, step, max, caseData) {
     const { rewardsWithCumulativeChance, totalChanceSum } = prepareSimulationData(caseData);
     const results = [];
     let totalValueGained = 0;
@@ -135,5 +137,5 @@ export function runGraphSimulation(step, max, caseData) {
             }
         }
     }
-    renderProfitGraph(results, 50); // El 50 es MAX_GRAPH_SECTIONS
+    renderProfitGraph(appData, results, 50); // El 50 es MAX_GRAPH_SECTIONS
 }

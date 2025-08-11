@@ -854,7 +854,7 @@ export function renderResultsTable(appData, data, appState) {
 }
 
 
-export function renderSimulationLoot(wonItems) {
+export function renderSimulationLoot(appData, wonItems) {
     dom.containers.simulationLoot.style.display = 'block';
     if (Object.keys(wonItems).length === 0) {
         dom.containers.simulationLoot.innerHTML = '<h4>Loot Summary</h4><p>No items won in this simulation.</p>';
@@ -862,7 +862,8 @@ export function renderSimulationLoot(wonItems) {
     }
     let listHTML = '<h4>Loot Summary</h4><ul>';
     for (const rewardId in wonItems) {
-        const rewardData = findSwordById(rewardId)?.sword;
+          // ¡CAMBIO! Pasamos appData a findSwordById
+        const rewardData = findSwordById(appData, rewardId)?.sword;
         if (rewardData) {
             listHTML += `<li>${wonItems[rewardId]}x <span class="rarity-text ${rewardData.rarity}">${rewardData.name}</span></li>`;
         }
@@ -872,7 +873,7 @@ export function renderSimulationLoot(wonItems) {
 }
 
 
-export function renderHuntResult(result) {
+export function renderHuntResult(appData, result) {
     dom.containers.simulationLoot.style.display = 'block';
     if (result.found) {
         dom.containers.simulationLoot.innerHTML = `<h4>Hunt Result</h4><p>It took <strong>${result.casesOpened.toLocaleString()}</strong> cases to find <span class="rarity-text ${result.bestReward.rarity}">${result.bestReward.name}</span>!</p>`;
@@ -882,7 +883,7 @@ export function renderHuntResult(result) {
 }
 
 
-export function renderProfitGraph(results, MAX_GRAPH_SECTIONS) {
+export function renderProfitGraph(appData, results, MAX_GRAPH_SECTIONS) {
     if (results.length > MAX_GRAPH_SECTIONS) {
         dom.containers.resultsTable.innerHTML = `<p class="error-message" style="display:block;">Too many sections requested (Max: ${MAX_GRAPH_SECTIONS}).</p>`;
         return;
