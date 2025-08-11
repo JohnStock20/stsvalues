@@ -881,7 +881,7 @@ export function closeGiveawayModal() {
 }
 
 // Reemplaza tu función renderAdminTools por esta versión completa y corregida
-export function renderAdminTools(onAdminAction) {
+export function renderAdminTools(onAdminAction, onManageDataClick) {
     const container = dom.containers.adminTools;
     container.innerHTML = `
     <div class="admin-tool-card">
