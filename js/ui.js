@@ -290,12 +290,11 @@ export function createSearchResultItem(reward, source, navigateTo) {
 }
 
 
-// Esta función se encarga SOLO de la cabecera (imagen, nombre, precio)
-export function renderCaseDetailsHeader(caseData) {
+export function renderCaseDetailsHeader(appData, caseData) {
     if (!caseData) return;
     document.getElementById('details-case-image').src = caseData.image;
     document.getElementById('details-case-name').textContent = caseData.name;
-    document.getElementById('details-case-price').innerHTML = getCurrencyHTML(caseData.currency, caseData.price);
+    document.getElementById('details-case-price').innerHTML = getCurrencyHTML(appData, caseData.currency, caseData.price);
     document.querySelector('#case-details-view .info-column').style.setProperty('--case-border-color', caseData.borderColor || 'var(--main-green)');
 }
 
@@ -330,7 +329,7 @@ function parseAndSetDescription(appData, element, text, navigateTo) {
                 link.onclick = (e) => { e.preventDefault(); navigateTo('caseDetails', id); };
             }
         } else if (type === 'sword') {
-            linkData = findSwordById(id);
+            linkData = findSwordById(appData, id);
             if (linkData) {
                 link.textContent = linkData.sword.name;
                 link.className = 'sword-link-in-description';
@@ -346,7 +345,7 @@ function parseAndSetDescription(appData, element, text, navigateTo) {
 }
 
 
-export function renderSwordDetails(sword, sourceInfo, navigateTo, onNewInterval) {
+export function renderSwordDetails(appData, sword, sourceInfo, navigateTo, onNewInterval) {
     const swordInfoCard = document.getElementById('sword-info-card');
     swordInfoCard.className = 'sword-info-card';
     swordInfoCard.classList.add(sword.rarity);
@@ -360,7 +359,7 @@ export function renderSwordDetails(sword, sourceInfo, navigateTo, onNewInterval)
     document.getElementById('sword-details-image-container').innerHTML = `<img src="${sword.image}" alt="${sword.name}">`;
     document.getElementById('sword-details-name').textContent = sword.name;
     const fullDescription = sword.description || (sourceInfo.id ? `This sword is obtainable from the [case:${sourceInfo.id}].` : 'No origin specified.');
-    parseAndSetDescription(document.getElementById('sword-details-description'), fullDescription, navigateTo);
+    parseAndSetDescription(appData, document.getElementById('sword-details-description'), fullDescription, navigateTo);
     document.getElementById('sword-details-value').textContent = formatLargeNumber(parseValue(sword.value));
     document.getElementById('sword-details-stats').textContent = sword.stats;
     document.getElementById('sword-details-more').innerHTML = `
@@ -630,12 +629,12 @@ function renderTitleDetails(title, onEquip) {
   }
 }
 
-export function renderGiveawayPage(giveaways, recentWinners, currentUser, onJoin, onHost) {
+export function renderGiveawayPage(appData, giveaways, recentWinners, currentUser, onJoin, onHost) {
     const activeGiveaway = giveaways.find(gw => gw.status === 'active');
-    renderActiveGiveaway(activeGiveaway, currentUser, onJoin);
-    renderUpcomingGiveaways(giveaways.filter(gw => gw.status === 'upcoming'));
+    renderActiveGiveaway(appData, activeGiveaway, currentUser, onJoin);
+    renderUpcomingGiveaways(appData, giveaways.filter(gw => gw.status === 'upcoming'));
     renderParticipants(activeGiveaway ? activeGiveaway.participants : []);
-    renderRecentWinners(recentWinners);
+    renderRecentWinners(appData, recentWinners);
     dom.containers.hostGiveawayBtn.innerHTML = '';
     if (currentUser && ['owner', 'tester'].includes(currentUser.role)) {
         const hostBtn = document.createElement('button');
@@ -649,13 +648,13 @@ export function renderGiveawayPage(giveaways, recentWinners, currentUser, onJoin
 }
 
 
-function renderActiveGiveaway(giveaway, currentUser, onJoin) {
+function renderActiveGiveaway(appData, giveaway, currentUser, onJoin) {
     const container = dom.containers.activeGiveaway;
     if (!giveaway) {
         container.innerHTML = `<div class="giveaway-card"><h2>There are no active giveaways right now. Check back soon!</h2></div>`;
         return;
     }
-    const prizeListHTML = giveaway.prize_pool.map(prize => `<div class="prize-item">${getPrizeItemHtml(prize)}</div>`).join('');
+    const prizeListHTML = giveaway.prize_pool.map(prize => `<div class="prize-item">${getPrizeItemHtml(appData, prize)}</div>`).join('');
     const isJoined = giveaway.participants?.some(p => p.username === currentUser?.username);
     container.innerHTML = `
         <div id="active-giveaway-card" class="giveaway-card">

@@ -4,7 +4,7 @@
 // =================================================================================
 
 // --- Funciones de Búsqueda ---
-export function findSwordById(swordId) {
+export function findSwordById(appData, swordId) {
     // Buscar en las recompensas de las cajas
     for (const caseId in appData.cases) {
         const reward = appData.cases[caseId].rewards.find(r => r.id === swordId);
@@ -104,7 +104,7 @@ export function formatHours(totalHours) {
     return `${years.toFixed(2)} years`;
 }
 
-export function getPrizeItemHtml(prize) {
+export function getPrizeItemHtml(appData, prize) {
     const amount = formatLargeNumber(prize.amount);
     if (prize.type === 'currency') {
         const currency = appData.currencies[prize.id] || { name: 'Unknown', icon: '' };

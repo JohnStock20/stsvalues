@@ -150,12 +150,12 @@ async function navigateToSubView(view, data) {
             customCaseValues = fetchedValues || {};
             
             renderRewardSection(caseData);
-            UI.renderCaseDetailsHeader(caseData);
+            UI.renderCaseDetailsHeader(appData, caseData);
             UI.showView('caseDetails');
             break;
 
         case 'swordDetails':
-            UI.renderSwordDetails(data.sword, data.source, navigateToSubView, (intervalId) => {
+            UI.renderSwordDetails(appData, data.sword, data.source, navigateToSubView, (intervalId) => {
                 window.swordUpdateInterval = intervalId;
             });
             break;
@@ -370,7 +370,7 @@ async function fetchGiveaways() {
         appDataCache.recentWinners = data.recentWinners;
         
         if (document.getElementById('giveaways-view').style.display === 'block') {
-            UI.renderGiveawayPage(appDataCache.giveaways, appDataCache.recentWinners, currentUser, handleJoinGiveaway, openCreateGiveawayModal);
+            UI.renderGiveawayPage(appData, appDataCache.giveaways, appDataCache.recentWinners, currentUser, handleJoinGiveaway, openCreateGiveawayModal);
         }
     } catch (error) {
         console.error("Error fetching giveaways:", error);
