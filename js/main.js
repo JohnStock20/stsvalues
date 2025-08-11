@@ -103,7 +103,7 @@ async function loadAndRenderAdminData() {
         };
 
         // Renderizamos la vista completa con todos los datos y acciones
-        UI.renderAdminDataView(allAdminSwords, allAdminCases, onAddSword, onEditSword, onDeleteSword, onBack, onAddCase, onEditCase);
+        UI.renderAdminDataView(appData, allAdminSwords, allAdminCases, onAddSword, onEditSword, onDeleteSword, onBack, onAddCase, onEditCase);
         
     } catch (error) {
         console.error('Error loading admin data:', error);

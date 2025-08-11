@@ -171,7 +171,7 @@ export function renderOtherSwords(appData, appState, navigateTo) {
 
 // Reemplaza tu función renderAdminDataView completa en ui.js
 
-export function renderAdminDataView(swords, cases, onAddSword, onEditSword, onDeleteSword, onBack, onAddCase, onEditCase) {
+export function renderAdminDataView(appData, swords, cases, onAddSword, onEditSword, onDeleteSword, onBack, onAddCase, onEditCase) {
     const container = dom.views.adminDataView;
 
     // --- HTML para la lista de Espadas ---
