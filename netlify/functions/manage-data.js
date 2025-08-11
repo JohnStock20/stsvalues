@@ -93,39 +93,73 @@ exports.handler = async (event) => {
                 };
             }
 
-            // --- ¡AÑADE ESTE BLOQUE NUEVO PARA GUARDAR CAJAS! ---
-            else if (action === 'createOrUpdateCase') {
-                const { caseData } = payload;
-                const caseId = caseData.id || generateId(caseData.name); // generateId es la función que ya teníamos
+else if (action === 'createOrUpdateCase') {
+    // Ahora esperamos 'caseData' y un array opcional 'rewards'
+    const { caseData, rewards } = payload; 
+    const caseId = caseData.id || generateId(caseData.name);
 
-                // Usamos "UPSERT" también para las cajas
-                const query = `
-                    INSERT INTO cases (id, name, image_path, price, currency, border_color, updated_at)
-                    VALUES ($1, $2, $3, $4, $5, $6, NOW())
-                    ON CONFLICT (id) DO UPDATE SET
-                        name = EXCLUDED.name,
-                        image_path = EXCLUDED.image_path,
-                        price = EXCLUDED.price,
-                        currency = EXCLUDED.currency,
-                        border_color = EXCLUDED.border_color,
-                        updated_at = NOW()
-                    RETURNING *;
-                `;
+    // --- Transacción: Hacemos todo o no hacemos nada ---
+    try {
+        await client.query('BEGIN'); // Iniciar transacción
 
-                const result = await client.query(query, [
-                    caseId,
-                    caseData.name,
-                    caseData.image_path,
-                    parseValue(String(caseData.price)), // Usamos parseValue para manejar "10k", etc.
-                    caseData.currency,
-                    caseData.border_color
-                ]);
+        // 1. Guardar los datos principales de la caja (como antes)
+        const caseQuery = `
+            INSERT INTO cases (id, name, image_path, price, currency, border_color, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, NOW())
+            ON CONFLICT (id) DO UPDATE SET
+                name = EXCLUDED.name, image_path = EXCLUDED.image_path, price = EXCLUDED.price,
+                currency = EXCLUDED.currency, border_color = EXCLUDED.border_color, updated_at = NOW()
+            RETURNING *;
+        `;
+        const savedCase = await client.query(caseQuery, [
+            caseId, caseData.name, caseData.image_path, parseValue(String(caseData.price)),
+            caseData.currency, caseData.border_color
+        ]);
 
-                return {
-                    statusCode: 200,
-                    body: JSON.stringify({ message: `Case '${result.rows[0].name}' saved successfully!`, case: result.rows[0] })
-                };
+        // 2. Gestionar las recompensas (si se han enviado)
+        if (rewards && Array.isArray(rewards)) {
+            // Borramos todas las recompensas antiguas para esta caja
+            await client.query('DELETE FROM case_rewards WHERE case_id = $1', [caseId]);
+
+            // Insertamos las nuevas recompensas una por una
+            for (const reward of rewards) {
+                if (reward.sword_id && reward.chance) { // Nos aseguramos de tener los datos necesarios
+                    await client.query(
+                        'INSERT INTO case_rewards (case_id, sword_id, chance) VALUES ($1, $2, $3)',
+                        [caseId, reward.sword_id, reward.chance]
+                    );
+                }
             }
+        }
+
+        await client.query('COMMIT'); // Confirmar todos los cambios
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ message: `Case '${savedCase.rows[0].name}' saved successfully!`, case: savedCase.rows[0] })
+        };
+
+    } catch (e) {
+        await client.query('ROLLBACK'); // Si algo falla, deshacer todo
+        throw e; // Lanzar el error para que lo capture el catch principal
+    }
+}
+
+// Añade este 'else if' a tu handler en manage-data.js
+else if (action === 'getAllCasesWithRewards') {
+    const casesResult = await client.query('SELECT * FROM cases ORDER BY name ASC');
+    const rewardsResult = await client.query('SELECT * FROM case_rewards');
+    
+    const casesWithRewards = casesResult.rows.map(c => ({
+        ...c,
+        rewards: rewardsResult.rows.filter(r => r.case_id === c.id)
+    }));
+
+    return {
+        statusCode: 200,
+        body: JSON.stringify({ cases: casesWithRewards })
+    };
+}
 
             // Dentro de exports.handler, añade este nuevo 'else if'
 else if (action === 'deleteSword') {

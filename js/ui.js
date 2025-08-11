@@ -442,21 +442,73 @@ export function renderSwordEditor(swordData, onSave, onCancel) {
 
 // AÑADE ESTA NUEVA FUNCIÓN en ui.js
 
+// Reemplaza tu función renderCaseEditor completa con esta versión en ui.js
+
 export function renderCaseEditor(caseData, allSwords, onSave, onCancel) {
-    // Usamos un modal para editar cajas
     const isCreating = !caseData;
     const caseItem = caseData || {};
+    let currentRewards = caseData?.rewards || []; // Estado local para las recompensas
 
-    // Creamos el overlay del modal
     const modalOverlay = document.createElement('div');
     modalOverlay.className = 'auth-modal-overlay visible';
     modalOverlay.style.display = 'flex';
+
+    // Función interna para renderizar la lista de recompensas
+    const renderRewardList = () => {
+        const container = document.getElementById('case-rewards-editor');
+        if (!container) return;
+        
+        if (currentRewards.length === 0) {
+            container.innerHTML = '<p>No rewards added to this case yet.</p>';
+            return;
+        }
+
+        container.innerHTML = currentRewards.map(reward => {
+            const sword = allSwords.find(s => s.id === reward.sword_id);
+            return `
+                <div class="admin-list-item">
+                    <span>${sword ? sword.name : 'Unknown Sword'}</span>
+                    <div class="item-actions">
+                        <input type="number" class="chance-input" data-sword-id="${reward.sword_id}" value="${reward.chance}" step="0.01" placeholder="Chance %">
+                        <button type="button" class="value-action-btn danger-btn remove-reward-btn" data-sword-id="${reward.sword_id}">Remove</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    };
     
+    // Función interna para renderizar los resultados de búsqueda de espadas
+    const renderSearchResults = (query) => {
+        const container = document.getElementById('reward-search-results');
+        if (!query) {
+            container.style.display = 'none';
+            return;
+        }
+        const existingRewardIds = new Set(currentRewards.map(r => r.sword_id));
+        const results = allSwords.filter(s => 
+            s.name.toLowerCase().includes(query) && !existingRewardIds.has(s.id)
+        ).slice(0, 5);
+
+        if (results.length > 0) {
+            container.innerHTML = results.map(sword => `
+                <div class="search-result-item" data-sword-id="${sword.id}">
+                    <span>${sword.name}</span>
+                    <button type="button" class="value-action-btn add-reward-btn" data-sword-id="${sword.id}">Add</button>
+                </div>
+            `).join('');
+            container.style.display = 'block';
+        } else {
+            container.style.display = 'none';
+        }
+    };
+
     modalOverlay.innerHTML = `
-        <div class="auth-modal" style="max-width: 800px;">
-            <button class="close-modal-btn">&times;</button>
-            <h2>${isCreating ? 'Create New Case' : 'Edit Case'}</h2>
-            <form id="case-editor-form" class="admin-form">
+        <div class="auth-modal" style="max-width: 800px; max-height: 90vh; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>${isCreating ? 'Create New Case' : 'Edit Case'}</h2>
+                <button class="close-modal-btn">&times;</button>
+            </div>
+            <form id="case-editor-form" class="admin-form" style="overflow-y: auto; flex-grow: 1; padding-right: 15px;">
                 <input type="hidden" name="id" value="${caseItem.id || ''}">
                 <div class="form-grid">
                     <input type="text" name="name" placeholder="Case Name" value="${caseItem.name || ''}" required>
@@ -466,30 +518,64 @@ export function renderCaseEditor(caseData, allSwords, onSave, onCancel) {
                     <input type="text" name="border_color" placeholder="Border Color (CSS value)" value="${caseItem.border_color || ''}">
                 </div>
                 
+                <hr style="border-color: var(--border-color); margin: 20px 0;">
+
                 <h3>Rewards in this Case</h3>
-                <div id="case-rewards-editor">
-                    <!-- Las recompensas se cargarán aquí -->
+                <div id="case-rewards-editor" class="admin-item-list"></div>
+                
+                <div class="reward-adder">
+                    <input type="text" id="reward-search-input" placeholder="Search a sword to add...">
+                    <div id="reward-search-results"></div>
                 </div>
-                <button type="submit" class="auth-button">${isCreating ? 'Create Case' : 'Save Changes'}</button>
             </form>
+            <div class="form-actions" style="margin-top: 20px;">
+                 <button type="submit" form="case-editor-form" class="auth-button" style="width: 100%;">💾 ${isCreating ? 'Create Case' : 'Save Changes'}</button>
+            </div>
         </div>
     `;
 
     document.body.appendChild(modalOverlay);
-    
-    // Lógica para cerrar el modal
+    renderRewardList(); // Renderizamos la lista inicial
+
+    // --- Lógica de Event Listeners del Modal ---
     const closeModal = () => document.body.removeChild(modalOverlay);
     modalOverlay.querySelector('.close-modal-btn').addEventListener('click', closeModal);
-    modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) closeModal();
+
+    const rewardsContainer = document.getElementById('case-rewards-editor');
+    rewardsContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-reward-btn')) {
+            const swordId = e.target.dataset.swordId;
+            currentRewards = currentRewards.filter(r => r.sword_id !== swordId);
+            renderRewardList();
+        }
+    });
+    rewardsContainer.addEventListener('input', (e) => {
+        if (e.target.classList.contains('chance-input')) {
+            const swordId = e.target.dataset.swordId;
+            const reward = currentRewards.find(r => r.sword_id === swordId);
+            if(reward) reward.chance = parseFloat(e.target.value) || 0;
+        }
     });
 
-    // Lógica para guardar
+    const searchInput = document.getElementById('reward-search-input');
+    searchInput.addEventListener('input', () => renderSearchResults(searchInput.value.toLowerCase()));
+    
+    const searchResultsContainer = document.getElementById('reward-search-results');
+    searchResultsContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('add-reward-btn')) {
+            const swordId = e.target.dataset.swordId;
+            currentRewards.push({ case_id: caseItem.id, sword_id: swordId, chance: 0 });
+            searchInput.value = '';
+            renderSearchResults('');
+            renderRewardList();
+        }
+    });
+
     modalOverlay.querySelector('#case-editor-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const updatedCaseData = Object.fromEntries(formData.entries());
-        onSave(updatedCaseData);
+        onSave(updatedCaseData, currentRewards); // ¡Ahora enviamos también las recompensas!
         closeModal();
     });
 }

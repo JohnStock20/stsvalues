@@ -64,7 +64,7 @@ function navigateToView(viewName) {
     } 
     else if (viewName === 'adminDataView') {
         // Esta vista se encarga de cargar y mostrar la lista de espadas
-        loadAndRenderAdminSwords();
+        loadAndRenderAdminData();
     }
 }
 
@@ -73,13 +73,9 @@ function navigateToView(viewName) {
 
 async function loadAndRenderAdminData() {
     try {
-        // Pedimos todos los datos en paralelo
-        const swordsPromise = fetchWithAuth('/.netlify/functions/manage-data', {
-            method: 'POST', body: JSON.stringify({ action: 'getAllSwords' })
-        });
-        const casesPromise = fetchWithAuth('/.netlify/functions/manage-data', {
-            method: 'POST', body: JSON.stringify({ action: 'getAllCases' })
-        });
+        const swordsPromise = fetchWithAuth('/.netlify/functions/manage-data', { method: 'POST', body: JSON.stringify({ action: 'getAllSwords' }) });
+        // ¡Llamamos a la nueva acción!
+        const casesPromise = fetchWithAuth('/.netlify/functions/manage-data', { method: 'POST', body: JSON.stringify({ action: 'getAllCasesWithRewards' }) });
 
         const [swordsResponse, casesResponse] = await Promise.all([swordsPromise, casesPromise]);
         if (!swordsResponse.ok || !casesResponse.ok) throw new Error('Could not fetch all admin data.');
@@ -102,7 +98,8 @@ async function loadAndRenderAdminData() {
         };
         const onEditCase = (caseId) => {
             const caseData = allAdminCases.find(c => c.id === caseId);
-            UI.renderCaseEditor(caseData, allAdminSwords, handleSaveCase, () => {});
+                       // Ahora pasamos todos los datos necesarios al editor
+            UI.renderCaseEditor(caseData, allAdminSwords, handleSaveCase);
         };
 
         // Renderizamos la vista completa con todos los datos y acciones
@@ -114,28 +111,26 @@ async function loadAndRenderAdminData() {
     }
 }
 
-// ¡NUEVA FUNCIÓN para guardar cajas!
-async function handleSaveCase(caseData) {
+async function handleSaveCase(caseData, rewards) { // ¡Ahora recibe las recompensas!
     try {
         const response = await fetchWithAuth('/.netlify/functions/manage-data', {
             method: 'POST',
             body: JSON.stringify({
                 action: 'createOrUpdateCase',
-                payload: { caseData }
+                payload: { caseData, rewards } // ¡Enviamos las recompensas al backend!
             })
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
         
         alert(result.message);
-        loadAndRenderAdminData(); // Recargamos la vista
+        loadAndRenderAdminData();
         
     } catch (error) {
         console.error('Failed to save case:', error);
         alert(`Error: ${error.message}`);
     }
 }
-
 // AÑADE ESTA FUNCIÓN en main.js
 async function loadInitialData() {
     try {
