@@ -9,6 +9,8 @@ const pool = new Pool({
     ssl: { rejectUnauthorized: false }
 });
 
+// --- FUNCIONES DE UTILIDAD DEL BACKEND ---
+
 // Función para parsear valores (necesaria para el precio de las cajas)
 function parseValue(value) {
     if (typeof value === 'number') return value;
@@ -34,15 +36,21 @@ function parseValue(value) {
 
 // Función para generar un ID amigable a partir del nombre
 const generateId = (name) => {
+    if (typeof name !== 'string' || !name) return `item-${Date.now()}`;
     return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 };
+
+
+// --- HANDLER PRINCIPAL DE LA FUNCIÓN ---
 
 exports.handler = async (event) => {
     if (event.httpMethod !== 'POST') {
         return { statusCode: 405, body: JSON.stringify({ message: 'Method Not Allowed' }) };
     }
 
+    const client = await pool.connect();
     try {
+        // 1. Seguridad: Verificamos el token y el rol de 'owner'
         const token = event.headers.authorization?.split(' ')[1];
         if (!token) return { statusCode: 401, body: JSON.stringify({ message: 'Not authorized' }) };
         
@@ -51,100 +59,107 @@ exports.handler = async (event) => {
             return { statusCode: 403, body: JSON.stringify({ message: 'Forbidden: You do not have permission.' }) };
         }
 
+        // 2. Procesamos la acción solicitada
         const { action, payload } = JSON.parse(event.body);
-        const client = await pool.connect();
 
-        try {
-            if (action === 'createOrUpdateSword') {
-                const { swordData } = payload;
-                const swordId = swordData.id || generateId(swordData.name);
-                const query = `
-                    INSERT INTO swords (id, name, image_path, rarity, value_text, stats_text, exist_text, demand, description, is_custom, updated_at)
-                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
-                    ON CONFLICT (id) DO UPDATE SET
-                        name = EXCLUDED.name, image_path = EXCLUDED.image_path, rarity = EXCLUDED.rarity,
-                        value_text = EXCLUDED.value_text, stats_text = EXCLUDED.stats_text, exist_text = EXCLUDED.exist_text,
-                        demand = EXCLUDED.demand, description = EXCLUDED.description, is_custom = EXCLUDED.is_custom, updated_at = NOW()
-                    RETURNING *;`;
-                const result = await client.query(query, [
-                    swordId, swordData.name, swordData.image_path, swordData.rarity, swordData.value_text,
-                    swordData.stats_text, swordData.exist_text, swordData.demand, swordData.description, swordData.is_custom
-                ]);
-                return { statusCode: 200, body: JSON.stringify({ message: `Sword '${result.rows[0].name}' saved successfully!`, sword: result.rows[0] }) };
-            } 
-            else if (action === 'getAllSwords') {
-                const result = await client.query('SELECT * FROM swords ORDER BY name ASC');
-                return { statusCode: 200, body: JSON.stringify({ swords: result.rows }) };
-            } 
-            else if (action === 'deleteSword') {
-                const { swordId } = payload;
-                if (!swordId) return { statusCode: 400, body: JSON.stringify({ message: 'Sword ID is required.' }) };
-                const swordResult = await client.query('SELECT * FROM swords WHERE id = $1', [swordId]);
-                if (swordResult.rowCount === 0) return { statusCode: 404, body: JSON.stringify({ message: 'Sword not found.' }) };
-                const swordToDelete = swordResult.rows[0];
-                await client.query('DELETE FROM swords WHERE id = $1', [swordId]);
-                if (process.env.DISCORD_WEBHOOK_URL) {
-                    const embed = {
-                        title: `Sword Deleted: ${swordToDelete.name}`, color: 15158332,
-                        fields: [
-                            { name: 'ID', value: `\`${swordToDelete.id}\``, inline: true }, { name: 'Rarity', value: swordToDelete.rarity, inline: true },
-                            { name: 'Value', value: `\`${swordToDelete.value_text}\``, inline: true }, { name: 'Stats', value: swordToDelete.stats_text, inline: true },
-                            { name: 'Exist', value: `\`${swordToDelete.exist_text}\``, inline: true }, { name: 'Demand', value: swordToDelete.demand, inline: true },
-                        ],
-                        footer: { text: `Deleted by: ${decoded.username}` }, timestamp: new Date().toISOString()
-                    };
-                    await axios.post(process.env.DISCORD_WEBHOOK_URL, { embeds: [embed] });
-                }
-                return { statusCode: 200, body: JSON.stringify({ message: `Sword '${swordToDelete.name}' has been deleted.` }) };
-            } 
-            else if (action === 'getAllCasesWithRewards') {
-                const casesResult = await client.query('SELECT * FROM cases ORDER BY name ASC');
-                const rewardsResult = await client.query('SELECT * FROM case_rewards');
-                const casesWithRewards = casesResult.rows.map(c => ({
-                    ...c,
-                    rewards: rewardsResult.rows.filter(r => r.case_id === c.id)
-                }));
-                return { statusCode: 200, body: JSON.stringify({ cases: casesWithRewards }) };
+        // --- ACCIÓN: CREAR O ACTUALIZAR UNA ESPADA ---
+        if (action === 'createOrUpdateSword') {
+            const { swordData } = payload;
+            const swordId = swordData.id || generateId(swordData.name);
+            const query = `
+                INSERT INTO swords (id, name, image_path, rarity, value_text, stats_text, exist_text, demand, description, is_custom, updated_at)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+                ON CONFLICT (id) DO UPDATE SET
+                    name = EXCLUDED.name, image_path = EXCLUDED.image_path, rarity = EXCLUDED.rarity,
+                    value_text = EXCLUDED.value_text, stats_text = EXCLUDED.stats_text, exist_text = EXCLUDED.exist_text,
+                    demand = EXCLUDED.demand, description = EXCLUDED.description, is_custom = EXCLUDED.is_custom, updated_at = NOW()
+                RETURNING *;`;
+            const result = await client.query(query, [
+                swordId, swordData.name, swordData.image_path, swordData.rarity, swordData.value_text,
+                swordData.stats_text, swordData.exist_text, swordData.demand, swordData.description, swordData.is_custom
+            ]);
+            return { statusCode: 200, body: JSON.stringify({ message: `Sword '${result.rows[0].name}' saved successfully!`, sword: result.rows[0] }) };
+        } 
+        
+        // --- ACCIÓN: OBTENER TODAS LAS ESPADAS ---
+        else if (action === 'getAllSwords') {
+            const result = await client.query('SELECT * FROM swords ORDER BY name ASC');
+            return { statusCode: 200, body: JSON.stringify({ swords: result.rows }) };
+        } 
+        
+        // --- ACCIÓN: BORRAR UNA ESPADA ---
+        else if (action === 'deleteSword') {
+            const { swordId } = payload;
+            if (!swordId) return { statusCode: 400, body: JSON.stringify({ message: 'Sword ID is required.' }) };
+            const swordResult = await client.query('SELECT * FROM swords WHERE id = $1', [swordId]);
+            if (swordResult.rowCount === 0) return { statusCode: 404, body: JSON.stringify({ message: 'Sword not found.' }) };
+            const swordToDelete = swordResult.rows[0];
+            await client.query('DELETE FROM swords WHERE id = $1', [swordId]);
+            if (process.env.DISCORD_WEBHOOK_URL) {
+                const embed = {
+                    title: `Sword Deleted: ${swordToDelete.name}`, color: 15158332,
+                    fields: [
+                        { name: 'ID', value: `\`${swordToDelete.id}\``, inline: true }, { name: 'Rarity', value: swordToDelete.rarity, inline: true },
+                        { name: 'Value', value: `\`${swordToDelete.value_text}\``, inline: true }, { name: 'Stats', value: swordToDelete.stats_text, inline: true },
+                        { name: 'Exist', value: `\`${swordToDelete.exist_text}\``, inline: true }, { name: 'Demand', value: swordToDelete.demand, inline: true },
+                    ],
+                    footer: { text: `Deleted by: ${decoded.username}` }, timestamp: new Date().toISOString()
+                };
+                await axios.post(process.env.DISCORD_WEBHOOK_URL, { embeds: [embed] });
             }
-            else if (action === 'createOrUpdateCase') {
-                const { caseData, rewards } = payload;
-                const caseId = caseData.id || generateId(caseData.name);
-                try {
-                    await client.query('BEGIN');
-                    const caseQuery = `
-                        INSERT INTO cases (id, name, image_path, price, currency, border_color, updated_at)
-                        VALUES ($1, $2, $3, $4, $5, $6, NOW())
-                        ON CONFLICT (id) DO UPDATE SET
-                            name = EXCLUDED.name, image_path = EXCLUDED.image_path, price = EXCLUDED.price,
-                            currency = EXCLUDED.currency, border_color = EXCLUDED.border_color, updated_at = NOW()
-                        RETURNING *;`;
-                    const savedCase = await client.query(caseQuery, [
-                        caseId, caseData.name, caseData.image_path, parseValue(String(caseData.price)),
-                        caseData.currency, caseData.border_color
-                    ]);
-                    if (rewards && Array.isArray(rewards)) {
-                        await client.query('DELETE FROM case_rewards WHERE case_id = $1', [caseId]);
-                        for (const reward of rewards) {
-                            if (reward.sword_id && reward.chance) {
-                                await client.query('INSERT INTO case_rewards (case_id, sword_id, chance) VALUES ($1, $2, $3)', [caseId, reward.sword_id, reward.chance]);
-                            }
+            return { statusCode: 200, body: JSON.stringify({ message: `Sword '${swordToDelete.name}' has been deleted.` }) };
+        } 
+        
+        // --- ACCIÓN: OBTENER CAJAS CON SUS RECOMPENSAS ---
+        else if (action === 'getAllCasesWithRewards') {
+            const casesResult = await client.query('SELECT * FROM cases ORDER BY name ASC');
+            const rewardsResult = await client.query('SELECT * FROM case_rewards');
+            const casesWithRewards = casesResult.rows.map(c => ({
+                ...c,
+                rewards: rewardsResult.rows.filter(r => r.case_id === c.id)
+            }));
+            return { statusCode: 200, body: JSON.stringify({ cases: casesWithRewards }) };
+        }
+        
+        // --- ACCIÓN: CREAR O ACTUALIZAR UNA CAJA Y SUS RECOMPENSAS ---
+        else if (action === 'createOrUpdateCase') {
+            const { caseData, rewards } = payload;
+            const caseId = caseData.id || generateId(caseData.name);
+            try {
+                await client.query('BEGIN');
+                const caseQuery = `
+                    INSERT INTO cases (id, name, image_path, price, currency, border_color, updated_at)
+                    VALUES ($1, $2, $3, $4, $5, $6, NOW())
+                    ON CONFLICT (id) DO UPDATE SET
+                        name = EXCLUDED.name, image_path = EXCLUDED.image_path, price = EXCLUDED.price,
+                        currency = EXCLUDED.currency, border_color = EXCLUDED.border_color, updated_at = NOW()
+                    RETURNING *;`;
+                const savedCase = await client.query(caseQuery, [
+                    caseId, caseData.name, caseData.image_path, parseValue(String(caseData.price)),
+                    caseData.currency, caseData.border_color
+                ]);
+                if (rewards && Array.isArray(rewards)) {
+                    await client.query('DELETE FROM case_rewards WHERE case_id = $1', [caseId]);
+                    for (const reward of rewards) {
+                        if (reward.sword_id && reward.chance) {
+                            await client.query('INSERT INTO case_rewards (case_id, sword_id, chance) VALUES ($1, $2, $3)', [caseId, reward.sword_id, reward.chance]);
                         }
                     }
-                    await client.query('COMMIT');
-                    return {
-                        statusCode: 200,
-                        body: JSON.stringify({ message: `Case '${savedCase.rows[0].name}' saved successfully!`, case: savedCase.rows[0] })
-                    };
-                } catch (e) {
-                    await client.query('ROLLBACK');
-                    throw e;
                 }
+                await client.query('COMMIT');
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify({ message: `Case '${savedCase.rows[0].name}' saved successfully!`, case: savedCase.rows[0] })
+                };
+            } catch (e) {
+                await client.query('ROLLBACK');
+                throw e;
             }
-            else {
-                return { statusCode: 400, body: JSON.stringify({ message: 'Invalid action specified.' }) };
-            }
-        } finally {
-            client.release();
+        }
+        
+        // --- SI NINGUNA ACCIÓN COINCIDE ---
+        else {
+            return { statusCode: 400, body: JSON.stringify({ message: 'Invalid action specified.' }) };
         }
     } catch (error) {
         console.error("Error in manage-data handler:", error);
@@ -152,5 +167,9 @@ exports.handler = async (event) => {
              return { statusCode: 401, body: JSON.stringify({ message: error.message }) };
         }
         return { statusCode: 500, body: JSON.stringify({ message: "An internal server error occurred." }) };
+    } finally {
+        if (client) {
+            client.release();
+        }
     }
 };
