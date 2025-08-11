@@ -82,6 +82,43 @@ exports.handler = async (event) => {
                     body: JSON.stringify({ swords: result.rows })
                 };
             }
+
+            // Dentro de exports.handler, añade este nuevo 'else if'
+else if (action === 'deleteSword') {
+    const { swordId } = payload;
+    if (!swordId) return { statusCode: 400, body: JSON.stringify({ message: 'Sword ID is required.' }) };
+
+    // Primero, obtenemos los datos de la espada para la notificación
+    const swordResult = await client.query('SELECT * FROM swords WHERE id = $1', [swordId]);
+    if (swordResult.rowCount === 0) {
+        return { statusCode: 404, body: JSON.stringify({ message: 'Sword not found.' }) };
+    }
+    const swordToDelete = swordResult.rows[0];
+
+    // Luego, la borramos
+    await client.query('DELETE FROM swords WHERE id = $1', [swordId]);
+
+    // Finalmente, enviamos la notificación a Discord
+    if (process.env.DISCORD_WEBHOOK_URL) {
+        const embed = {
+            title: `Sword Deleted: ${swordToDelete.name}`,
+            color: 15158332, // Rojo
+            fields: [
+                { name: 'ID', value: `\`${swordToDelete.id}\``, inline: true },
+                { name: 'Rarity', value: swordToDelete.rarity, inline: true },
+                { name: 'Value', value: `\`${swordToDelete.value_text}\``, inline: true },
+                { name: 'Stats', value: swordToDelete.stats_text, inline: true },
+                { name: 'Exist', value: `\`${swordToDelete.exist_text}\``, inline: true },
+                { name: 'Demand', value: swordToDelete.demand, inline: true },
+            ],
+            footer: { text: `Deleted by: ${decoded.username}` },
+            timestamp: new Date().toISOString()
+        };
+        await axios.post(process.env.DISCORD_WEBHOOK_URL, { embeds: [embed] });
+    }
+
+    return { statusCode: 200, body: JSON.stringify({ message: `Sword '${swordToDelete.name}' has been deleted.` }) };
+}
             
             // --- Aquí añadiremos más acciones en el futuro (createCase, etc.) ---
 

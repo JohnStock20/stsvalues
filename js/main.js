@@ -90,9 +90,35 @@ async function loadAndRenderAdminSwords() {
             UI.renderSwordEditor(swordData, handleSaveSword, () => navigateToView('adminDataView'));
             navigateToView('swordEditorView');
         };
-        const onDelete = (swordId) => {
-            alert(`Delete functionality for ${swordId} coming soon!`);
-        };
+// En main.js, dentro de loadAndRenderAdminSwords
+const onDelete = async (swordId) => {
+    const swordData = data.swords.find(s => s.id === swordId);
+    if (!swordData) return;
+
+    // Pedimos confirmación
+    if (!confirm(`Are you sure you want to delete the sword "${swordData.name}"? This cannot be undone.`)) {
+        return;
+    }
+
+    try {
+        const response = await fetchWithAuth('/.netlify/functions/manage-data', {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'deleteSword',
+                payload: { swordId }
+            })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message);
+        
+        alert(result.message);
+        loadAndRenderAdminSwords(); // Recargamos la lista
+
+    } catch (error) {
+        console.error('Failed to delete sword:', error);
+        alert(`Error: ${error.message}`);
+    }
+};
         const onBack = () => {
             navigateToView('devtools');
         };

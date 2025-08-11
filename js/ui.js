@@ -174,15 +174,20 @@ export function renderAdminDataView(swords, onAdd, onEdit, onDelete, onBack) {
 
     let swordsListHTML = '<p>No swords found in the database.</p>';
     if (swords && swords.length > 0) {
-        swordsListHTML = swords.map(sword => `
-            <div class="admin-list-item">
-                <span>${sword.name} <em class="rarity-text ${sword.rarity || ''}">(${sword.rarity || 'N/A'})</em></span>
-                <div class="item-actions">
-                    <button class="value-action-btn edit-btn" data-sword-id="${sword.id}">Edit</button>
-                    <button class="value-action-btn danger-btn delete-btn" data-sword-id="${sword.id}">Delete</button>
-                </div>
+swordsListHTML = swords.map(sword => `
+    <div class="reward-item ${sword.rarity || 'common'}">
+        <div class="reward-info">
+            <div class="reward-image-placeholder">
+                <img src="${sword.image_path || 'images/placeholder.png'}" alt="${sword.name}">
             </div>
-        `).join('');
+            <span class="reward-name">${sword.name}</span>
+        </div>
+        <div class="item-actions">
+            <button class="value-action-btn edit-btn" data-sword-id="${sword.id}">Edit</button>
+            <button class="value-action-btn danger-btn delete-btn" data-sword-id="${sword.id}">Delete</button>
+        </div>
+    </div>
+`).join('');
     }
 
     // Construimos el HTML completo de la vista
@@ -338,10 +343,11 @@ function createRewardItemHTML(reward, source) {
     const isCaseReward = source.type === 'case';
     const numericValue = parseValue(reward.value); // Usamos parseValue para obtener el número
     
-    const valueDisplayHTML = (typeof reward.value === 'string' && reward.value.toUpperCase().startsWith('O/C'))
-      ? `<span class="value-oc" title="Owner's Choice">O/C</span>`
-      : formatLargeNumber(numericValue);
-
+const valueDisplayHTML = (typeof reward.value === 'string' && reward.value.toUpperCase().startsWith('O/C'))
+  // Ahora el 'title' del span contiene el valor real de la espada
+  ? `<span class="value-oc" title="Estimated Value: ${reward.value}">O/C</span>`
+  : formatLargeNumber(numericValue);
+  
     return `
       <div class="reward-info">
         <div class="reward-image-placeholder"><img src="${reward.image}" alt="${reward.name}"></div>
@@ -476,7 +482,7 @@ export function renderSwordDetails(appData, sword, sourceInfo, navigateTo, onNew
     document.getElementById('sword-details-name').textContent = sword.name;
     const fullDescription = sword.description || (sourceInfo.id ? `This sword is obtainable from the [case:${sourceInfo.id}].` : 'No origin specified.');
     parseAndSetDescription(appData, document.getElementById('sword-details-description'), fullDescription, navigateTo);
-    document.getElementById('sword-details-value').textContent = formatLargeNumber(parseValue(sword.value));
+document.getElementById('sword-details-value').textContent = sword.value_text;
     document.getElementById('sword-details-stats').textContent = sword.stats;
     document.getElementById('sword-details-more').innerHTML = `
         ${sword.chance ? `Chance - ${sword.chance}%<br>` : ''}
