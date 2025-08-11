@@ -1,4 +1,4 @@
-// =================================================================================
+js// =================================================================================
 // ARCHIVO: ui.js (Controlador de la Interfaz de Usuario) - VERSIÓN 100% COMPLETA
 // =================================================================================
 
@@ -88,15 +88,19 @@ export function showView(viewName) {
 // --- Renderizado de la Página Principal ---
 
 
-function getCurrencyHTML(currencyKey, price) {
+// ¡CORRECCIÓN! Ahora acepta 'appData' como argumento.
+function getCurrencyHTML(appData, currencyKey, price) {
     if (currencyKey === 'cooldown') return `<span class="currency-text">Free (Every ${price} hr)</span>`;
+    
+    // ¡CORRECCIÓN! Usa el 'appData' que se le ha pasado, no uno global.
     const currency = appData.currencies[currencyKey];
+    
     if (currency.icon) return `<img src="${currency.icon}" alt="${currency.name}" class="currency-icon"> <span class="value">${price.toLocaleString()}</span>`;
     return `<span class="currency-text">${currency.name}</span> <span class="value">${price.toLocaleString()}</span>`;
 }
 
 
-export function renderCaseSelection(navigateTo) {
+export function renderCaseSelection(appData, navigateTo) {
     dom.containers.cases.innerHTML = '';
     Object.keys(appData.cases).forEach(caseId => {
         const data = appData.cases[caseId];
@@ -117,7 +121,7 @@ export function renderCaseSelection(navigateTo) {
 }
 
 
-export function renderOtherSwords(appState, navigateTo) {
+export function renderOtherSwords(app,appState, navigateTo) {
     const { currentPage, itemsPerPage } = appState;
     dom.containers.otherSwords.innerHTML = '';
     const start = (currentPage - 1) * itemsPerPage;
