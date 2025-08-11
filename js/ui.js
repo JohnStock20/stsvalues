@@ -749,6 +749,7 @@ export function renderSwordDetails(appData, sword, sourceInfo, navigateTo, onNew
     const swordInfoCard = document.getElementById('sword-info-card');
     swordInfoCard.className = 'sword-info-card';
     swordInfoCard.classList.add(sword.rarity);
+
     const demandIndicator = document.getElementById('sword-demand-indicator');
     if (sword.demand) {
         demandIndicator.className = 'sword-demand-indicator ' + sword.demand;
@@ -756,25 +757,34 @@ export function renderSwordDetails(appData, sword, sourceInfo, navigateTo, onNew
     } else {
         demandIndicator.style.display = 'none';
     }
-    document.getElementById('sword-details-image-container').innerHTML = `<img src="${sword.image}" alt="${sword.name}">`;
+
+    // Usamos 'image_path' y 'name'
+    document.getElementById('sword-details-image-container').innerHTML = `<img src="${sword.image_path || sword.image}" alt="${sword.name}">`;
     document.getElementById('sword-details-name').textContent = sword.name;
+    
     const fullDescription = sword.description || (sourceInfo.id ? `This sword is obtainable from the [case:${sourceInfo.id}].` : 'No origin specified.');
     parseAndSetDescription(appData, document.getElementById('sword-details-description'), fullDescription, navigateTo);
-document.getElementById('sword-details-value').textContent = sword.value_text;
-    document.getElementById('sword-details-stats').textContent = sword.stats;
+
+    // ¡CORRECCIÓN CLAVE! Usamos 'value_text' y 'stats_text'
+    document.getElementById('sword-details-value').textContent = sword.value_text;
+    document.getElementById('sword-details-stats').textContent = sword.stats_text;
+    
     document.getElementById('sword-details-more').innerHTML = `
         ${sword.chance ? `Chance - ${sword.chance}%<br>` : ''}
-        Exist - ${formatLargeNumber(sword.exist)}<br>
+        Exist - ${sword.exist_text}<br>
         Rarity - <span class="rarity-text ${sword.rarity}">${sword.rarity}</span>`;
+    
+    // Usamos 'updated_at' de la base de datos, o 'lastUpdated' si viene de otro sitio
+    const lastUpdated = sword.updated_at || sword.lastUpdated;
     const updatedEl = document.getElementById('sword-details-updated');
-    const updateSwordTime = () => updatedEl.textContent = formatTimeAgo(sword.lastUpdated);
+    const updateSwordTime = () => updatedEl.textContent = formatTimeAgo(lastUpdated);
+    
     updateSwordTime();
-    onNewInterval(setInterval(updateSwordTime, 60000));
+    if (onNewInterval) { // Comprobación de seguridad
+        onNewInterval(setInterval(updateSwordTime, 60000));
+    }
     showView('swordDetails');
 }
-
-
-
 
 // --- Renderizado de la Calculadora ---
 

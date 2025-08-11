@@ -36,7 +36,7 @@ export function runTheoreticalCalculation(quantity, caseData, appState) {
     let expectedValuePerCase = 0;
 
     caseData.rewards.forEach(reward => {
-        const numericValue = parseValue(reward.value);
+        const numericValue = parseValue(reward.value_text);
         const chance = reward.chance / 100;
         if (numericValue > 0 && !isNaN(chance)) {
             expectedValuePerCase += (numericValue * chance);
@@ -62,7 +62,7 @@ export function runRealisticSimulation(quantity, caseData, appState) {
         const random = Math.random() * totalChanceSum;
         const wonReward = rewardsWithCumulativeChance.find(r => random <= r.cumulative);
         if (wonReward) {
-            totalValueGained += parseValue(wonReward.value);
+            totalValueGained += parseValue(wonReward.value_text);
             wonItems[wonReward.id] = (wonItems[wonReward.id] || 0) + 1;
         }
     }
@@ -91,7 +91,7 @@ export function runUntilBestSimulation(caseData, appState) {
         const wonReward = rewardsWithCumulativeChance.find(r => random <= r.cumulative);
 
         if (wonReward) {
-            totalValueGained += parseValue(wonReward.value);
+            totalValueGained += parseValue(wonReward.value_text);
             if (wonReward.id === bestReward.id) {
                 hasFoundBest = true;
             }
