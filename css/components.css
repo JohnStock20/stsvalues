@@ -1070,6 +1070,55 @@ var(--border-color); cursor: not-allowed; }
     margin-bottom: 20px;
 }
 
+.color-picker-wrapper {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding-left: 15px;
+}
+.color-picker-wrapper input[type="text"] {
+    border: none;
+    flex-grow: 1;
+    padding-left: 0;
+}
+.color-picker-wrapper input[type="color"] {
+    width: 40px;
+    height: 30px;
+    border: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    border-radius: var(--border-radius-sm);
+}
+
+.chance-input {
+    width: 80px;
+    background-color: var(--dark-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px;
+    border-radius: var(--border-radius-sm);
+    text-align: right;
+}
+.reward-adder {
+    position: relative;
+}
+#reward-search-results {
+    position: absolute;
+    width: 100%;
+    background: var(--panel-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    z-index: 1002; /* Para que aparezca por encima del modal */
+    margin-top: 5px;
+}
+#reward-search-results .reward-item {
+    margin: 5px;
+    padding: 10px;
+    cursor: default;
+}
+
 /* --- RESPONSIVE ADAPTATIONS FOR COMPONENTS --- */
 @media (max-width: 900px) { /* Usamos un breakpoint más consistente */
 

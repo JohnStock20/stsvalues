@@ -194,14 +194,17 @@ export function renderAdminDataView(swords, cases, onAddSword, onEditSword, onDe
     // --- HTML para la lista de Cajas ---
     let casesListHTML = '<p>No cases found in the database.</p>';
     if (cases && cases.length > 0) {
-        casesListHTML = cases.map(caseItem => `
-            <div class="admin-list-item">
-                <span>${caseItem.name}</span>
-                <div class="item-actions">
-                    <button class="value-action-btn edit-case-btn" data-case-id="${caseItem.id}">Edit</button>
+        // Usamos flexbox para que las cajas se envuelvan como en la página principal
+        casesListHTML = `<div class="cases-container" style="justify-content: flex-start;">${cases.map(caseItem => `
+            <div class="case-link" style="position: relative;">
+                <div class="case-item" style="--case-border-color: ${caseItem.border_color || 'var(--main-green)'};">
+                    <img class="case-content-image" src="${caseItem.image_path || 'images/placeholder.png'}" alt="${caseItem.name}">
+                    <h3 class="case-title">${caseItem.name}</h3>
+                    <div class="case-price">${getCurrencyHTML(appData, caseItem.currency, caseItem.price)}</div>
                 </div>
+                <button class="auth-button edit-case-btn" data-case-id="${caseItem.id}" style="position: absolute; top: 10px; right: 25px;">Edit</button>
             </div>
-        `).join('');
+        `).join('')}</div>`;
     }
 
     // --- Construimos el HTML completo de la vista ---
@@ -453,21 +456,24 @@ export function renderCaseEditor(caseData, allSwords, onSave, onCancel) {
     modalOverlay.className = 'auth-modal-overlay visible';
     modalOverlay.style.display = 'flex';
 
-    // Función interna para renderizar la lista de recompensas
+    // --- Función interna para renderizar la lista de recompensas ---
     const renderRewardList = () => {
         const container = document.getElementById('case-rewards-editor');
         if (!container) return;
         
         if (currentRewards.length === 0) {
-            container.innerHTML = '<p>No rewards added to this case yet.</p>';
+            container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">No rewards added to this case yet.</p>';
             return;
         }
 
         container.innerHTML = currentRewards.map(reward => {
             const sword = allSwords.find(s => s.id === reward.sword_id);
             return `
-                <div class="admin-list-item">
-                    <span>${sword ? sword.name : 'Unknown Sword'}</span>
+                <div class="reward-item ${sword ? sword.rarity : 'common'}">
+                    <div class="reward-info">
+                        <div class="reward-image-placeholder"><img src="${sword ? sword.image_path : ''}" alt="${sword ? sword.name : ''}"></div>
+                        <span class="reward-name">${sword ? sword.name : 'Unknown Sword'}</span>
+                    </div>
                     <div class="item-actions">
                         <input type="number" class="chance-input" data-sword-id="${reward.sword_id}" value="${reward.chance}" step="0.01" placeholder="Chance %">
                         <button type="button" class="value-action-btn danger-btn remove-reward-btn" data-sword-id="${reward.sword_id}">Remove</button>
@@ -477,7 +483,7 @@ export function renderCaseEditor(caseData, allSwords, onSave, onCancel) {
         }).join('');
     };
     
-    // Función interna para renderizar los resultados de búsqueda de espadas
+    // --- Función interna para renderizar los resultados de búsqueda ---
     const renderSearchResults = (query) => {
         const container = document.getElementById('reward-search-results');
         if (!query) {
@@ -491,9 +497,14 @@ export function renderCaseEditor(caseData, allSwords, onSave, onCancel) {
 
         if (results.length > 0) {
             container.innerHTML = results.map(sword => `
-                <div class="search-result-item" data-sword-id="${sword.id}">
-                    <span>${sword.name}</span>
-                    <button type="button" class="value-action-btn add-reward-btn" data-sword-id="${sword.id}">Add</button>
+                 <div class="reward-item ${sword.rarity}">
+                    <div class="reward-info">
+                        <div class="reward-image-placeholder"><img src="${sword.image_path}" alt="${sword.name}"></div>
+                        <span class="reward-name">${sword.name}</span>
+                    </div>
+                    <div class="item-actions">
+                        <button type="button" class="value-action-btn add-reward-btn" data-sword-id="${sword.id}">Add</button>
+                    </div>
                 </div>
             `).join('');
             container.style.display = 'block';
@@ -515,7 +526,11 @@ export function renderCaseEditor(caseData, allSwords, onSave, onCancel) {
                     <input type="text" name="image_path" placeholder="Image Filename" value="${caseItem.image_path || ''}">
                     <input type="text" name="price" placeholder="Price (e.g., 10k)" value="${caseItem.price || ''}">
                     <input type="text" name="currency" placeholder="Currency (e.g., time)" value="${caseItem.currency || ''}">
-                    <input type="text" name="border_color" placeholder="Border Color (CSS value)" value="${caseItem.border_color || ''}">
+        <!-- ¡CAMBIO! Envolvemos el input de color y texto -->
+        <div class="color-picker-wrapper">
+            <input type="text" name="border_color" id="case-border-color-text" placeholder="Border Color (CSS value)" value="${caseItem.border_color || ''}">
+            <input type="color" id="case-border-color-picker" value="${caseItem.border_color || '#ffffff'}">
+        </div>
                 </div>
                 
                 <hr style="border-color: var(--border-color); margin: 20px 0;">
@@ -540,6 +555,12 @@ export function renderCaseEditor(caseData, allSwords, onSave, onCancel) {
     // --- Lógica de Event Listeners del Modal ---
     const closeModal = () => document.body.removeChild(modalOverlay);
     modalOverlay.querySelector('.close-modal-btn').addEventListener('click', closeModal);
+
+       // ¡NUEVO! Sincronizamos el selector de color y el texto
+    const colorText = document.getElementById('case-border-color-text');
+    const colorPicker = document.getElementById('case-border-color-picker');
+    colorText.addEventListener('input', (e) => colorPicker.value = e.target.value);
+    colorPicker.addEventListener('input', (e) => colorText.value = e.target.value);
 
     const rewardsContainer = document.getElementById('case-rewards-editor');
     rewardsContainer.addEventListener('click', (e) => {
