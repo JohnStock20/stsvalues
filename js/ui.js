@@ -1,4 +1,4 @@
-js// =================================================================================
+// =================================================================================
 // ARCHIVO: ui.js (Controlador de la Interfaz de Usuario) - VERSIÓN 100% COMPLETA
 // =================================================================================
 
@@ -121,7 +121,7 @@ export function renderCaseSelection(appData, navigateTo) {
 }
 
 
-export function renderOtherSwords(app,appState, navigateTo) {
+export function renderOtherSwords(appData, appState, navigateTo) {
     const { currentPage, itemsPerPage } = appState;
     dom.containers.otherSwords.innerHTML = '';
     const start = (currentPage - 1) * itemsPerPage;
