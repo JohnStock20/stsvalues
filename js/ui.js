@@ -310,7 +310,7 @@ export function renderCaseDetails(caseId, navigateTo) {
 }
 
 
-function parseAndSetDescription(element, text, navigateTo) {
+function parseAndSetDescription(appData, element, text, navigateTo) {
     element.innerHTML = '';
     if (!text) { element.textContent = 'No description available.'; return; }
     const fragment = document.createDocumentFragment();
@@ -408,7 +408,7 @@ export function clearCalculator(appState) {
   }
 }
 
-export function renderResultsTable(data, appState) {
+export function renderResultsTable(appData, data, appState) {
     dom.containers.resultsTable.innerHTML = '';
     const quantity = data.quantityOverride || parseInt(dom.inputs.caseQuantity.value, 10) || 1;
     const resultClass = data.result >= 0 ? 'profit' : 'loss';
@@ -681,7 +681,7 @@ function renderActiveGiveaway(giveaway, currentUser, onJoin) {
 }
 
 
-function renderUpcomingGiveaways(giveaways) {
+function renderUpcomingGiveaways(appData, giveaways) {
     const container = dom.containers.upcomingGiveaways;
     container.innerHTML = '';
     if (giveaways.length === 0) return;
@@ -731,7 +731,7 @@ function renderParticipants(participants) {
 }
 
 // MODIFICADO: renderRecentWinners ahora usa la nueva tarjeta
-function renderRecentWinners(winners) {
+function renderRecentWinners(appData, winners) {
   const list = dom.containers.winnersList;
   if (!winners || winners.length === 0) {
     list.innerHTML = '<p>No recent winners.</p>';
