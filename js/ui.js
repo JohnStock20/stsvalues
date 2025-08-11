@@ -16,6 +16,8 @@ export const dom = {
         giveaways: document.getElementById('giveaways-view'),
         notifications: document.getElementById('notifications-view'),
         devtools: document.getElementById('devtools-view'),
+        adminDataView: document.getElementById('admin-data-view'),
+        swordEditorView: document.getElementById('sword-editor-view'),
     },
     containers: {
         cases: document.querySelector('#cases-view .cases-container'),
@@ -165,6 +167,37 @@ export function renderOtherSwords(appData, appState, navigateTo) {
     updatePaginationControls(appData, appState);
 }
 
+// AÑADE ESTA NUEVA FUNCIÓN en ui.js
+export function renderAdminSwordsList(swords, onEdit, onDelete) {
+    const container = document.getElementById('swords-management-list');
+    if (!swords || swords.length === 0) {
+        container.innerHTML = '<p>No swords found in the database.</p>';
+        return;
+    }
+
+    container.innerHTML = swords.map(sword => `
+        <div class="admin-list-item">
+            <span>${sword.name} <em class="rarity-text ${sword.rarity}">(${sword.rarity})</em></span>
+            <div class="item-actions">
+                <button class="value-action-btn" data-sword-id="${sword.id}">Edit</button>
+                <button class="value-action-btn danger-btn" data-sword-id="${sword.id}">Delete</button>
+            </div>
+        </div>
+    `).join('');
+
+    // Añadimos los event listeners a los botones creados
+    container.querySelectorAll('.value-action-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            const swordId = button.dataset.swordId;
+            if (button.textContent === 'Edit') {
+                onEdit(swordId);
+            } else {
+                onDelete(swordId);
+            }
+        });
+    });
+}
+
 // En ui.js, añade esta nueva función
 export function renderNotificationsPage(notifications, timeFormatter) {
     const container = document.getElementById('notifications-list-container');
@@ -204,6 +237,75 @@ export function renderNotificationsPage(notifications, timeFormatter) {
             </div>
         `;
     }).join('');
+}
+
+// AÑADE ESTA NUEVA FUNCIÓN en ui.js
+
+export function renderSwordEditor(swordData, onSave, onCancel) {
+    const container = dom.views.swordEditorView;
+    const isCreating = !swordData; // Si no hay datos, estamos creando
+    const sword = swordData || {}; // Usamos un objeto vacío si es nuevo
+
+    const rarities = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic', 'godly', 'insane', 'subzero', 'staff', 'limited', 'exclusive', 'event', 'easter', 'unobtainable', 'hell', 'evil'];
+    const demands = ['insane', 'high', 'medium', 'low', 'N/A'];
+
+    container.innerHTML = `
+        <button id="cancel-sword-edit-btn" class="back-btn">← Cancel</button>
+        <h2 class="section-title">~ ${isCreating ? 'Create New Sword' : 'Edit Sword'} ~</h2>
+        
+        <form id="sword-editor-form" class="admin-form">
+            <input type="hidden" name="id" value="${sword.id || ''}">
+            
+            <label for="name">Name</label>
+            <input type="text" name="name" placeholder="e.g., Excalibur" value="${sword.name || ''}" required>
+            
+            <label for="image_path">Image Filename</label>
+            <input type="text" name="image_path" placeholder="e.g., excalibur.png" value="${sword.image_path || ''}">
+            
+            <label for="rarity">Rarity</label>
+            <select name="rarity" required>
+                ${rarities.map(r => `<option value="${r}" ${sword.rarity === r ? 'selected' : ''}>${r.charAt(0).toUpperCase() + r.slice(1)}</option>`).join('')}
+            </select>
+            
+            <label for="value_text">Value</label>
+            <input type="text" name="value_text" placeholder="e.g., 75K or 80T-100T" value="${sword.value_text || ''}">
+            
+            <label for="stats_text">Stats</label>
+            <input type="text" name="stats_text" placeholder="e.g., x6.5" value="${sword.stats_text || ''}">
+            
+            <label for="exist_text">Exist</label>
+            <input type="text" name="exist_text" placeholder="e.g., 500 or N/A" value="${sword.exist_text || ''}">
+
+            <label for="demand">Demand</label>
+            <select name="demand">
+                 ${demands.map(d => `<option value="${d}" ${sword.demand === d ? 'selected' : ''}>${d}</option>`).join('')}
+            </select>
+            
+            <label for="description">Description</label>
+            <textarea name="description" placeholder="Use [case:case_id] or [sword:sword_id] for links.">${sword.description || ''}</textarea>
+            
+            <div class="form-checkbox">
+                <input type="checkbox" id="is_custom" name="is_custom" ${sword.is_custom ? 'checked' : ''}>
+                <label for="is_custom">Is this a custom sword? (Belongs to "Other Swords")</label>
+            </div>
+
+            <button type="submit" class="auth-button">${isCreating ? 'Create Sword' : 'Save Changes'}</button>
+        </form>
+    `;
+
+    // Añadimos los event listeners para los botones y el formulario
+    document.getElementById('cancel-sword-edit-btn').addEventListener('click', onCancel);
+
+    document.getElementById('sword-editor-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const swordData = Object.fromEntries(formData.entries());
+        
+        // Convertimos el checkbox a booleano
+        swordData.is_custom = e.target.elements.is_custom.checked;
+
+        onSave(swordData);
+    });
 }
 
 export function updatePaginationControls(appData, appState) {
@@ -829,6 +931,11 @@ export function renderAdminTools(onAdminAction) {
             unbanDate: form.unbanDate.value ? new Date(form.unbanDate.value).toISOString() : null
         };
         onAdminAction(action, form.targetUsername.value, payload, 'ban-user-feedback');
+    });
+
+        // ¡NUEVO! Event listener para el nuevo botón
+    document.getElementById('manage-data-btn').addEventListener('click', () => {
+        navigateTo('adminDataView'); // Navegamos a una nueva vista que crearemos
     });
 }
 

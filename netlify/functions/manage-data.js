@@ -1,0 +1,102 @@
+const { Pool } = require('pg');
+const jwt = require('jsonwebtoken');
+
+const pool = new Pool({
+    connectionString: process.env.NEON_DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+});
+
+// Función para generar un ID amigable a partir del nombre (ej: "Neon Red Dilemma" -> "neon-red-dilemma")
+const generateId = (name) => {
+    return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+};
+
+exports.handler = async (event) => {
+    // 1. Verificamos que sea un método POST
+    if (event.httpMethod !== 'POST') {
+        return { statusCode: 405, body: JSON.stringify({ message: 'Method Not Allowed' }) };
+    }
+
+    try {
+        // 2. Seguridad: Verificamos el token y el rol de 'owner'
+        const token = event.headers.authorization?.split(' ')[1];
+        if (!token) return { statusCode: 401, body: JSON.stringify({ message: 'Not authorized' }) };
+        
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded.role !== 'owner') {
+            return { statusCode: 403, body: JSON.stringify({ message: 'Forbidden: You do not have permission.' }) };
+        }
+
+        // 3. Procesamos la acción
+        const { action, payload } = JSON.parse(event.body);
+        const client = await pool.connect();
+
+        try {
+            if (action === 'createOrUpdateSword') {
+                const { swordData } = payload;
+                // Si la espada no tiene ID, es nueva y lo generamos.
+                const swordId = swordData.id || generateId(swordData.name);
+
+                // Usamos una consulta "UPSERT": si el ID ya existe, actualiza. Si no, inserta.
+                const query = `
+                    INSERT INTO swords (id, name, image_path, rarity, value_text, stats_text, exist_text, demand, description, is_custom, updated_at)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+                    ON CONFLICT (id) DO UPDATE SET
+                        name = EXCLUDED.name,
+                        image_path = EXCLUDED.image_path,
+                        rarity = EXCLUDED.rarity,
+                        value_text = EXCLUDED.value_text,
+                        stats_text = EXCLUDED.stats_text,
+                        exist_text = EXCLUDED.exist_text,
+                        demand = EXCLUDED.demand,
+                        description = EXCLUDED.description,
+                        is_custom = EXCLUDED.is_custom,
+                        updated_at = NOW()
+                    RETURNING *;
+                `;
+                
+                const result = await client.query(query, [
+                    swordId,
+                    swordData.name,
+                    swordData.image_path,
+                    swordData.rarity,
+                    swordData.value_text,
+                    swordData.stats_text,
+                    swordData.exist_text,
+                    swordData.demand,
+                    swordData.description,
+                    swordData.is_custom
+                ]);
+
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify({ message: `Sword '${result.rows[0].name}' saved successfully!`, sword: result.rows[0] })
+                };
+            }
+
+                        // --- ¡AÑADE ESTE BLOQUE NUEVO! ---
+            else if (action === 'getAllSwords') {
+                const result = await client.query('SELECT * FROM swords ORDER BY name ASC');
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify({ swords: result.rows })
+                };
+            }
+            
+            // --- Aquí añadiremos más acciones en el futuro (createCase, etc.) ---
+
+            return { statusCode: 400, body: JSON.stringify({ message: 'Invalid action' }) };
+
+        } finally {
+            client.release();
+        }
+
+    } catch (error) {
+        console.error("Error in manage-data handler:", error);
+        // Devolvemos el mensaje de error real si es un error de token, para que el frontend pueda reaccionar
+        if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+             return { statusCode: 401, body: JSON.stringify({ message: error.message }) };
+        }
+        return { statusCode: 500, body: JSON.stringify({ message: error.message }) };
+    }
+};

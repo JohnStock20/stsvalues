@@ -972,6 +972,16 @@ var(--border-color); cursor: not-allowed; }
     border: 2px solid var(--panel-bg); /* Borde para que destaque */
 }
 
+.form-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+}
+.form-checkbox input {
+    width: auto;
+}
+
 /* --- RESPONSIVE ADAPTATIONS FOR COMPONENTS --- */
 @media (max-width: 900px) { /* Usamos un breakpoint más consistente */
 

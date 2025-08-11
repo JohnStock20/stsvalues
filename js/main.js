@@ -47,12 +47,44 @@ function navigateToView(viewName) {
         UI.renderGiveawayPage(appDataCache.giveaways, appDataCache.recentWinners, currentUser, handleJoinGiveaway, openCreateGiveawayModal);
     } else if (viewName === 'notifications') {
         markNotificationsAsRead();
+    } else if (viewName === 'adminDataView') { // <-- ¡AÑADE ESTE ELSE IF!
+        loadAndRenderAdminSwords();
     } else if (viewName === 'devtools') {
         if (currentUser && currentUser.role === 'owner') {
-            UI.renderAdminTools(handleAdminAction);
+            UI.renderAdminTools(handleAdminAction, navigateToView);
         } else {
             document.getElementById('devtools-view').innerHTML = `<h2 class="section-title">ACCESS DENIED</h2><p>You do not have permission to view this page.</p>`;
         }
+    }
+}
+
+// AÑADE ESTA NUEVA FUNCIÓN en main.js
+async function loadAndRenderAdminSwords() {
+    try {
+        const response = await fetchWithAuth('/.netlify/functions/manage-data', {
+            method: 'POST',
+            body: JSON.stringify({ action: 'getAllSwords' })
+        });
+        if (!response.ok) throw new Error('Could not fetch swords list.');
+        
+        const data = await response.json();
+        
+        const onEdit = (swordId) => {
+            const swordData = data.swords.find(s => s.id === swordId);
+            UI.renderSwordEditor(swordData, handleSaveSword, () => navigateToView('adminDataView'));
+            navigateToView('swordEditorView');
+        };
+
+        const onDelete = (swordId) => {
+            // Lógica de borrado (la haremos en el siguiente paso)
+            alert(`Delete functionality for ${swordId} coming soon!`);
+        };
+
+        UI.renderAdminSwordsList(data.swords, onEdit, onDelete);
+        
+    } catch (error) {
+        console.error(error);
+        alert('Error loading swords list.');
     }
 }
 
@@ -355,6 +387,35 @@ async function handleGrantTitle(targetUsername, titleKey) {
         feedbackEl.style.display = 'block';
         btn.disabled = false;
         btn.textContent = 'Grant Title';
+    }
+}
+
+// AÑADE ESTA NUEVA FUNCIÓN en main.js
+
+async function handleSaveSword(swordData) {
+    try {
+        const response = await fetchWithAuth('/.netlify/functions/manage-data', {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'createOrUpdateSword',
+                payload: { swordData }
+            })
+        });
+
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.message);
+
+        alert(result.message); // Mostramos el mensaje de éxito del backend
+        
+        // Refrescamos los datos del juego para que se reflejen los cambios
+        await loadInitialData(); 
+        
+        // Volvemos a la lista de gestión
+        navigateToView('adminDataView');
+
+    } catch (error) {
+        console.error('Failed to save sword:', error);
+        alert(`Error: ${error.message}`);
     }
 }
 
@@ -873,6 +934,15 @@ async function initializeApp() {
             }
         }
     });
+
+//Dentro de initializeApp()
+document.getElementById('back-to-devtools-btn').addEventListener('click', () => navigateToView('devtools'));
+
+document.getElementById('add-new-sword-btn').addEventListener('click', () => {
+    // Llamamos al editor sin datos para crear una nueva espada
+    UI.renderSwordEditor(null, handleSaveSword, () => navigateToView('adminDataView'));
+    navigateToView('swordEditorView');
+});
 
     console.log("STS Values App Initialized!");
 }
