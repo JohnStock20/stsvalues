@@ -71,10 +71,12 @@ function navigateToView(viewName) {
 // Renombra 'loadAndRenderAdminSwords' a 'loadAndRenderAdminData'
 // y reemplaza su contenido
 
+// Reemplaza esta función completa en main.js
+
 async function loadAndRenderAdminData() {
     try {
+        // Pedimos todos los datos en paralelo
         const swordsPromise = fetchWithAuth('/.netlify/functions/manage-data', { method: 'POST', body: JSON.stringify({ action: 'getAllSwords' }) });
-        // ¡Llamamos a la nueva acción!
         const casesPromise = fetchWithAuth('/.netlify/functions/manage-data', { method: 'POST', body: JSON.stringify({ action: 'getAllCasesWithRewards' }) });
 
         const [swordsResponse, casesResponse] = await Promise.all([swordsPromise, casesPromise]);
@@ -86,23 +88,57 @@ async function loadAndRenderAdminData() {
         const allAdminSwords = swordsData.swords;
         const allAdminCases = casesData.cases;
 
-        // --- Definimos las acciones ---
-        const onAddSword = () => { /* ... */ };
-        const onEditSword = (swordId) => { /* ... */ };
-        const onDeleteSword = async (swordId) => { /* ... */ };
+        // --- ¡AQUÍ ESTÁ LA LÓGICA CORREGIDA Y COMPLETA! ---
+
+        const onAddSword = () => {
+            // Llama al editor sin datos para crear una nueva espada
+            UI.renderSwordEditor(null, handleSaveSword, () => navigateToView('adminDataView'));
+            navigateToView('swordEditorView');
+        };
+
+        const onEditSword = (swordId) => {
+            const swordData = allAdminSwords.find(s => s.id === swordId);
+            // Llama al editor con los datos de la espada seleccionada
+            UI.renderSwordEditor(swordData, handleSaveSword, () => navigateToView('adminDataView'));
+            navigateToView('swordEditorView');
+        };
+        
+        const onDeleteSword = async (swordId) => {
+            const swordData = allAdminSwords.find(s => s.id === swordId);
+            if (!swordData) return;
+
+            if (!confirm(`Are you sure you want to delete "${swordData.name}"? This cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetchWithAuth('/.netlify/functions/manage-data', {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'deleteSword', payload: { swordId } })
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message);
+                
+                alert(result.message);
+                loadAndRenderAdminData(); // Recargamos toda la vista para reflejar el borrado
+            } catch (error) {
+                console.error('Failed to delete sword:', error);
+                alert(`Error: ${error.message}`);
+            }
+        };
+
         const onBack = () => navigateToView('devtools');
 
-        // ¡NUEVAS ACCIONES PARA CAJAS!
         const onAddCase = () => {
-            UI.renderCaseEditor(null, allAdminSwords, handleSaveCase, () => {});
+            UI.renderCaseEditor(null, allAdminSwords, handleSaveCase);
         };
+
         const onEditCase = (caseId) => {
             const caseData = allAdminCases.find(c => c.id === caseId);
-                       // Ahora pasamos todos los datos necesarios al editor
             UI.renderCaseEditor(caseData, allAdminSwords, handleSaveCase);
         };
 
-        // Renderizamos la vista completa con todos los datos y acciones
+        // Renderizamos la vista completa con todas las funciones de control ya definidas
         UI.renderAdminDataView(appData, allAdminSwords, allAdminCases, onAddSword, onEditSword, onDeleteSword, onBack, onAddCase, onEditCase);
         
     } catch (error) {
