@@ -111,15 +111,27 @@ async function loadAndRenderAdminData() {
     }
 }
 
-async function handleSaveCase(caseData, rewards) { // ¡Ahora recibe las recompensas!
+async function handleSaveCase(caseData, rewards) {
     try {
+        // --- ¡ESTA ES LA CORRECCIÓN CLAVE! ---
+        // Creamos una copia de los datos para no modificar el original
+        const processedCaseData = { ...caseData };
+        
+        // Convertimos el precio de texto (ej: "10k") a un número (ej: 10000)
+        // ANTES de enviarlo al backend.
+        processedCaseData.price = parseValue(String(caseData.price));
+
+        // --- Fin de la corrección ---
+
         const response = await fetchWithAuth('/.netlify/functions/manage-data', {
             method: 'POST',
             body: JSON.stringify({
                 action: 'createOrUpdateCase',
-                payload: { caseData, rewards } // ¡Enviamos las recompensas al backend!
+                // Enviamos los datos ya procesados
+                payload: { caseData: processedCaseData, rewards } 
             })
         });
+
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
         
