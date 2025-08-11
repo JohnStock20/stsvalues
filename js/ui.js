@@ -162,7 +162,7 @@ export function renderOtherSwords(appData, appState, navigateTo) {
         const item = createRewardItem(reward, { type: 'other' }, navigateTo);
         dom.containers.otherSwords.appendChild(item);
     });
-    updatePaginationControls(appState);
+    updatePaginationControls(appData, appState);
 }
 
 // En ui.js, añade esta nueva función
@@ -206,7 +206,7 @@ export function renderNotificationsPage(notifications, timeFormatter) {
     }).join('');
 }
 
-export function updatePaginationControls(appState) {
+export function updatePaginationControls(appData, appState) {
     const totalPages = Math.ceil(appData.otherSwords.length / appState.itemsPerPage);
     dom.buttons.prevPage.disabled = appState.currentPage === 1;
     dom.buttons.nextPage.disabled = appState.currentPage === totalPages;
