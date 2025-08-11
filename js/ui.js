@@ -88,46 +88,66 @@ export function showView(viewName) {
 // --- Renderizado de la Página Principal ---
 
 
-// ¡CORRECCIÓN! Ahora acepta 'appData' como argumento.
+// ¡VERSIÓN CORREGIDA Y FINAL!
+// Acepta appData, currencyKey y price en el orden correcto.
 function getCurrencyHTML(appData, currencyKey, price) {
-    // Primero, manejamos el caso especial
     if (currencyKey === 'cooldown') {
         return `<span class="currency-text">Free (Every ${price} hr)</span>`;
     }
     
-    // Luego, buscamos la divisa en nuestro objeto de datos
+    // Comprobación de seguridad
+    if (!appData || !appData.currencies) {
+        console.error("appData.currencies is not available in getCurrencyHTML");
+        return `<span>${price}</span>`;
+    }
+    
     const currency = appData.currencies[currencyKey];
     
-    // ¡AÑADIMOS UNA COMPROBACIÓN DE SEGURIDAD!
-    // Si por alguna razón la divisa no existe, devolvemos algo para no romper la app.
     if (!currency) {
         console.error(`Currency with key "${currencyKey}" not found.`);
-        return `<span>${price}</span>`; // Solo mostramos el precio
+        return `<span>${price}</span>`;
     }
-
     
-    if (currency.icon) return `<img src="${currency.icon}" alt="${currency.name}" class="currency-icon"> <span class="value">${price.toLocaleString()}</span>`;
+    if (currency.icon) {
+        return `<img src="${currency.icon}" alt="${currency.name}" class="currency-icon"> <span class="value">${price.toLocaleString()}</span>`;
+    }
+    
     return `<span class="currency-text">${currency.name}</span> <span class="value">${price.toLocaleString()}</span>`;
 }
 
 
+
+// ¡VERSIÓN CORREGIDA Y FINAL!
+// Asegura que los parámetros se pasen en el orden correcto a getCurrencyHTML.
 export function renderCaseSelection(appData, navigateTo) {
-    dom.containers.cases.innerHTML = '';
+    const container = dom.containers.cases;
+    if (!container) return; // Comprobación de seguridad
+    container.innerHTML = '';
+
+    if (!appData || !appData.cases) {
+        console.error("appData.cases is not available in renderCaseSelection");
+        return;
+    }
+
     Object.keys(appData.cases).forEach(caseId => {
         const data = appData.cases[caseId];
         const link = document.createElement('a');
         link.href = '#';
         link.className = 'case-link';
         link.onclick = (e) => { e.preventDefault(); navigateTo('caseDetails', caseId); };
+        
         const caseItem = document.createElement('div');
         caseItem.className = 'case-item';
         caseItem.style.setProperty('--case-border-color', data.borderColor || 'var(--main-green)');
+        
+        // La llamada aquí es la parte crucial.
         caseItem.innerHTML = `
             <img class="case-content-image" src="${data.image}" alt="${data.name}">
             <h3 class="case-title">${data.name}</h3>
-            <div class="case-price">${getCurrencyHTML(data.currency, data.price)}</div>`;
+            <div class="case-price">${getCurrencyHTML(appData, data.currency, data.price)}</div>`;
+            
         link.appendChild(caseItem);
-        dom.containers.cases.appendChild(link);
+        container.appendChild(link);
     });
 }
 
