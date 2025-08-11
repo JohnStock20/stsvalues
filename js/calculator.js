@@ -123,7 +123,7 @@ export function runGraphSimulation(step, max, caseData) {
         const random = Math.random() * totalChanceSum;
         const wonReward = rewardsWithCumulativeChance.find(r => random <= r.cumulative);
         if (wonReward) {
-            totalValueGained += parseValue(wonReward.value);
+            totalValueGained += parseValue(wonReward.value_text);
         }
         if (i % step === 0 || i === max) {
             const totalCost = calculateTotalCost(caseData.currency, caseData.price, i);

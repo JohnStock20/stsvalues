@@ -619,12 +619,13 @@ export function updatePaginationControls(appData, appState) {
 // 1. REEMPLAZA tu función createRewardItemHTML con esta
 function createRewardItemHTML(reward, source) {
     const isCaseReward = source.type === 'case';
-    const numericValue = parseValue(reward.value); // Usamos parseValue para obtener el número
+    // Usamos 'value_text' para el parseo, ya que es el que viene de la DB
+    const numericValue = parseValue(reward.value_text); 
     
-const valueDisplayHTML = (typeof reward.value === 'string' && reward.value.toUpperCase().startsWith('O/C'))
-  // Ahora el 'title' del span contiene el valor real de la espada
-  ? `<span class="value-oc" title="Estimated Value: ${reward.value}">O/C</span>`
-  : formatLargeNumber(numericValue);
+    // El tooltip debe mostrar el texto original
+    const valueDisplayHTML = (typeof reward.value_text === 'string' && reward.value_text.toUpperCase().startsWith('O/C'))
+      ? `<span class="value-oc" title="Estimated Value: ${reward.value_text}">O/C</span>`
+      : formatLargeNumber(numericValue);
 
     return `
       <div class="reward-info">
@@ -633,15 +634,13 @@ const valueDisplayHTML = (typeof reward.value === 'string' && reward.value.toUpp
       </div>
       <div class="reward-stats">
         ${isCaseReward ? `<span>${reward.chance}%</span>` : '<span class="no-chance">--</span>'}
-        
         <div class="reward-value">
           <span class="value-display">${valueDisplayHTML}</span>
           <div class="value-input-wrapper">
               <input type="text" class="value-input" data-sword-id="${reward.id}" value="${numericValue}">
           </div>
         </div>
-        
-        <span>${reward.stats}</span>
+        <span>${reward.stats_text}</span>
       </div>`;
 }
 
@@ -758,14 +757,13 @@ export function renderSwordDetails(appData, sword, sourceInfo, navigateTo, onNew
         demandIndicator.style.display = 'none';
     }
 
-    // Usamos 'image_path' y 'name'
-    document.getElementById('sword-details-image-container').innerHTML = `<img src="${sword.image_path || sword.image}" alt="${sword.name}">`;
+    document.getElementById('sword-details-image-container').innerHTML = `<img src="${sword.image}" alt="${sword.name}">`;
     document.getElementById('sword-details-name').textContent = sword.name;
     
     const fullDescription = sword.description || (sourceInfo.id ? `This sword is obtainable from the [case:${sourceInfo.id}].` : 'No origin specified.');
     parseAndSetDescription(appData, document.getElementById('sword-details-description'), fullDescription, navigateTo);
 
-    // ¡CORRECCIÓN CLAVE! Usamos 'value_text' y 'stats_text'
+    // ¡AQUÍ ESTÁ LA CORRECCIÓN FINAL!
     document.getElementById('sword-details-value').textContent = sword.value_text;
     document.getElementById('sword-details-stats').textContent = sword.stats_text;
     
@@ -774,13 +772,12 @@ export function renderSwordDetails(appData, sword, sourceInfo, navigateTo, onNew
         Exist - ${sword.exist_text}<br>
         Rarity - <span class="rarity-text ${sword.rarity}">${sword.rarity}</span>`;
     
-    // Usamos 'updated_at' de la base de datos, o 'lastUpdated' si viene de otro sitio
-    const lastUpdated = sword.updated_at || sword.lastUpdated;
+    const lastUpdated = sword.lastUpdated || sword.updated_at;
     const updatedEl = document.getElementById('sword-details-updated');
     const updateSwordTime = () => updatedEl.textContent = formatTimeAgo(lastUpdated);
     
     updateSwordTime();
-    if (onNewInterval) { // Comprobación de seguridad
+    if (onNewInterval) {
         onNewInterval(setInterval(updateSwordTime, 60000));
     }
     showView('swordDetails');

@@ -57,14 +57,15 @@ exports.handler = async (event) => {
                 appData.cases[rewardRow.case_id].rewards.push({
                     id: swordData.id,
                     name: swordData.name,
-                    image: swordData.image_path,
-                    rarity: swordData.rarity, // ¡CORRECCIÓN! Era 'rararidad', ahora es 'rarity'
-                    value: swordData.value_text,
-                    stats: swordData.stats_text,
-                    exist: swordData.exist_text,
+                    image: swordData.image_path, // Mantendremos 'image' por simplicidad en el frontend
+                    rarity: swordData.rarity,
+                    value_text: swordData.value_text, // <-- CORREGIDO
+                    stats_text: swordData.stats_text, // <-- CORREGIDO
+                    exist_text: swordData.exist_text, // <-- CORREGIDO
                     demand: swordData.demand,
                     description: swordData.description,
-                    chance: parseFloat(rewardRow.chance)
+                    chance: parseFloat(rewardRow.chance),
+                    updated_at: swordData.updated_at // <-- AÑADIDO
                 });
             }
         }
@@ -74,14 +75,14 @@ exports.handler = async (event) => {
                 appData.otherSwords.push({
                     id: swordRow.id,
                     name: swordRow.name,
-                    image: swordRow.image_path, // Corregido: debía ser swordRow
+                    image: swordRow.image_path, // Mantendremos 'image'
                     rarity: swordRow.rarity,
-                    value: swordRow.value_text,
-                    stats: swordRow.stats_text,
-                    exist: swordRow.exist_text,
+                    value_text: swordRow.value_text, // <-- CORREGIDO
+                    stats_text: swordRow.stats_text, // <-- CORREGIDO
+                    exist_text: swordRow.exist_text, // <-- CORREGIDO
                     demand: swordRow.demand,
                     description: swordRow.description,
-                    lastUpdated: swordRow.updated_at
+                    lastUpdated: swordRow.updated_at // <-- CORREGIDO (usamos lastUpdated para consistencia)
                 });
             }
         }
