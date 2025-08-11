@@ -279,10 +279,10 @@ export function renderSwordEditor(swordData, onSave, onCancel) {
     const demands = ['insane', 'high', 'medium', 'low', 'N/A'];
 
     container.innerHTML = `
-        <div class="form-actions" style="justify-content: space-between; margin-bottom: 20px;">
-            <button id="cancel-sword-edit-btn" class="back-btn">← Cancel</button>
-            <button id="save-sword-changes-btn" class="auth-button">💾 ${isCreating ? 'Create Sword' : 'Save Changes'}</button>
-        </div>
+<div class="editor-actions">
+    <button id="cancel-sword-edit-btn" class="back-btn">← Cancel</button>
+    <button id="save-sword-changes-btn" class="auth-button">💾 ${isCreating ? 'Create Sword' : 'Save Changes'}</button>
+</div>
 
         <div class="sword-details-content">
             <!-- Columna Izquierda: Tarjeta de Información Editable -->

@@ -1038,6 +1038,7 @@ var(--border-color); cursor: not-allowed; }
     flex-direction: column;
     gap: 15px;
     font-size: 1em;
+    color: var(--text-secondary); /* Le damos un color base al texto 'Chance', 'Exist', etc. */
 }
 .editable-more span {
     display: flex;
@@ -1048,6 +1049,25 @@ var(--border-color); cursor: not-allowed; }
     width: 60%;
     text-align: right;
     padding: 4px 8px;
+    /* ¡AÑADIMOS ESTO! Le damos un fondo sólido para que no sea transparente */
+    background-color: var(--dark-bg); 
+    border: 1px dashed var(--border-color);
+    color: var(--text-primary);
+    border-radius: var(--border-radius-sm);
+}
+
+/* Para que las opciones del select se vean bien */
+.editable-more select option {
+    background-color: var(--dark-bg);
+    color: var(--text-primary);
+}
+
+/* -- Contenedor para los botones de acción del editor -- */
+.editor-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
 /* --- RESPONSIVE ADAPTATIONS FOR COMPONENTS --- */
