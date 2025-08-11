@@ -1,5 +1,6 @@
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
 
 const pool = new Pool({
     connectionString: process.env.NEON_DATABASE_URL,
