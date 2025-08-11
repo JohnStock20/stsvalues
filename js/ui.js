@@ -169,47 +169,46 @@ export function renderOtherSwords(appData, appState, navigateTo) {
 
 // Reemplaza esta función completa en ui.js
 
-export function renderAdminDataView(allSwords, onAdd, onEdit, onDelete, onBack) {
+// Reemplaza tu función renderAdminDataView completa en ui.js
+
+export function renderAdminDataView(swords, cases, onAddSword, onEditSword, onDeleteSword, onBack, onAddCase, onEditCase) {
     const container = dom.views.adminDataView;
 
-    // Función interna para renderizar solo la lista de espadas
-    const renderList = (swordsToRender) => {
-        const listContainer = document.getElementById('swords-management-list');
-        if (!listContainer) return;
-
-        if (!swordsToRender || swordsToRender.length === 0) {
-            listContainer.innerHTML = '<p>No swords match your search or none exist.</p>';
-            return;
-        }
-
-        listContainer.innerHTML = swordsToRender.map(sword => `
+    // --- HTML para la lista de Espadas ---
+    let swordsListHTML = '<p>No swords found in the database.</p>';
+    if (swords && swords.length > 0) {
+        swordsListHTML = swords.map(sword => `
             <div class="reward-item ${sword.rarity || 'common'}">
                 <div class="reward-info">
-                    <div class="reward-image-placeholder">
-                        <img src="${sword.image_path || 'images/placeholder.png'}" alt="${sword.name}">
-                    </div>
+                    <div class="reward-image-placeholder"><img src="${sword.image_path || 'images/placeholder.png'}" alt="${sword.name}"></div>
                     <span class="reward-name">${sword.name}</span>
                 </div>
                 <div class="item-actions">
-                    <button class="value-action-btn edit-btn" data-sword-id="${sword.id}">Edit</button>
-                    <button class="value-action-btn danger-btn delete-btn" data-sword-id="${sword.id}">Delete</button>
+                    <button class="value-action-btn edit-sword-btn" data-sword-id="${sword.id}">Edit</button>
+                    <button class="value-action-btn danger-btn delete-sword-btn" data-sword-id="${sword.id}">Delete</button>
                 </div>
             </div>
         `).join('');
+    }
 
-        // Añadimos los listeners a los botones que acabamos de crear en la lista
-        listContainer.querySelectorAll('.edit-btn').forEach(button => {
-            button.addEventListener('click', () => onEdit(button.dataset.swordId));
-        });
-        listContainer.querySelectorAll('.delete-btn').forEach(button => {
-            button.addEventListener('click', () => onDelete(button.dataset.swordId));
-        });
-    };
+    // --- HTML para la lista de Cajas ---
+    let casesListHTML = '<p>No cases found in the database.</p>';
+    if (cases && cases.length > 0) {
+        casesListHTML = cases.map(caseItem => `
+            <div class="admin-list-item">
+                <span>${caseItem.name}</span>
+                <div class="item-actions">
+                    <button class="value-action-btn edit-case-btn" data-case-id="${caseItem.id}">Edit</button>
+                </div>
+            </div>
+        `).join('');
+    }
 
-    // Construimos el HTML estático de la vista (el "marco")
+    // --- Construimos el HTML completo de la vista ---
     container.innerHTML = `
         <button id="back-to-devtools-btn" class="back-btn">← Back to Admin Tools</button>
         <h2 class="section-title">~Manage Game Data~</h2>
+
         <div class="admin-section">
             <h3>Swords</h3>
             <div class="admin-controls">
@@ -217,26 +216,108 @@ export function renderAdminDataView(allSwords, onAdd, onEdit, onDelete, onBack) 
                 <button id="add-new-sword-btn" class="auth-button">Add New Sword</button>
             </div>
             <div id="swords-management-list" class="admin-item-list">
-                <!-- La lista se renderizará aquí -->
+                ${swordsListHTML}
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h3>Cases</h3>
+            <button id="add-new-case-btn" class="auth-button">Add New Case</button>
+            <div id="cases-management-list" class="admin-item-list">
+                ${casesListHTML}
             </div>
         </div>
     `;
 
-    // --- Vinculamos los listeners a los elementos del "marco" ---
-    document.getElementById('back-to-devtools-btn').addEventListener('click', onBack);
-    document.getElementById('add-new-sword-btn').addEventListener('click', onAdd);
+    // --- Añadimos TODOS los Event Listeners ---
     
+    // Botones Generales
+    document.getElementById('back-to-devtools-btn').addEventListener('click', onBack);
+    
+    // Sección de Espadas
+    document.getElementById('add-new-sword-btn').addEventListener('click', onAddSword);
     const searchInput = document.getElementById('admin-sword-search');
     searchInput.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase();
-        const filteredSwords = allSwords.filter(sword => 
-            sword.name.toLowerCase().includes(query)
-        );
-        renderList(filteredSwords); // Volvemos a renderizar SOLO la lista con los resultados
+        const filteredSwords = swords.filter(sword => sword.name.toLowerCase().includes(query));
+        
+        // Para la búsqueda, necesitamos volver a renderizar la lista y re-atachar los listeners
+        // Es más simple filtrar y volver a llamar a la función que renderiza la lista.
+        renderAdminSwordsList(filteredSwords, onEditSword, onDeleteSword);
+    });
+    
+    container.querySelectorAll('.edit-sword-btn').forEach(button => {
+        button.addEventListener('click', () => onEditSword(button.dataset.swordId));
+    });
+    container.querySelectorAll('.delete-sword-btn').forEach(button => {
+        button.addEventListener('click', () => onDeleteSword(button.dataset.swordId));
     });
 
-    // Renderizamos la lista inicial con todas las espadas
-    renderList(allSwords);
+    // Sección de Cajas
+    document.getElementById('add-new-case-btn').addEventListener('click', onAddCase);
+    container.querySelectorAll('.edit-case-btn').forEach(button => {
+        button.addEventListener('click', () => onEditCase(button.dataset.caseId));
+    });
+}
+
+
+// ¡NUEVA FUNCIÓN AUXILIAR!
+// Creamos una función separada para renderizar la lista de espadas,
+// así podemos llamarla desde la búsqueda sin redibujar toda la página.
+export function renderAdminSwordsList(swords, onEdit, onDelete) {
+    const listContainer = document.getElementById('swords-management-list');
+    if (!listContainer) return;
+
+    if (!swords || swords.length === 0) {
+        listContainer.innerHTML = '<p>No swords match your search.</p>';
+        return;
+    }
+
+    listContainer.innerHTML = swords.map(sword => `
+        <div class="reward-item ${sword.rarity || 'common'}">
+            <div class="reward-info">
+                 <div class="reward-image-placeholder"><img src="${sword.image_path || 'images/placeholder.png'}" alt="${sword.name}"></div>
+                 <span class="reward-name">${sword.name}</span>
+            </div>
+            <div class="item-actions">
+                <button class="value-action-btn edit-sword-btn" data-sword-id="${sword.id}">Edit</button>
+                <button class="value-action-btn danger-btn delete-sword-btn" data-sword-id="${sword.id}">Delete</button>
+            </div>
+        </div>
+    `).join('');
+
+    // Re-atachamos los listeners a los nuevos botones
+    listContainer.querySelectorAll('.edit-sword-btn').forEach(button => {
+        button.addEventListener('click', () => onEdit(button.dataset.swordId));
+    });
+    listContainer.querySelectorAll('.delete-sword-btn').forEach(button => {
+        button.addEventListener('click', () => onDelete(button.dataset.swordId));
+    });
+}
+
+// AÑADE ESTA NUEVA FUNCIÓN en ui.js
+
+export function renderAdminCasesList(cases, onEdit) {
+    const container = document.getElementById('cases-management-list');
+    if (!container) return;
+
+    if (!cases || cases.length === 0) {
+        container.innerHTML = '<p>No cases found in the database.</p>';
+        return;
+    }
+
+    container.innerHTML = cases.map(caseItem => `
+        <div class="admin-list-item">
+            <span>${caseItem.name}</span>
+            <div class="item-actions">
+                <button class="value-action-btn edit-case-btn" data-case-id="${caseItem.id}">Edit</button>
+            </div>
+        </div>
+    `).join('');
+
+    container.querySelectorAll('.edit-case-btn').forEach(button => {
+        button.addEventListener('click', () => onEdit(button.dataset.caseId));
+    });
 }
 
 // En ui.js, añade esta nueva función
@@ -357,6 +438,60 @@ export function renderSwordEditor(swordData, onSave, onCancel) {
     });
 
     document.getElementById('cancel-sword-edit-btn').addEventListener('click', onCancel);
+}
+
+// AÑADE ESTA NUEVA FUNCIÓN en ui.js
+
+export function renderCaseEditor(caseData, allSwords, onSave, onCancel) {
+    // Usamos un modal para editar cajas
+    const isCreating = !caseData;
+    const caseItem = caseData || {};
+
+    // Creamos el overlay del modal
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'auth-modal-overlay visible';
+    modalOverlay.style.display = 'flex';
+    
+    modalOverlay.innerHTML = `
+        <div class="auth-modal" style="max-width: 800px;">
+            <button class="close-modal-btn">&times;</button>
+            <h2>${isCreating ? 'Create New Case' : 'Edit Case'}</h2>
+            <form id="case-editor-form" class="admin-form">
+                <input type="hidden" name="id" value="${caseItem.id || ''}">
+                <div class="form-grid">
+                    <input type="text" name="name" placeholder="Case Name" value="${caseItem.name || ''}" required>
+                    <input type="text" name="image_path" placeholder="Image Filename" value="${caseItem.image_path || ''}">
+                    <input type="text" name="price" placeholder="Price (e.g., 10k)" value="${caseItem.price || ''}">
+                    <input type="text" name="currency" placeholder="Currency (e.g., time)" value="${caseItem.currency || ''}">
+                    <input type="text" name="border_color" placeholder="Border Color (CSS value)" value="${caseItem.border_color || ''}">
+                </div>
+                
+                <h3>Rewards in this Case</h3>
+                <div id="case-rewards-editor">
+                    <!-- Las recompensas se cargarán aquí -->
+                </div>
+                <button type="submit" class="auth-button">${isCreating ? 'Create Case' : 'Save Changes'}</button>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(modalOverlay);
+    
+    // Lógica para cerrar el modal
+    const closeModal = () => document.body.removeChild(modalOverlay);
+    modalOverlay.querySelector('.close-modal-btn').addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) closeModal();
+    });
+
+    // Lógica para guardar
+    modalOverlay.querySelector('#case-editor-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const updatedCaseData = Object.fromEntries(formData.entries());
+        onSave(updatedCaseData);
+        closeModal();
+    });
 }
 
 export function updatePaginationControls(appData, appState) {

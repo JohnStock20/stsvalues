@@ -84,6 +84,49 @@ exports.handler = async (event) => {
                 };
             }
 
+                        // --- ¡AÑADE ESTE BLOQUE NUEVO PARA OBTENER LAS CAJAS! ---
+            else if (action === 'getAllCases') {
+                const result = await client.query('SELECT * FROM cases ORDER BY name ASC');
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify({ cases: result.rows })
+                };
+            }
+
+            // --- ¡AÑADE ESTE BLOQUE NUEVO PARA GUARDAR CAJAS! ---
+            else if (action === 'createOrUpdateCase') {
+                const { caseData } = payload;
+                const caseId = caseData.id || generateId(caseData.name); // generateId es la función que ya teníamos
+
+                // Usamos "UPSERT" también para las cajas
+                const query = `
+                    INSERT INTO cases (id, name, image_path, price, currency, border_color, updated_at)
+                    VALUES ($1, $2, $3, $4, $5, $6, NOW())
+                    ON CONFLICT (id) DO UPDATE SET
+                        name = EXCLUDED.name,
+                        image_path = EXCLUDED.image_path,
+                        price = EXCLUDED.price,
+                        currency = EXCLUDED.currency,
+                        border_color = EXCLUDED.border_color,
+                        updated_at = NOW()
+                    RETURNING *;
+                `;
+
+                const result = await client.query(query, [
+                    caseId,
+                    caseData.name,
+                    caseData.image_path,
+                    parseValue(String(caseData.price)), // Usamos parseValue para manejar "10k", etc.
+                    caseData.currency,
+                    caseData.border_color
+                ]);
+
+                return {
+                    statusCode: 200,
+                    body: JSON.stringify({ message: `Case '${result.rows[0].name}' saved successfully!`, case: result.rows[0] })
+                };
+            }
+
             // Dentro de exports.handler, añade este nuevo 'else if'
 else if (action === 'deleteSword') {
     const { swordId } = payload;
