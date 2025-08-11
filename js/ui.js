@@ -884,6 +884,13 @@ export function closeGiveawayModal() {
 export function renderAdminTools(onAdminAction, onManageDataClick) {
     const container = dom.containers.adminTools;
     container.innerHTML = `
+    <!-- ¡ESTE BLOQUE FALTABA! LO AÑADIMOS DE NUEVO -->
+    <div class="admin-tool-card">
+        <h3>Admin Panel</h3>
+        <p>Manage game data, users, and more.</p>
+        <button id="manage-data-btn" class="auth-button">Manage Game Data</button>
+    </div>
+    
     <div class="admin-tool-card">
         <h3>Grant Title to User</h3>
         <form id="grant-title-form" class="admin-form">
@@ -923,10 +930,10 @@ export function renderAdminTools(onAdminAction, onManageDataClick) {
     </div>
     `;
 
-    // Asignamos la función recibida al evento click
+    // Ahora esta línea encontrará el botón que acabamos de añadir
     document.getElementById('manage-data-btn').addEventListener('click', onManageDataClick);
 
-    // --- Event Listeners para los formularios ---
+    // El resto de los event listeners ya estaban bien
     document.getElementById('grant-title-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const form = e.target;
