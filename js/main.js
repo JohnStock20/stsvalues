@@ -68,7 +68,8 @@ function navigateToView(viewName) {
     }
 }
 
-// AÑADE ESTA NUEVA FUNCIÓN en main.js
+// Reemplaza tu función loadAndRenderAdminSwords en main.js
+
 async function loadAndRenderAdminSwords() {
     try {
         const response = await fetchWithAuth('/.netlify/functions/manage-data', {
@@ -79,18 +80,25 @@ async function loadAndRenderAdminSwords() {
         
         const data = await response.json();
         
+        // Definimos todas las acciones que la interfaz necesita
+        const onAdd = () => {
+            UI.renderSwordEditor(null, handleSaveSword, () => navigateToView('adminDataView'));
+            navigateToView('swordEditorView');
+        };
         const onEdit = (swordId) => {
             const swordData = data.swords.find(s => s.id === swordId);
             UI.renderSwordEditor(swordData, handleSaveSword, () => navigateToView('adminDataView'));
             navigateToView('swordEditorView');
         };
-
         const onDelete = (swordId) => {
-            // Lógica de borrado (la haremos en el siguiente paso)
             alert(`Delete functionality for ${swordId} coming soon!`);
         };
+        const onBack = () => {
+            navigateToView('devtools');
+        };
 
-        UI.renderAdminSwordsList(data.swords, onEdit, onDelete);
+        // Llamamos a la nueva función de renderizado con todos los datos y acciones
+        UI.renderAdminDataView(data.swords, onAdd, onEdit, onDelete, onBack);
         
     } catch (error) {
         console.error(error);
@@ -944,15 +952,6 @@ async function initializeApp() {
             }
         }
     });
-
-//Dentro de initializeApp()
-document.getElementById('back-to-devtools-btn').addEventListener('click', () => navigateToView('devtools'));
-
-document.getElementById('add-new-sword-btn').addEventListener('click', () => {
-    // Llamamos al editor sin datos para crear una nueva espada
-    UI.renderSwordEditor(null, handleSaveSword, () => navigateToView('adminDataView'));
-    navigateToView('swordEditorView');
-});
 
     console.log("STS Values App Initialized!");
 }

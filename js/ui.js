@@ -167,26 +167,42 @@ export function renderOtherSwords(appData, appState, navigateTo) {
     updatePaginationControls(appData, appState);
 }
 
-export function renderAdminSwordsList(swords, onEdit, onDelete) {
-    const container = document.getElementById('swords-management-list');
-    if (!container) return; // Comprobación de seguridad
+// Reemplaza renderAdminSwordsList por esta nueva función en ui.js
 
-    if (!swords || swords.length === 0) {
-        container.innerHTML = '<p>No swords found in the database.</p>';
-        return;
+export function renderAdminDataView(swords, onAdd, onEdit, onDelete, onBack) {
+    const container = dom.views.adminDataView; // Usamos el contenedor de la vista principal
+
+    let swordsListHTML = '<p>No swords found in the database.</p>';
+    if (swords && swords.length > 0) {
+        swordsListHTML = swords.map(sword => `
+            <div class="admin-list-item">
+                <span>${sword.name} <em class="rarity-text ${sword.rarity || ''}">(${sword.rarity || 'N/A'})</em></span>
+                <div class="item-actions">
+                    <button class="value-action-btn edit-btn" data-sword-id="${sword.id}">Edit</button>
+                    <button class="value-action-btn danger-btn delete-btn" data-sword-id="${sword.id}">Delete</button>
+                </div>
+            </div>
+        `).join('');
     }
 
-    container.innerHTML = swords.map(sword => `
-        <div class="admin-list-item">
-            <span>${sword.name} <em class="rarity-text ${sword.rarity || ''}">(${sword.rarity || 'N/A'})</em></span>
-            <div class="item-actions">
-                <button class="value-action-btn edit-btn" data-sword-id="${sword.id}">Edit</button>
-                <button class="value-action-btn danger-btn delete-btn" data-sword-id="${sword.id}">Delete</button>
+    // Construimos el HTML completo de la vista
+    container.innerHTML = `
+        <button id="back-to-devtools-btn" class="back-btn">← Back to Admin Tools</button>
+        <h2 class="section-title">~Manage Game Data~</h2>
+        <div class="admin-section">
+            <h3>Swords</h3>
+            <button id="add-new-sword-btn" class="auth-button">Add New Sword</button>
+            <div id="swords-management-list" class="admin-item-list">
+                ${swordsListHTML}
             </div>
         </div>
-    `).join('');
+    `;
 
-    // Añadimos los event listeners a los botones creados
+    // --- AHORA AÑADIMOS TODOS LOS LISTENERS ---
+    // Sabemos que los botones existen porque los acabamos de crear.
+    document.getElementById('back-to-devtools-btn').addEventListener('click', onBack);
+    document.getElementById('add-new-sword-btn').addEventListener('click', onAdd);
+    
     container.querySelectorAll('.edit-btn').forEach(button => {
         button.addEventListener('click', () => onEdit(button.dataset.swordId));
     });
