@@ -3,7 +3,7 @@
 // =================================================================================
 
 // --- MÓDULOS ---
-import { findSwordById, getPrizeItemHtml, getUnitValue, convertTimeValueToCurrency, formatLargeNumber, formatTimeAgo, parseValue} from './utils.js';
+import { findSwordById, getPrizeItemHtml, getUnitValue, convertTimeValueToCurrency, formatLargeNumber, formatTimeAgo, parseValue } from './utils.js';
 import * as UI from './ui.js';
 import { initializeAuth, titleStyles } from './auth.js';
 import * as Calculator from './calculator.js';
