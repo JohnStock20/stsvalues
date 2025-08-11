@@ -90,10 +90,21 @@ export function showView(viewName) {
 
 // ¡CORRECCIÓN! Ahora acepta 'appData' como argumento.
 function getCurrencyHTML(appData, currencyKey, price) {
-    if (currencyKey === 'cooldown') return `<span class="currency-text">Free (Every ${price} hr)</span>`;
+    // Primero, manejamos el caso especial
+    if (currencyKey === 'cooldown') {
+        return `<span class="currency-text">Free (Every ${price} hr)</span>`;
+    }
     
-    // ¡CORRECCIÓN! Usa el 'appData' que se le ha pasado, no uno global.
+    // Luego, buscamos la divisa en nuestro objeto de datos
     const currency = appData.currencies[currencyKey];
+    
+    // ¡AÑADIMOS UNA COMPROBACIÓN DE SEGURIDAD!
+    // Si por alguna razón la divisa no existe, devolvemos algo para no romper la app.
+    if (!currency) {
+        console.error(`Currency with key "${currencyKey}" not found.`);
+        return `<span>${price}</span>`; // Solo mostramos el precio
+    }
+
     
     if (currency.icon) return `<img src="${currency.icon}" alt="${currency.name}" class="currency-icon"> <span class="value">${price.toLocaleString()}</span>`;
     return `<span class="currency-text">${currency.name}</span> <span class="value">${price.toLocaleString()}</span>`;
