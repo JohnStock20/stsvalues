@@ -513,6 +513,9 @@ export function renderCaseEditor(caseData, allSwords, onSave, onCancel) {
         }
     };
 
+    // Función para verificar si un string es un color hexadecimal válido de 6 dígitos
+    const isValidHexColor = (str) => /^#[0-9A-F]{6}$/i.test(str);
+
     modalOverlay.innerHTML = `
         <div class="auth-modal" style="max-width: 800px; max-height: 90vh; display: flex; flex-direction: column;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -526,11 +529,12 @@ export function renderCaseEditor(caseData, allSwords, onSave, onCancel) {
                     <input type="text" name="image_path" placeholder="Image Filename" value="${caseItem.image_path || ''}">
                     <input type="text" name="price" placeholder="Price (e.g., 10k)" value="${caseItem.price || ''}">
                     <input type="text" name="currency" placeholder="Currency (e.g., time)" value="${caseItem.currency || ''}">
-        <!-- ¡CAMBIO! Envolvemos el input de color y texto -->
-        <div class="color-picker-wrapper">
-            <input type="text" name="border_color" id="case-border-color-text" placeholder="Border Color (CSS value)" value="${caseItem.border_color || ''}">
-            <input type="color" id="case-border-color-picker" value="${caseItem.border_color || '#ffffff'}">
-        </div>
+    <div class="color-picker-wrapper">
+        <input type="text" name="border_color" id="case-border-color-text" placeholder="Border Color (CSS value)" value="${caseItem.border_color || ''}">
+        
+        <!-- ¡CAMBIO! Usamos la función para poner un valor por defecto si no es válido -->
+        <input type="color" id="case-border-color-picker" value="${isValidHexColor(caseItem.border_color) ? caseItem.border_color : '#000000'}">
+    </div>
                 </div>
                 
                 <hr style="border-color: var(--border-color); margin: 20px 0;">
