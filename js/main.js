@@ -68,6 +68,8 @@ function navigateToView(viewName) {
         loadAndRenderAdminData();
     }
     else if (viewName === 'updateLog') {
+        // --- AÑADE ESTA LÍNEA ---
+    console.log('ENTRANDO en el bloque de updateLog. Llamando a loadAndRenderUpdateLog...');
     loadAndRenderUpdateLog();
 }
 }
@@ -176,6 +178,8 @@ async function loadAndRenderAdminData() {
 
 // Añade esta nueva función a main.js
 async function loadAndRenderUpdateLog() {
+        // --- AÑADE ESTA LÍNEA ---
+    console.log('EJECUTANDO loadAndRenderUpdateLog...');
     try {
         // No necesita autenticación, es fetch normal
         const response = await fetch('/.netlify/functions/get-update-log');
