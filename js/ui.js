@@ -15,6 +15,7 @@ export const dom = {
         titles: document.getElementById('titles-view'),
         giveaways: document.getElementById('giveaways-view'),
         notifications: document.getElementById('notifications-view'),
+        // --- ¡LA LÍNEA CRÍTICA ESTÁ AQUÍ, DENTRO DE 'views'! ---
         updateLogView: document.getElementById('update-log-view'),
         devtools: document.getElementById('devtools-view'),
         adminDataView: document.getElementById('admin-data-view'),
