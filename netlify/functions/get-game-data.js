@@ -21,7 +21,7 @@ exports.handler = async (event) => {
 
     const client = await pool.connect();
     try {
-        const casesPromise = client.query('SELECT * FROM cases');
+        const casesPromise = client.query('SELECT * FROM cases ORDER BY sort_order ASC');
         const swordsPromise = client.query('SELECT * FROM swords');
         const rewardsPromise = client.query('SELECT * FROM case_rewards');
 

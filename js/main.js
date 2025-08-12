@@ -138,8 +138,31 @@ async function loadAndRenderAdminData() {
             UI.renderCaseEditor(caseData, allAdminSwords, handleSaveCase);
         };
 
+                // ¡NUEVA FUNCIÓN para guardar el orden de las cajas!
+        const onSaveCaseOrder = async () => {
+            const inputs = Array.from(document.querySelectorAll('.case-order-input'));
+            const orderedCaseIds = inputs
+                .sort((a, b) => a.value - b.value) // Ordenamos los elementos por el valor de su input
+                .map(input => input.dataset.caseId); // Extraemos los IDs en el nuevo orden
+
+            try {
+                const response = await fetchWithAuth('/.netlify/functions/manage-data', {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'updateCasesOrder', payload: { orderedCaseIds } })
+                });
+                const result = await response.json();
+                if (!response.ok) throw new Error(result.message);
+                
+                alert(result.message);
+                loadAndRenderAdminData(); // Recargamos para ver el nuevo orden
+            } catch (error) {
+                console.error('Failed to save case order:', error);
+                alert(`Error: ${error.message}`);
+            }
+        };
+
         // Renderizamos la vista completa con todas las funciones de control ya definidas
-        UI.renderAdminDataView(appData, allAdminSwords, allAdminCases, onAddSword, onEditSword, onDeleteSword, onBack, onAddCase, onEditCase);
+        UI.renderAdminDataView(appData, allAdminSwords, allAdminCases, onAddSword, onEditSword, onDeleteSword, onBack, onAddCase, onEditCase, onSaveCaseOrder);
         
     } catch (error) {
         console.error('Error loading admin data:', error);

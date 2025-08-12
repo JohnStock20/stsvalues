@@ -171,7 +171,7 @@ export function renderOtherSwords(appData, appState, navigateTo) {
 
 // Reemplaza tu función renderAdminDataView completa en ui.js
 
-export function renderAdminDataView(appData, swords, cases, onAddSword, onEditSword, onDeleteSword, onBack, onAddCase, onEditCase) {
+export function renderAdminDataView(appData, swords, cases, onAddSword, onEditSword, onDeleteSword, onBack, onAddCase, onEditCase, onSaveCaseOrder) {
     const container = dom.views.adminDataView;
 
     // --- HTML para la lista de Espadas ---
@@ -191,26 +191,39 @@ export function renderAdminDataView(appData, swords, cases, onAddSword, onEditSw
         `).join('');
     }
 
-    // --- HTML para la lista de Cajas ---
+// --- HTML para la lista de Cajas ---
     let casesListHTML = '<p>No cases found in the database.</p>';
     if (cases && cases.length > 0) {
-        // Usamos flexbox para que las cajas se envuelvan como en la página principal
-        casesListHTML = `<div class="cases-container" style="justify-content: flex-start;">${cases.map(caseItem => `
-            <div class="case-link" style="position: relative;">
-                <div class="case-item" style="--case-border-color: ${caseItem.border_color || 'var(--main-green)'};">
-                    <img class="case-content-image" src="${caseItem.image_path || 'images/placeholder.png'}" alt="${caseItem.name}">
-                    <h3 class="case-title">${caseItem.name}</h3>
-                    <div class="case-price">${getCurrencyHTML(appData, caseItem.currency, caseItem.price)}</div>
+        // 1. Ordenamos las cajas por su sort_order para mostrarlas correctamente
+        const sortedCases = [...cases].sort((a, b) => a.sort_order - b.sort_order);
+        
+        // 2. Generamos el HTML para cada caja con el input de orden
+        casesListHTML = sortedCases.map(caseItem => `
+            <div class="admin-list-item">
+                <input type="number" class="case-order-input" value="${caseItem.sort_order}" data-case-id="${caseItem.id}" title="Edit order number">
+                <span class="admin-item-name">${caseItem.name}</span>
+                <div class="item-actions">
+                    <button class="value-action-btn edit-case-btn" data-case-id="${caseItem.id}">Edit</button>
                 </div>
-                <button class="auth-button edit-case-btn" data-case-id="${caseItem.id}" style="position: absolute; top: 10px; right: 25px;">Edit</button>
             </div>
-        `).join('')}</div>`;
+        `).join('');
     }
 
     // --- Construimos el HTML completo de la vista ---
     container.innerHTML = `
         <button id="back-to-devtools-btn" class="back-btn">← Back to Admin Tools</button>
         <h2 class="section-title">~Manage Game Data~</h2>
+
+        <div class="admin-section">
+            <h3>Cases</h3>
+            <div class="admin-controls">
+                 <button id="add-new-case-btn" class="auth-button">Add New Case</button>
+                 <button id="save-case-order-btn" class="auth-button">Save Order</button>
+            </div>
+            <div id="cases-management-list" class="admin-item-list">
+                ${casesListHTML} <!-- Aquí se inserta el HTML que acabamos de generar -->
+            </div>
+        </div>
 
         <div class="admin-section">
             <h3>Swords</h3>
@@ -220,14 +233,6 @@ export function renderAdminDataView(appData, swords, cases, onAddSword, onEditSw
             </div>
             <div id="swords-management-list" class="admin-item-list">
                 ${swordsListHTML}
-            </div>
-        </div>
-
-        <div class="admin-section">
-            <h3>Cases</h3>
-            <button id="add-new-case-btn" class="auth-button">Add New Case</button>
-            <div id="cases-management-list" class="admin-item-list">
-                ${casesListHTML}
             </div>
         </div>
     `;
@@ -255,6 +260,9 @@ export function renderAdminDataView(appData, swords, cases, onAddSword, onEditSw
     container.querySelectorAll('.delete-sword-btn').forEach(button => {
         button.addEventListener('click', () => onDeleteSword(button.dataset.swordId));
     });
+
+        // --- Vinculamos el listener al nuevo botón "Save Order" ---
+    document.getElementById('save-case-order-btn').addEventListener('click', onSaveCaseOrder);
 
     // Sección de Cajas
     document.getElementById('add-new-case-btn').addEventListener('click', onAddCase);
@@ -383,6 +391,11 @@ export function renderSwordEditor(swordData, onSave, onCancel) {
     <button id="save-sword-changes-btn" class="auth-button">💾 ${isCreating ? 'Create Sword' : 'Save Changes'}</button>
 </div>
 
+            <div class="form-checkbox">
+                <input type="checkbox" id="edit-sword-is_custom" name="is_custom" ${sword.is_custom ? 'checked' : ''}>
+                <label for="edit-sword-is_custom">Is this a custom sword? (Belongs to "Other Swords")</label>
+            </div>
+
         <div class="sword-details-content">
             <!-- Columna Izquierda: Tarjeta de Información Editable -->
             <div id="sword-info-card" class="sword-info-card ${sword.rarity}">
@@ -434,8 +447,8 @@ export function renderSwordEditor(swordData, onSave, onCancel) {
             exist_text: document.getElementById('edit-sword-exist').value,
             demand: sword.demand, // Por ahora lo mantenemos simple, luego lo haremos interactivo
             description: document.getElementById('edit-sword-description').value,
-            // El checkbox para 'is_custom' lo añadiremos en el siguiente paso para no complicar
-            is_custom: true // Asumimos que todas las espadas nuevas son 'custom' por ahora
+        // ¡CORRECCIÓN! Leemos el valor del checkbox
+        is_custom: document.getElementById('edit-sword-is_custom').checked
         };
         onSave(updatedSwordData);
     });

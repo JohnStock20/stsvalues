@@ -1119,6 +1119,29 @@ var(--border-color); cursor: not-allowed; }
     cursor: default;
 }
 
+.admin-list-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 10px;
+    background-color: var(--panel-bg);
+    border-radius: var(--border-radius-md);
+    margin-bottom: 10px;
+}
+.case-order-input {
+    width: 60px;
+    background-color: var(--dark-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 8px;
+    border-radius: var(--border-radius-sm);
+    text-align: center;
+}
+.admin-item-name {
+    flex-grow: 1; /* Empuja los botones a la derecha */
+    font-weight: bold;
+}
+
 /* --- RESPONSIVE ADAPTATIONS FOR COMPONENTS --- */
 @media (max-width: 900px) { /* Usamos un breakpoint más consistente */
 

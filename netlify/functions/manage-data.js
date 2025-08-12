@@ -96,6 +96,7 @@ exports.handler = async (event) => {
             const swordToDelete = swordResult.rows[0];
             await client.query('DELETE FROM swords WHERE id = $1', [swordId]);
             if (process.env.DISCORD_WEBHOOK_URL) {
+            try {
                 const embed = {
                     title: `Sword Deleted: ${swordToDelete.name}`, color: 15158332,
                     fields: [
@@ -106,6 +107,10 @@ exports.handler = async (event) => {
                     footer: { text: `Deleted by: ${decoded.username}` }, timestamp: new Date().toISOString()
                 };
                 await axios.post(process.env.DISCORD_WEBHOOK_URL, { embeds: [embed] });
+                        } catch (discordError) {
+            console.error("Failed to send Discord notification:", discordError.message);
+            // No devolvemos un error al usuario, solo lo registramos, ya que la espada SÍ se borró.
+               }
             }
             return { statusCode: 200, body: JSON.stringify({ message: `Sword '${swordToDelete.name}' has been deleted.` }) };
         } 
@@ -156,6 +161,26 @@ exports.handler = async (event) => {
                 throw e;
             }
         }
+
+        else if (action === 'updateCasesOrder') {
+        const { orderedCaseIds } = payload; // Esperamos un array de IDs en el orden correcto
+        
+        // Usamos una transacción para asegurar que todo se haga de una vez
+        try {
+            await client.query('BEGIN');
+            // Usamos un bucle para actualizar cada caja con su nueva posición (índice + 1)
+            for (let i = 0; i < orderedCaseIds.length; i++) {
+                const caseId = orderedCaseIds[i];
+                const newOrder = i + 1;
+                await client.query('UPDATE cases SET sort_order = $1 WHERE id = $2', [newOrder, caseId]);
+            }
+            await client.query('COMMIT');
+            return { statusCode: 200, body: JSON.stringify({ message: 'Cases order updated successfully!' }) };
+        } catch (e) {
+            await client.query('ROLLBACK');
+            throw e;
+        }
+    }
         
         // --- SI NINGUNA ACCIÓN COINCIDE ---
         else {
