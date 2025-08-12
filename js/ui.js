@@ -15,10 +15,10 @@ export const dom = {
         titles: document.getElementById('titles-view'),
         giveaways: document.getElementById('giveaways-view'),
         notifications: document.getElementById('notifications-view'),
+        updateLogView: document.getElementById('update-log-view'),
         devtools: document.getElementById('devtools-view'),
         adminDataView: document.getElementById('admin-data-view'),
         swordEditorView: document.getElementById('sword-editor-view'),
-        updateLogView: document.getElementById('update-log-view'),
     },
     containers: {
         cases: document.querySelector('#cases-view .cases-container'),
@@ -140,20 +140,31 @@ function generateChangeHTML(prev, curr) {
     return html;
 }
 
+// Reemplaza esta función completa en ui.js
+
 export function renderUpdateLogPage(logData) {
-    const container = document.getElementById('update-log-container');
+    // Obtenemos el contenedor de la lista, NO el de la vista completa
+    const container = document.getElementById('update-log-container'); 
+    
+    // ¡Comprobación de seguridad!
+    if (!container) {
+        console.error('CRITICAL ERROR: Container #update-log-container not found in the DOM.');
+        return;
+    }
+
     if (!logData || logData.length === 0) {
         container.innerHTML = '<p>No updates have been logged yet.</p>';
         return;
     }
+
     container.innerHTML = logData.map(log => {
         const changes = generateChangeHTML(log.previous_values, log.new_values);
-        if (!changes) return ''; // No mostrar si no hay cambios relevantes
+        if (!changes) return ''; 
         
         return `
-        <div class="reward-item ${log.sword_rarity}">
+        <div class="reward-item ${log.sword_rarity || 'common'}">
             <div class="reward-info">
-                <div class="reward-image-placeholder"><img src="${log.sword_image}" alt="${log.sword_name}"></div>
+                <div class="reward-image-placeholder"><img src="${log.sword_image || 'images/placeholder.png'}" alt="${log.sword_name}"></div>
                 <div style="display: flex; flex-direction: column;">
                     <span class="reward-name">${log.sword_name}</span>
                     <span class="timestamp" style="font-size:0.8em; color:var(--text-secondary);">${formatTimeAgo(log.created_at)}</span>
