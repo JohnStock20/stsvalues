@@ -18,6 +18,7 @@ export const dom = {
         devtools: document.getElementById('devtools-view'),
         adminDataView: document.getElementById('admin-data-view'),
         swordEditorView: document.getElementById('sword-editor-view'),
+        updateLogView: document.getElementById('update-log-view'),
     },
     containers: {
         cases: document.querySelector('#cases-view .cases-container'),
@@ -117,6 +118,54 @@ function getCurrencyHTML(appData, currencyKey, price) {
     return `<span class="currency-text">${currency.name}</span> <span class="value">${price.toLocaleString()}</span>`;
 }
 
+
+function generateChangeHTML(prev, curr) {
+    let html = '';
+    const demandOrder = { 'insane': 5, 'high': 4, 'medium': 3, 'low': 2, 'N/A': 1 };
+
+    if (prev.value_text !== curr.value_text) {
+        const prevVal = parseValue(prev.value_text);
+        const currVal = parseValue(curr.value_text);
+        const prevColor = prevVal > currVal ? 'new-value' : 'old-value';
+        const currColor = currVal > prevVal ? 'new-value' : 'old-value';
+        html += `<div class="change-row"><strong>Value:</strong> <span class="${prevColor}">${prev.value_text}</span> → <span class="${currColor}">${curr.value_text}</span></div>`;
+    }
+    if (prev.demand !== curr.demand) {
+        const prevDemandVal = demandOrder[prev.demand] || 0;
+        const currDemandVal = demandOrder[curr.demand] || 0;
+        const prevColor = prevDemandVal > currDemandVal ? 'new-value' : 'old-value';
+        const currColor = currDemandVal > prevDemandVal ? 'new-value' : 'old-value';
+        html += `<div class="change-row"><strong>Demand:</strong> <span class="${prevColor}">${prev.demand}</span> → <span class="${currColor}">${curr.demand}</span></div>`;
+    }
+    return html;
+}
+
+export function renderUpdateLogPage(logData) {
+    const container = document.getElementById('update-log-container');
+    if (!logData || logData.length === 0) {
+        container.innerHTML = '<p>No updates have been logged yet.</p>';
+        return;
+    }
+    container.innerHTML = logData.map(log => {
+        const changes = generateChangeHTML(log.previous_values, log.new_values);
+        if (!changes) return ''; // No mostrar si no hay cambios relevantes
+        
+        return `
+        <div class="reward-item ${log.sword_rarity}">
+            <div class="reward-info">
+                <div class="reward-image-placeholder"><img src="${log.sword_image}" alt="${log.sword_name}"></div>
+                <div style="display: flex; flex-direction: column;">
+                    <span class="reward-name">${log.sword_name}</span>
+                    <span class="timestamp" style="font-size:0.8em; color:var(--text-secondary);">${formatTimeAgo(log.created_at)}</span>
+                </div>
+            </div>
+            <div class="change-details">
+                ${changes}
+            </div>
+        </div>
+        `;
+    }).join('');
+}
 
 
 // ¡VERSIÓN CORREGIDA Y FINAL!

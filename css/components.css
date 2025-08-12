@@ -1142,6 +1142,25 @@ var(--border-color); cursor: not-allowed; }
     font-weight: bold;
 }
 
+/* En components.css */
+.update-log-item .reward-info {
+    flex-grow: 1;
+}
+.update-log-item .change-details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 0.9em;
+    text-align: right;
+}
+.change-details .change-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.change-details .old-value { color: #ef4444; /* Rojo */ text-decoration: line-through; }
+.change-details .new-value { color: #22c55e; /* Verde */ }
+
 /* --- RESPONSIVE ADAPTATIONS FOR COMPONENTS --- */
 @media (max-width: 900px) { /* Usamos un breakpoint más consistente */
 

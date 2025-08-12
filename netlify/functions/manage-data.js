@@ -62,24 +62,48 @@ exports.handler = async (event) => {
         // 2. Procesamos la acción solicitada
         const { action, payload } = JSON.parse(event.body);
 
-        // --- ACCIÓN: CREAR O ACTUALIZAR UNA ESPADA ---
-        if (action === 'createOrUpdateSword') {
-            const { swordData } = payload;
-            const swordId = swordData.id || generateId(swordData.name);
-            const query = `
-                INSERT INTO swords (id, name, image_path, rarity, value_text, stats_text, exist_text, demand, description, is_custom, updated_at)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
-                ON CONFLICT (id) DO UPDATE SET
-                    name = EXCLUDED.name, image_path = EXCLUDED.image_path, rarity = EXCLUDED.rarity,
-                    value_text = EXCLUDED.value_text, stats_text = EXCLUDED.stats_text, exist_text = EXCLUDED.exist_text,
-                    demand = EXCLUDED.demand, description = EXCLUDED.description, is_custom = EXCLUDED.is_custom, updated_at = NOW()
-                RETURNING *;`;
-            const result = await client.query(query, [
-                swordId, swordData.name, swordData.image_path, swordData.rarity, swordData.value_text,
-                swordData.stats_text, swordData.exist_text, swordData.demand, swordData.description, swordData.is_custom
-            ]);
-            return { statusCode: 200, body: JSON.stringify({ message: `Sword '${result.rows[0].name}' saved successfully!`, sword: result.rows[0] }) };
-        } 
+// En manage-data.js, reemplaza esta acción
+if (action === 'createOrUpdateSword') {
+    const { swordData } = payload;
+    const swordId = swordData.id || generateId(swordData.name);
+
+    await client.query('BEGIN'); // Iniciar transacción
+    try {
+        // 1. Obtenemos el estado actual de la espada ANTES de actualizarla
+        const previousStateResult = await client.query('SELECT * FROM swords WHERE id = $1', [swordId]);
+        const previousValues = previousStateResult.rows[0];
+
+        // 2. Actualizamos o insertamos la espada (UPSERT)
+        const query = `
+            INSERT INTO swords (id, name, image_path, rarity, value_text, stats_text, exist_text, demand, description, is_custom, updated_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+            ON CONFLICT (id) DO UPDATE SET
+                name = EXCLUDED.name, image_path = EXCLUDED.image_path, rarity = EXCLUDED.rarity,
+                value_text = EXCLUDED.value_text, stats_text = EXCLUDED.stats_text, exist_text = EXCLUDED.exist_text,
+                demand = EXCLUDED.demand, description = EXCLUDED.description, is_custom = EXCLUDED.is_custom, updated_at = NOW()
+            RETURNING *;`;
+        const result = await client.query(query, [
+            swordId, swordData.name, swordData.image_path, swordData.rarity, swordData.value_text,
+            swordData.stats_text, swordData.exist_text, swordData.demand, swordData.description, swordData.is_custom
+        ]);
+        const newValues = result.rows[0];
+
+        // 3. Si la espada existía y ha cambiado, creamos un registro en el log
+        if (previousValues) {
+             await client.query(
+                `INSERT INTO update_log (sword_id, changed_by, previous_values, new_values) VALUES ($1, $2, $3, $4)`,
+                [swordId, decoded.username, JSON.stringify(previousValues), JSON.stringify(newValues)]
+            );
+        }
+
+        await client.query('COMMIT');
+        return { statusCode: 200, body: JSON.stringify({ message: `Sword '${newValues.name}' saved successfully!`, sword: newValues }) };
+
+    } catch (e) {
+        await client.query('ROLLBACK');
+        throw e;
+    }
+}
         
         // --- ACCIÓN: OBTENER TODAS LAS ESPADAS ---
         else if (action === 'getAllSwords') {

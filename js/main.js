@@ -16,6 +16,7 @@ let appDataCache = {
     giveaways: [],
     recentWinners: []
 };
+let updateLogCache = [];
 let giveawayUpdateInterval = null;
 let timerInterval = null;
 let selectedTitleKey = null;
@@ -66,6 +67,9 @@ function navigateToView(viewName) {
         // Esta vista se encarga de cargar y mostrar la lista de espadas
         loadAndRenderAdminData();
     }
+    else if (viewName === 'updateLog') {
+    loadAndRenderUpdateLog();
+}
 }
 
 // Renombra 'loadAndRenderAdminSwords' a 'loadAndRenderAdminData'
@@ -167,6 +171,19 @@ async function loadAndRenderAdminData() {
     } catch (error) {
         console.error('Error loading admin data:', error);
         alert('Error loading admin panel data.');
+    }
+}
+
+// Añade esta nueva función a main.js
+async function loadAndRenderUpdateLog() {
+    try {
+        // No necesita autenticación, es fetch normal
+        const response = await fetch('/.netlify/functions/get-update-log');
+        if (!response.ok) throw new Error('Could not fetch update log.');
+        updateLogCache = await response.json();
+        UI.renderUpdateLogPage(updateLogCache);
+    } catch (error) {
+        console.error("Failed to load update log:", error);
     }
 }
 
@@ -317,12 +334,31 @@ async function navigateToSubView(view, data) {
 function renderRewardSection(caseData) {
     const rewards = caseData.rewards;
     const hasCustomValues = Object.keys(customCaseValues).length > 0;
+    // ¡NUEVA LÓGICA DE ORDENAMIENTO!
+    const rarityOrder = { 'mythic': 10, 'godly': 9, 'insane': 8, 'legendary': 7, 'subzero': 6, 'staff': 5, 'epic': 4, 'rare': 3, 'uncommon': 2, 'common': 1 };
+    const parseStats = (stats) => parseFloat(stats.replace('x', '')) || 0;
 
     // Decide qué fuente de datos usar
     const displayRewards = activeValueSource === 'custom' && hasCustomValues
         ? rewards.map(r => ({ ...r, value: customCaseValues[r.id] || r.value }))
         : rewards;
     
+
+    displayRewards.sort((a, b) => {
+        // 1. Por Chance (descendente)
+        if (b.chance !== a.chance) {
+            return b.chance - a.chance;
+        }
+        // 2. Por Rareza (descendente)
+        const rarityA = rarityOrder[a.rarity] || 0;
+        const rarityB = rarityOrder[b.rarity] || 0;
+        if (rarityB !== rarityA) {
+            return rarityB - rarityA;
+        }
+        // 3. Por Stats (descendente)
+        return parseStats(b.stats_text) - parseStats(a.stats_text);
+    });
+
     // Renderiza la lista de espadas
     UI.dom.containers.rewards.innerHTML = '';
     displayRewards.forEach(reward => {
