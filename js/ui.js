@@ -76,10 +76,15 @@ export const dom = {
 
 
 export function showView(viewName) {
+    console.log(`Attempting to show view: "${viewName}"`);
+    console.log("Found element for this view:", dom.views[viewName]);
+
     Object.values(dom.views).forEach(view => { if (view) view.style.display = 'none'; });
+    
     if (dom.views[viewName]) {
         dom.views[viewName].style.display = 'block';
     } else {
+        console.error(`View "${viewName}" not found in dom.views object! Defaulting to 'cases'.`);
         dom.views.cases.style.display = 'block';
     }
     window.scrollTo(0, 0);
