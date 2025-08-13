@@ -1231,9 +1231,10 @@ function renderRecentWinners(appData, winners) {
     return;
   }
   list.innerHTML = winners.map(w => {
-    const prizeText = w.prize_pool.map(p =>
-      `${formatLargeNumber(p.amount)}${p.type === 'sword' ? 'x' : ''} ${p.type === 'currency' ? (appData.currencies[p.id]?.name || p.id) : (findSwordById(p.id)?.sword.name || p.id)}`
-    ).join(' + ');
+ const prizeText = w.prize_pool.map(p =>
+    `${formatLargeNumber(p.amount)}${p.type === 'sword' ? 'x' : ''}
+    ${p.type === 'currency' ? (appData.currencies[p.id]?.name || p.id) : (findSwordById(appData, p.id)?.sword.name || p.id)}`
+).join(' + ');
     
     // Creamos una tarjeta para el ganador y debajo mostramos el premio
     return `

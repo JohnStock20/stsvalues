@@ -985,6 +985,10 @@ function onLoginSuccess(loggedInUser) {
     const currentViewKey = Object.keys(UI.dom.views).find(key => UI.dom.views[key] && UI.dom.views[key].style.display === 'block') || 'cases';
     fetchAndRenderNotifications(); // ¡NUEVO!
     navigateToView(currentViewKey);
+
+    if (currentViewKey === 'giveaways') {
+        UI.renderGiveawayPage(appData, appDataCache.giveaways, appDataCache.recentWinners, currentUser, handleJoinGiveaway, openCreateGiveawayModal);
+    }
 }
 
 async function fetchAndRenderNotifications() {
