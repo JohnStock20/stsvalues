@@ -483,18 +483,25 @@ export function renderSwordEditor(swordData, onSave, onCancel) {
                     <h4>STATS</h4>
                     <input type="text" id="edit-sword-stats" class="editable-stat-p" value="${sword.stats_text}">
                 </div>
-                <div class="stat-box">
-                    <h4>MORE</h4>
-                    <div class="editable-more">
-                        <span>Chance - <input type="text" id="edit-sword-chance" value="N/A (Set in Case)" disabled></span>
-                        <span>Exist - <input type="text" id="edit-sword-exist" value="${sword.exist_text}"></span>
-                        <span>Rarity - 
-                            <select id="edit-sword-rarity">
-                                ${rarities.map(r => `<option value="${r}" ${sword.rarity === r ? 'selected' : ''}>${r}</option>`).join('')}
-                            </select>
-                        </span>
-                    </div>
-                </div>
+<!-- CÓDIGO NUEVO Y CORREGIDO -->
+<div class="stat-box">
+    <h4>MORE</h4>
+    <div class="editable-more">
+        <span>Chance - <input type="text" id="edit-sword-chance" value="N/A (Set in Case)" disabled></span>
+        <span>Exist - <input type="text" id="edit-sword-exist" value="${sword.exist_text}"></span>
+        <span>Rarity - 
+            <select id="edit-sword-rarity">
+                ${rarities.map(r => `<option value="${r}" ${sword.rarity === r ? 'selected' : ''}>${r}</option>`).join('')}
+            </select>
+        </span>
+        <!-- ¡AÑADIDO! Menú desplegable para Demand -->
+        <span>Demand - 
+            <select id="edit-sword-demand">
+                ${demands.map(d => `<option value="${d}" ${sword.demand === d ? 'selected' : ''}>${d}</option>`).join('')}
+            </select>
+        </span>
+    </div>
+</div>
             </div>
         </div>
     `;
@@ -510,7 +517,8 @@ export function renderSwordEditor(swordData, onSave, onCancel) {
             value_text: document.getElementById('edit-sword-value').value,
             stats_text: document.getElementById('edit-sword-stats').value,
             exist_text: document.getElementById('edit-sword-exist').value,
-            demand: sword.demand, // Por ahora lo mantenemos simple, luego lo haremos interactivo
+            // LÍNEA NUEVA Y CORREGIDA
+demand: document.getElementById('edit-sword-demand').value,
             description: document.getElementById('edit-sword-description').value,
         // ¡CORRECCIÓN! Leemos el valor del checkbox
         is_custom: document.getElementById('edit-sword-is_custom').checked
