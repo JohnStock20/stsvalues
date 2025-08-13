@@ -646,11 +646,11 @@ function openCreateGiveawayModal() {
     UI.openGiveawayModal();
 }
 
-function renderPrizePoolInModal() {
+function renderPrizePoolInModal(appData) { // <-- 1. Aceptar appData
     const list = document.getElementById('added-prizes-list');
     list.innerHTML = prizePool.map((prize, index) => {
         return `<div class="added-prize-item">
-            <span>${getPrizeItemHtml(prize)}</span>
+            <span>${getPrizeItemHtml(appData, prize)}</span> <!-- 2. Pasar appData -->
             <button type="button" class="remove-prize-btn" data-index="${index}">×</button>
         </div>`;
     }).join('');
@@ -697,7 +697,7 @@ async function handleCreateGiveaway(event) {
     }
 }
 
-function setupGiveawayModal() {
+function setupGiveawayModal(appData) {
     const prizeTypeSelect = document.getElementById('prize-type');
     const prizeIdContainer = document.getElementById('prize-id-container');
     const prizeAmountInput = document.getElementById('prize-amount');
@@ -746,7 +746,7 @@ function setupGiveawayModal() {
         const amount = parseInt(prizeAmountInput.value, 10);
         if (!id || isNaN(amount) || amount < 1) { alert("Please select a valid item and amount."); return; }
         prizePool.push({ type, id, amount });
-        renderPrizePoolInModal();
+        renderPrizePoolInModal(appData);
         prizeAmountInput.value = 1;
         if(type === 'sword') {
             document.getElementById('prize-id-search').value = '';
@@ -757,7 +757,7 @@ function setupGiveawayModal() {
     document.getElementById('added-prizes-list').addEventListener('click', (e) => {
         if (e.target.classList.contains('remove-prize-btn')) {
             prizePool.splice(parseInt(e.target.dataset.index, 10), 1);
-            renderPrizePoolInModal();
+            renderPrizePoolInModal(appData);
         }
     });
 }
@@ -1085,7 +1085,7 @@ async function initializeApp() {
         }
     });
 
-    setupGiveawayModal();
+    setupGiveawayModal(appData);
     UI.dom.modals.closeGiveaway.addEventListener('click', UI.closeGiveawayModal);
     UI.dom.modals.createGiveaway.addEventListener('click', (e) => {
         if (e.target === UI.dom.modals.createGiveaway) UI.closeGiveawayModal();
