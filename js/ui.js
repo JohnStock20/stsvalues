@@ -665,7 +665,11 @@ export function renderCaseEditor(caseData, allSwords, onSave, onCancel) {
         if (e.target.classList.contains('chance-input')) {
             const swordId = e.target.dataset.swordId;
             const reward = currentRewards.find(r => r.sword_id === swordId);
-            if(reward) reward.chance = parseFloat(e.target.value) || 0;
+if (reward) {
+    // Reemplazamos la coma por un punto ANTES de parsear
+    const valueWithDot = e.target.value.replace(',', '.');
+    reward.chance = parseFloat(valueWithDot) || 0;
+}
         }
     });
 
