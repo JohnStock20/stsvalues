@@ -2,7 +2,7 @@
 // ARCHIVO: ui.js (Controlador de la Interfaz de Usuario) - VERSIÓN 100% COMPLETA
 // =================================================================================
 
-import { findSwordById, formatLargeNumber, formatTimeAgo, getPrizeItemHtml, formatHours, parseValue } from './utils.js';
+import { findSwordById, formatLargeNumber, formatTimeAgo, getPrizeItemHtml, formatHours, parseValue, formatChance } from './utils.js';
 import { titleStyles } from './auth.js';
 
 
@@ -719,8 +719,8 @@ function createRewardItemHTML(reward, source) {
         <div class="reward-image-placeholder"><img src="${reward.image}" alt="${reward.name}"></div>
         <span class="reward-name">${reward.name}</span>
       </div>
-      <div class="reward-stats">
-        ${isCaseReward ? `<span>${reward.chance}%</span>` : '<span class="no-chance">--</span>'}
+<div class="reward-stats">
+  ${isCaseReward ? `<span>${formatChance(reward.chance)}%</span>` : '<span class="no-chance">--</span>'}
         <div class="reward-value">
           <span class="value-display">${valueDisplayHTML}</span>
           <div class="value-input-wrapper">
@@ -854,9 +854,9 @@ export function renderSwordDetails(appData, sword, sourceInfo, navigateTo, onNew
     document.getElementById('sword-details-value').textContent = sword.value_text;
     document.getElementById('sword-details-stats').textContent = sword.stats_text;
     
-    document.getElementById('sword-details-more').innerHTML = `
-        ${sword.chance ? `Chance - ${sword.chance}%<br>` : ''}
-        Exist - ${sword.exist_text}<br>
+document.getElementById('sword-details-more').innerHTML = `
+ ${sword.chance ? `Chance - ${formatChance(sword.chance)}%<br>` : ''}
+ Exist - ${sword.exist_text}<br>
         Rarity - <span class="rarity-text ${sword.rarity}">${sword.rarity}</span>`;
     
     const lastUpdated = sword.lastUpdated || sword.updated_at;

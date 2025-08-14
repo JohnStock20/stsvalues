@@ -154,7 +154,23 @@ export function parseValue(value) {
     const plainNumber = parseFloat(processableValue);
     return isNaN(plainNumber) ? 0 : plainNumber;
 }
-
+/**
+ * Formatea un número de probabilidad para su visualización,
+ * manteniendo la precisión decimal necesaria sin añadir ceros innecesarios.
+ * @param {number} chance El número de probabilidad.
+ * @returns {string} La probabilidad formateada como texto.
+ */
+export function formatChance(chance) {
+  // Si el valor no es un número válido, devuelve un guion.
+  if (typeof chance !== 'number' || isNaN(chance)) {
+    return '--';
+  }
+  
+  // El método .toString() de JavaScript es ideal para esto, ya que
+  // elimina los ceros finales de los decimales (ej: 20.20 -> "20.2")
+  // y mantiene la precisión cuando es necesaria (ej: 0.025 -> "0.025").
+  return chance.toString();
+}
 export const currencyTiers = {
     'diamonds': [
         { threshold: 50000, value: parseValue("3B") },
@@ -179,3 +195,4 @@ export const currencyTiers = {
         { threshold: 0, value: 500e6 }
     ]
 };
+
