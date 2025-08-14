@@ -561,7 +561,8 @@ export function renderCaseEditor(caseData, allSwords, onSave, onCancel) {
                         <span class="reward-name">${sword ? sword.name : 'Unknown Sword'}</span>
                     </div>
                     <div class="item-actions">
-                        <input type="number" class="chance-input" data-sword-id="${reward.sword_id}" value="${reward.chance}" step="0.01" placeholder="Chance %">
+                        <!-- CÓDIGO CORREGIDO -->
+<input type="number" class="chance-input" data-sword-id="${reward.sword_id}" value="${reward.chance}" step="any" placeholder="Chance %">
                         <button type="button" class="value-action-btn danger-btn remove-reward-btn" data-sword-id="${reward.sword_id}">Remove</button>
                     </div>
                 </div>
